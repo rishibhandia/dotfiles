@@ -1,0 +1,52 @@
+
+# +------+
+# | dirs |
+# +------+
+alias d='dirs -v'
+for index ({1..9}) alias "$index"="cd +${index}"; unset index
+
+
+
+# +----+
+# | ls |
+# +----+
+
+alias ls='lsd'
+alias l='ls -l'
+alias ll='ls -lahF'
+alias lls='ls -lahFtr'
+alias la='ls -A'
+alias lc='ls -CF'
+
+# +----+
+# | cp |
+# +----+
+
+alias cp='cp -iv'
+alias mv='mv -iv'
+alias rm='rm -iv'
+
+
+# +------+
+# | grep |
+# +------+
+
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+
+
+
+# +--------+
+# | Neovim |
+# +--------+
+
+alias vim='nvim'
+alias vi='nvim'
+alias svim='sudoedit'
+alias dvim="vim -u /usr/share/nvim/archlinux.vim" # nvim with default config
+
+# +---------+
+# | netstat |
+# +---------+
+alias ports='sudo netstat -tulanp'

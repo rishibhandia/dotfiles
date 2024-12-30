@@ -1,0 +1,51 @@
+#!/usr/bin/env zsh
+
+
+
+###############################
+# EXPORT ENVIRONMENT VARIABLE #
+###############################
+
+export TERM='rxvt-256color'
+export DOTFILES="$HOME/.dotfiles"
+export WORKSPACE="$HOME/workspace"
+
+
+
+# XDG
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$XDG_CONFIG_HOME/cache"
+
+
+# editor
+export EDITOR="mate"
+export VISUAL="mate"
+
+# zsh
+# Setting ZDOTDIR so zsh doesn't make stuff in HOME dir
+export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+
+export HISTFILE="$ZDOTDIR/.zhistory"    # History filepath
+export HISTSIZE=10000                   # Maximum events for internal history
+export SAVEHIST=10000                   # Maximum events in history file
+
+setopt HIST_IGNORE_DUPS
+setopt INC_APPEND_HISTORY
+setopt SHARE_HISTORY
+setopt EXTENDED_HISTORY
+
+#Various Applications
+export SCREENSHOT="$HOME/Pictures/screenshots"
+export VIMCONFIG="$XDG_CONFIG_HOME/nvim"
+
+# uv
+export PATH="/Users/rishi/.local/share/../bin:$PATH"
+
+
+
+# Man pages
+#export MANPAGER = 'nvim +Man!'
+# SSH agent set to 1password
+#export SSH_AUTH_SOCK=~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock
+#. "$HOME/.cargo/env"
