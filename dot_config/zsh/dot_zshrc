@@ -1,3 +1,5 @@
+#If debug flag enabled (ZSH_DEBUG = 1), will print file path and name when sourced
+[ ! -z "$ZSH_DEBUG" ] && printf "Sourcing file %s (path: %s)\n" "${(%):-%N}" "${(%):-%x}"
 
 eval "$(navi widget zsh)"
 
@@ -46,6 +48,12 @@ autoload -U compinit; compinit
 _comp_options+=(globdots) # With hidden files
 
 source $ZDOTDIR/completion.zsh
+
+# +---------+
+# | SCRIPTS |
+# +---------+
+
+source $ZDOTDIR/scripts.zsh
 
 # +-----------------+
 # | STARSHIP PROMPT |

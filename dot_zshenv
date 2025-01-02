@@ -1,14 +1,14 @@
 #!/usr/bin/env zsh
 
 
+#If debug flag enabled (ZSH_DEBUG = 1), will print file path and name when sourced
+[ ! -z "$ZSH_DEBUG" ] && printf "Sourcing file %s (path: %s)\n" "${(%):-%N}" "${(%):-%x}"
 
 ###############################
 # EXPORT ENVIRONMENT VARIABLE #
 ###############################
 
 export TERM='rxvt-256color'
-export DOTFILES="$HOME/.dotfiles"
-export WORKSPACE="$HOME/workspace"
 
 
 
@@ -16,11 +16,11 @@ export WORKSPACE="$HOME/workspace"
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$XDG_CONFIG_HOME/cache"
-
+export XDG_STATE_HOME="$HOME/.local/state"
 
 # editor
-export EDITOR="mate"
-export VISUAL="mate"
+export EDITOR="nvim"
+export VISUAL="nvim"
 
 # zsh
 # Setting ZDOTDIR so zsh doesn't make stuff in HOME dir
