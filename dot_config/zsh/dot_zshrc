@@ -1,3 +1,7 @@
+# -*-mode:bash-*- vim:ft=bash
+#
+# ~/.config/zsh/.zshrc
+#
 #If debug flag enabled (ZSH_DEBUG = 1), will print file path and name when sourced
 [ ! -z "$ZSH_DEBUG" ] && printf "Sourcing file %s (path: %s)\n" "${(%):-%N}" "${(%):-%x}"
 

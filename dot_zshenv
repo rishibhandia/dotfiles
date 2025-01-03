@@ -1,4 +1,7 @@
-#!/usr/bin/env zsh
+# -*-mode:bash-*- vim:ft=bash
+#
+# ~/.zshenv
+#
 
 
 #If debug flag enabled (ZSH_DEBUG = 1), will print file path and name when sourced
@@ -9,6 +12,7 @@
 ###############################
 
 export TERM='rxvt-256color'
+export COLORTERM='truecolor'
 
 
 
@@ -38,6 +42,9 @@ setopt EXTENDED_HISTORY
 #Various Applications
 export SCREENSHOT="$HOME/Pictures/screenshots"
 export VIMCONFIG="$XDG_CONFIG_HOME/nvim"
+
+
+
 
 # uv
 export PATH="/Users/rishi/.local/share/../bin:$PATH"
