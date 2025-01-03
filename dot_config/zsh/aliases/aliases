@@ -53,16 +53,16 @@ if type 'vdir' &> /dev/null; then
     alias vdir='vdir --color=auto'
 fi
 # alias ls='lsd'
-
+alias ls='command ls -Fh ${colorflag}'
 
 # Lists files in long format showing permissions, size, and dates
 alias l='ls -l'
 
 # Lists all files (including hidden) in long format with human-readable sizes and classifies file types with symbols
-alias ll='ls -lahF'
+alias ll='ls -la'
 
 # Same as ll but sorts by time (newest last) and reverses the order
-alias lls='ls -lahFtr'
+alias lls='ls -latr'
 
 # Lists all files except . and .. (almost all)
 alias la='ls -A'
