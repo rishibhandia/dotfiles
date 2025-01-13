@@ -1,5 +1,4 @@
 # -*-mode:conf-toml-*- vim:ft=toml
-
 # ~/.local/share/chezmoi/.chezmoi.toml.tmpl
 # =============================================================================
 # Used to customize configuration when doing a `chezmoi init`.
@@ -9,30 +8,21 @@
 # `~/.config/chezmoi/chezmoi.toml`
 # See https://www.chezmoi.io/docs/how-to/
 #
-# {{- /* This file supports Go's text/template language. */}}
-
-# {{- $email := promptString "Git email address for the author/committer" }}
-# {{- $name := promptString "Git username for the author/committer" }}
-
-
 {{/* boolean feature tags */}}
 {{- $ephemeral := false -}}{{/* true if this machine is ephemeral, e.g. a cloud or VM instance */}}
 {{- $work := false -}}{{/* true if this machine is a work machine */}}
 {{- $headless := false -}}{{/* true if this machine does not have a screen and keyboard */}}
 {{- $personal := false -}}{{/* true if this machine should have personal secrets */}}
 {{- "" -}}
-
 {{- $osID := .chezmoi.os -}}
 {{- if (and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id")) -}}
 {{-   $osID = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
 {{- end -}}
-
 {{/* detect GitHub codespaces, VSCode remote containers, Docker containers, Multipass VMs, and Vagrant boxes */}}
 {{- if or (env "CODESPACES") (env "REMOTE_CONTAINERS_IPC") (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") -}}
 {{-   $ephemeral = true -}}
 {{-   $headless = true -}}
 {{- end -}}
-
 {{/* work around unreliable hostname on darwin */}}
 {{- $hostname := .chezmoi.hostname -}}
 {{- if eq .chezmoi.os "darwin" -}}
@@ -45,11 +35,9 @@
 {{-     $hostname = $computerName -}}
 {{-   end -}}
 {{- end -}}
-
 {{- if eq .chezmoi.os "windows" -}}
 {{-   $work = true -}}
 {{- end -}}
-
 {{- if not $ephemeral -}}
 {{-   if eq $hostname "rishi-macmini-2020" -}}
 {{-     $personal = true -}}
@@ -66,23 +54,25 @@
 {{-     $headless = true -}}
 {{-   end -}}
 {{- end -}}
-
 {{- $email := "rishi@bhandia.com" -}}
 {{- if $work -}}
 {{-   $email = "rb3926@nyu.edu" -}}
 {{- end -}}
+{{- $name := "Rishi Bhandia" -}}
 
 [data]
-    ephemeral = {{ $ephemeral }}
+    name = {{ $name | quote }}
     email = {{ $email | quote }}
+    ephemeral = {{ $ephemeral }}
     work = {{ $work }}
     headless = {{ $headless }}
     hostname = {{ $hostname | quote }}
     personal = {{ $personal }}
     osid = {{ $osID | quote }}
+
 [github]
     refreshPeriod = "12h"
     
 [git]
-  autoAdd = true
-  autoCommit = false
+    autoAdd = true
+    autoCommit = false
