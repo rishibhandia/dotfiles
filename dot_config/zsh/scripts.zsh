@@ -459,3 +459,14 @@ function cb() {
         powershell -NoProfile -Command "Set-Clipboard"
     fi
 }
+
+
+#Syncing with Katsumi Lab Google Drive 
+#-------------------------------------------------------------------------------
+function sync_tise2() {
+    if [ "$PWD" = "/Users/rishi/Documents/Scientific Data/NYU_Lab" ]; then
+        rclone copy --drive-shared-with-me -n NYU_Katsumi_Lab:'Katsumi lab'/'Astrella and OPA'/Data/TiSe2_TPOP_2025/ ./TiSe2_TPOP_2025
+    else
+        echo "Please navigate to the NYU_Lab directory first"
+    fi
+}
