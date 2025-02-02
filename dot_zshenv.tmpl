@@ -2,7 +2,7 @@
 #
 # ~/.zshenv
 #
-
+{{- /* Template for .zshenv */ -}}
 
 #If debug flag enabled (ZSH_DEBUG = 1), will print file path and name when sourced
 [ ! -z "$ZSH_DEBUG" ] && printf "Sourcing file %s (path: %s)\n" "${(%):-%N}" "${(%):-%x}"
@@ -10,11 +10,12 @@
 ###############################
 # EXPORT ENVIRONMENT VARIABLE #
 ###############################
-
+{{- if eq .chezmoi.os "darwin" }}
+export TERM='xterm-256color'
+{{- else }}
 export TERM='rxvt-256color'
+{{- end }}
 export COLORTERM='truecolor'
-
-
 
 # XDG
 export XDG_CONFIG_HOME="$HOME/.config"
@@ -29,30 +30,40 @@ export VISUAL="nvim"
 # zsh
 # Setting ZDOTDIR so zsh doesn't make stuff in HOME dir
 export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
-
 export HISTFILE="$ZDOTDIR/.zhistory"    # History filepath
 export HISTSIZE=10000                   # Maximum events for internal history
 export SAVEHIST=10000                   # Maximum events in history file
-
 setopt HIST_IGNORE_DUPS
 setopt INC_APPEND_HISTORY
 setopt SHARE_HISTORY
 setopt EXTENDED_HISTORY
 
-#Various Applications
+# Various Applications
 export SCREENSHOT="$HOME/Pictures/screenshots"
 export VIMCONFIG="$XDG_CONFIG_HOME/nvim"
 
+# uv path
+{{- if eq .chezmoi.os "darwin" }}
+export PATH="/Users/{{ .chezmoi.username }}/.local/share/../bin:$PATH"
+{{- else }}
+export PATH="/home/{{ .chezmoi.username }}/.local/share/../bin:$PATH"
+{{- end }}
 
+# API Keys from 1Password
+{{- with onepassword "OpenAI API Key" -}}
+export OPENAI_API_KEY="{{ .credential }}"
+{{- end }}
+{{- with onepassword "OpenRouter API Key" -}}
+export OPENROUTER_API_KEY="{{ .credential }}"
+{{- end }}
+{{- with onepassword "Anthropic API Key" -}}
+export ANTHROPIC_API_KEY="{{ .credential }}"
+{{- end }}
 
-
-# uv
-export PATH="/Users/rishi/.local/share/../bin:$PATH"
-
-
-
-# Man pages
-#export MANPAGER = 'nvim +Man!'
-# SSH agent set to 1password
+# SSH agent for 1password (commented out by default)
+{{- if eq .chezmoi.os "darwin" }}
 #export SSH_AUTH_SOCK=~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock
+{{- end }}
+
+# Cargo (uncomment if needed)
 #. "$HOME/.cargo/env"
