@@ -471,4 +471,3 @@ function sync_tise2() {
     fi
     rclone copy --drive-shared-with-me -v -M --check-first NYU_Katsumi_Lab:'Katsumi lab'/'Astrella and OPA'/Data/TiSe2_TPOP_2025/ ./TiSe2_TPOP_2025
 }
-}
