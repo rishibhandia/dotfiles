@@ -76,3 +76,13 @@
 [git]
     autoAdd = true
     autoCommit = false
+    
+[onepassword]
+    command = "op"
+    prompt = false  # Won't prompt for authentication if already signed in
+
+[onepassword.template]
+    # This will allow chezmoi to automatically sign in to 1password
+    # Optional: specify account and vault if you have multiple
+    # account = "my-account"
+    # vault = "my-vault"
