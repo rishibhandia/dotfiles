@@ -425,181 +425,87 @@ fi
 
 # LLM functions
 #------------------------------------------------------------------------------
-q() {
-  local url="$1"
-  local question="$2"
-  
-  # Check if required commands exist
-  if ! command -v curl >/dev/null 2>&1 || ! command -v llm >/dev/null 2>&1; then
-    echo "Required commands (curl, llm) not found. Please install missing dependencies."
-    return 1
-  }
-  
-  # Fetch the URL content through Jina
-  local content
-  content=$(curl -s "https://r.jina.ai/$url")
-  
-  # Check if the content was retrieved successfully
-  if [ -z "$content" ]; then
-    echo "Failed to retrieve content from the URL."
-    return 1
-  }
-  
-  local system="
-  You are a helpful assistant that can answer questions about the content.
-  Reply concisely, in a few sentences.
-  The content:
-  ${content}
-  "
-  
-  # Use llm with the fetched content as a system prompt
-  llm prompt "$question" -s "$system"
+function q {
+    # String literal needs to be properly escaped in zsh
+    url="$1"
+    question="$2"
+    content=$(curl -s "https://r.jina.ai/$url")
+    system="You are a helpful assistant that can answer questions about the content.
+Reply concisely, in a few sentences.
+The content:
+${content}"
+    llm prompt "${question}" -s "${system}"
 }
 
-qv() {
-  local url="$1"
-  local question="$2"
-  
-  # Check if required commands exist
-  if ! command -v yt-dlp >/dev/null 2>&1 || ! command -v curl >/dev/null 2>&1 || \
-     ! command -v sed >/dev/null 2>&1 || ! command -v grep >/dev/null 2>&1 || \
-     ! command -v tr >/dev/null 2>&1 || ! command -v llm >/dev/null 2>&1; then
-    echo "Required commands (yt-dlp, curl, sed, grep, tr, llm) not found. Please install missing dependencies."
-    return 1
-  }
-  
-  # Fetch the URL content
-  local subtitle_url
-  local content
-  
-  subtitle_url=$(yt-dlp -q --skip-download --convert-subs srt --write-sub \
-                --sub-langs "en" --write-auto-sub --print "requested_subtitles.en.url" "$url")
-  
-  content=$(curl -s "$subtitle_url" | \
-            sed '/^$/d' | \
-            grep -v '^[0-9]*$' | \
-            grep -v '\-->' | \
-            sed 's/<[^>]*>//g' | \
-            tr '\n' ' ')
-  
-  # Check if the content was retrieved successfully
-  if [ -z "$content" ]; then
-    echo "Failed to retrieve content from the URL."
-    return 1
-  }
-  
-  local system="
-  You are a helpful assistant that can answer questions about YouTube videos.
-  Reply concisely, in a few sentences.
-  The content:
-  ${content}
-  "
-  
-  # Use llm with the fetched content as a system prompt
-  llm prompt "$question" -s "$system"
-}
-
-
-
-gcm() {
-  # Check required dependencies
-  if ! command -v git >/dev/null 2>&1 || ! command -v llm >/dev/null 2>&1; then
-    echo "Error: Required commands (git, llm) not found. Please install missing dependencies."
-    return 1
-  }
-
-  # Check if we're in a git repository
-  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    echo "Error: Not in a git repository"
-    return 1
-  }
-
-  # Check if there are staged changes
-  if ! git diff --cached --quiet; then
-    : # Changes are staged, continue
-  else
-    echo "Error: No changes staged for commit"
-    return 1
-  fi
-
-# Function to generate commit message
-gcm() {
-  # Check required dependencies
-  if ! command -v git >/dev/null 2>&1 || ! command -v llm >/dev/null 2>&1; then
-    echo "Error: Required commands (git, llm) not found. Please install missing dependencies."
-    return 1
-  }
-
-  # Check if we're in a git repository
-  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    echo "Error: Not in a git repository"
-    return 1
-  }
-
-  # Check if there are staged changes
-  if ! git diff --cached --quiet; then
-    : # Changes are staged, continue
-  else
-    echo "Error: No changes staged for commit"
-    return 1
-  fi
-
-  # Function to generate commit message
-  generate_commit_message() {
-    git diff --cached | llm "
-Below is a diff of all staged changes, coming from the command:
-\`\`\`
-git diff --cached
-\`\`\`
-Please generate a concise, one-line commit message for these changes."
-  }
-
-  # Function to read user input that works across shells
-  read_input() {
-    if [ -t 0 ]; then  # Check if running interactively
-      if [ -n "$ZSH_VERSION" ]; then
-        # ZSH handling
-        echo -n "$1"
-        read -r REPLY
-      elif [ -n "$BASH_VERSION" ]; then
-        # Bash handling
-        read -p "$1" -r REPLY
-      else
-        # Generic shell handling
-        printf "%s" "$1"
-        read -r REPLY
-      fi
-    else
-      # Non-interactive handling
-      echo "Error: This function requires an interactive shell"
-      return 1
+function qv {
+    url="$1"
+    question="$2"
+    
+    if ! command -v yt-dlp >/dev/null 2>&1; then
+        echo "yt-dlp is required but not found"
+        return 1
     fi
+    
+    subtitle_url=$(yt-dlp -q --skip-download --convert-subs srt --write-sub \
+                  --sub-langs "en" --write-auto-sub --print "requested_subtitles.en.url" "$url")
+    
+    content=$(curl -s "$subtitle_url" | \
+              sed '/^$/d' | \
+              grep -v '^[0-9]*$' | \
+              grep -v '\-->' | \
+              sed 's/<[^>]*>//g' | \
+              tr '\n' ' ')
+              
+    system="You are a helpful assistant that can answer questions about YouTube videos.
+Reply concisely, in a few sentences.
+The content:
+${content}"
+    
+    llm prompt "${question}" -s "${system}"
+}
+
+
+function gcm {
+  # Check dependencies
+  command -v git >/dev/null 2>&1 || {
+    echo "Error: git not found"
+    return 1
+  }
+  
+  command -v llm >/dev/null 2>&1 || {
+    echo "Error: llm not found"
+    return 1
   }
 
-  # Store original IFS and set new one
+  # Check repository status
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+    echo "Error: Not in a git repository"
+    return 1
+  }
+
+  git diff --cached --quiet && {
+    echo "Error: No changes staged for commit"
+    return 1
+  }
+
+  # Save IFS
   OLD_IFS="$IFS"
   IFS=$'\n'
 
-  # Main script
   echo "Generating AI-powered commit message..."
-  commit_message=$(generate_commit_message)
+  commit_message=$(git diff --cached | llm "Generate a concise, descriptive commit message")
   
-  # Error handling for commit message generation
-  if [ -z "$commit_message" ]; then
+  [ -z "$commit_message" ] && {
     echo "Error: Failed to generate commit message"
     IFS="$OLD_IFS"
     return 1
-  fi
+  }
 
   while true; do
     printf "\nProposed commit message:\n%s\n" "$commit_message"
+    printf "Do you want to (a)ccept, (e)dit, (r)egenerate, or (c)ancel? "
+    read -r choice
     
-    if ! read_input "Do you want to (a)ccept, (e)dit, (r)egenerate, or (c)ancel? "; then
-      IFS="$OLD_IFS"
-      return 1
-    fi
-    
-    choice=$REPLY
     case "${choice:0:1}" in
       [aA])
         if git commit -m "$commit_message"; then
@@ -607,35 +513,32 @@ Please generate a concise, one-line commit message for these changes."
           IFS="$OLD_IFS"
           return 0
         else
-          echo "Error: Commit failed. Please check your changes and try again."
+          echo "Error: Commit failed"
           IFS="$OLD_IFS"
           return 1
         fi
         ;;
       [eE])
-        if ! read_input "Enter your commit message: "; then
-          IFS="$OLD_IFS"
-          return 1
-        fi
-        commit_message=$REPLY
+        printf "Enter your commit message: "
+        read -r commit_message
         if [ -n "$commit_message" ] && git commit -m "$commit_message"; then
-          echo "Changes committed successfully with your message!"
+          echo "Changes committed successfully!"
           IFS="$OLD_IFS"
           return 0
         else
-          echo "Error: Commit failed. Please check your message and try again."
+          echo "Error: Commit failed"
           IFS="$OLD_IFS"
           return 1
         fi
         ;;
       [rR])
         echo "Regenerating commit message..."
-        commit_message=$(generate_commit_message)
-        if [ -z "$commit_message" ]; then
+        commit_message=$(git diff --cached | llm "Generate a concise, descriptive commit message")
+        [ -z "$commit_message" ] && {
           echo "Error: Failed to regenerate commit message"
           IFS="$OLD_IFS"
           return 1
-        fi
+        }
         ;;
       [cC])
         echo "Commit cancelled."
@@ -648,7 +551,6 @@ Please generate a concise, one-line commit message for these changes."
     esac
   done
 }
-
 # Development
 # -----------------------------------------------------------------------------
 
