@@ -52,21 +52,23 @@ export PATH="/home/{{ .chezmoi.username }}/.local/share/../bin:$PATH"
 # API Keys from 1Password
 {{- with (onepassword "OpenAI API Key").fields -}}
 {{- range . -}}
-{{- if eq .id "credential" -}}
+{{- if eq .id "credential" }}
 export OPENAI_API_KEY="{{ .value }}"
 {{- end -}}
 {{- end -}}
 {{- end }}
+
 {{- with (onepassword "OpenRouter API Key").fields -}}
 {{- range . -}}
-{{- if eq .id "credential" -}}
+{{- if eq .id "credential" }}
 export OPENROUTER_API_KEY="{{ .value }}"
 {{- end -}}
 {{- end -}}
 {{- end }}
+
 {{- with (onepassword "Anthropic API Key").fields -}}
 {{- range . -}}
-{{- if eq .id "credential" -}}
+{{- if eq .id "credential" }}
 export ANTHROPIC_API_KEY="{{ .value }}"
 {{- end -}}
 {{- end -}}
