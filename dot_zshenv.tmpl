@@ -66,6 +66,8 @@ export OPENROUTER_API_KEY="{{ .value }}"
 {{- end -}}
 {{- end }}
 
+export OPENROUTER_KEY="$OPENROUTER_API_KEY"
+
 {{- with (onepassword "Anthropic API Key").fields -}}
 {{- range . -}}
 {{- if eq .id "credential" }}
