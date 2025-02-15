@@ -67,6 +67,7 @@ export OPENROUTER_API_KEY="{{ .value }}"
 {{- end }}
 
 export OPENROUTER_KEY="$OPENROUTER_API_KEY"
+export LLM_OPENROUTER_KEY="$OPENROUTER_KEY"
 
 {{- with (onepassword "Anthropic API Key").fields -}}
 {{- range . -}}
@@ -75,6 +76,15 @@ export ANTHROPIC_API_KEY="{{ .value }}"
 {{- end -}}
 {{- end -}}
 {{- end }}
+
+{{- with (onepassword "Google Gemini API Key").fields -}}
+{{- range . -}}
+{{- if eq .id "credential" }}
+export LLM_GEMINI_KEY="{{ .value }}"
+{{- end -}}
+{{- end -}}
+{{- end }}
+
 
 # SSH agent for 1password (commented out by default)
 {{- if eq .chezmoi.os "darwin" }}
