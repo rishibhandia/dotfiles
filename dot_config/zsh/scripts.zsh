@@ -551,6 +551,65 @@ function gcm {
     esac
   done
 }
+
+function sheet2csv() {
+  # Check dependencies
+  command -v llm >/dev/null 2>&1 || {
+    echo "Error: llm not found"
+    return 1
+  }
+  
+  # Check if image file is provided
+  if [ -z "$1" ]; then
+    echo "Usage: sheet2csv <image_file> [output_file.csv]"
+    echo "Help: Extracts data from a spreadsheet image into CSV format"
+    return 1
+  fi
+  
+  # Check if image file exists
+  if [ ! -f "$1" ]; then
+    echo "Error: Image file '$1' not found"
+    return 1
+  }
+  
+  # Set output file
+  local output_file
+  if [ -z "$2" ]; then
+    output_file="${1%.*}.csv"
+  else
+    output_file="$2"
+  fi
+  
+  echo "Extracting data from '$1' using Gemini AI..."
+  
+  # Create a system prompt for the model
+  local system_prompt="You are a spreadsheet data extraction assistant. 
+Extract all tabular data from the provided image into clean CSV format.
+Follow these rules:
+1. Preserve the exact structure of the table
+2. Include all rows and columns
+3. Use commas as delimiters
+4. Don't include any explanations or markdown formatting
+5. Output ONLY the CSV data, nothing else"
+  
+  # Process the image with Gemini model
+  base64_image=$(base64 -i "$1")
+  csv_data=$(echo "$base64_image" | llm -m "gemini-2.0-flash" prompt "Extract this spreadsheet into CSV format" -s "$system_prompt" --image -)
+  
+  if [ -z "$csv_data" ]; then
+    echo "Error: Failed to extract data from image"
+    return 1
+  fi
+  
+  # Save to file
+  echo "$csv_data" > "$output_file"
+  
+  echo "CSV data extracted and saved to '$output_file'"
+  
+  # Preview the first few lines
+  echo "Preview:"
+  head -n 5 "$output_file"
+}
 # Development
 # -----------------------------------------------------------------------------
 
