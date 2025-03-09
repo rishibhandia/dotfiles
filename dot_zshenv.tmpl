@@ -81,6 +81,7 @@ export ANTHROPIC_API_KEY="{{ .value }}"
 {{- range . -}}
 {{- if eq .id "credential" }}
 export LLM_GEMINI_KEY="{{ .value }}"
+export GEMINI_API_KEY="{{ .value }}"
 {{- end -}}
 {{- end -}}
 {{- end }}

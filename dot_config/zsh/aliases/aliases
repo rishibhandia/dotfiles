@@ -142,6 +142,9 @@ alias c='clear'
 alias h='history_search' # see file `functions`
 alias hs='history_session_search' # see file `functions`
 
+# AI-powered document extraction
+alias p2t='pdf2text'
+
 
 
 # +-------+

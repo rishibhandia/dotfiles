@@ -609,6 +609,71 @@ Follow these rules:
   echo "Preview:"
   head -n 5 "$output_file"
 }
+
+function pdf2text() {
+  # Check dependencies
+  command -v llm >/dev/null 2>&1 || {
+    echo "Error: llm not found"
+    return 1
+  }
+  
+  # Check if PDF file is provided
+  if [ -z "$1" ]; then
+    echo "Usage: pdf2text <pdf_file> [output_file.txt]"
+    echo "Help: Extracts text from a PDF file using Gemini AI"
+    return 1
+  fi
+  
+  # Check if PDF file exists
+  if [ ! -f "$1" ]; then
+    echo "Error: PDF file '$1' not found"
+    return 1
+  fi
+  
+  # Check if file is a PDF
+  file_type=$(file -b --mime-type "$1")
+  if [[ "$file_type" != "application/pdf" ]]; then
+    echo "Error: File '$1' is not a PDF (detected: $file_type)"
+    return 1
+  fi
+  
+  # Set output file
+  local output_file
+  if [ -z "$2" ]; then
+    output_file="${1%.*}.txt"
+  else
+    output_file="$2"
+  fi
+  
+  echo "Extracting text from '$1' using Gemini AI..."
+  
+  # Create a system prompt for the model
+  local system_prompt="You are a PDF text extraction assistant.
+Extract all text content from the provided PDF document.
+Follow these rules:
+1. Preserve the document structure as much as possible
+2. Include all headings, paragraphs, and important content
+3. Maintain the original formatting where appropriate
+4. Extract any visible text in tables, charts, or images
+5. Output ONLY the extracted text, nothing else"
+  
+  # Process the PDF with Gemini model
+  extracted_text=$(llm -m "gemini-2.0-flash" prompt "Extract all text from this PDF document" -s "$system_prompt" -a "$1")
+  
+  if [ -z "$extracted_text" ]; then
+    echo "Error: Failed to extract text from PDF"
+    return 1
+  fi
+  
+  # Save to file
+  echo "$extracted_text" > "$output_file"
+  
+  echo "Text extracted and saved to '$output_file'"
+  
+  # Preview the first few lines
+  echo "Preview:"
+  head -n 10 "$output_file"
+}
 # Development
 # -----------------------------------------------------------------------------
 
