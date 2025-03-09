@@ -592,9 +592,8 @@ Follow these rules:
 4. Don't include any explanations or markdown formatting
 5. Output ONLY the CSV data, nothing else"
   
-  # Process the image with Gemini model
-  base64_image=$(base64 -i "$1")
-  csv_data=$(echo "$base64_image" | llm -m "gemini-2.0-flash" prompt "Extract this spreadsheet into CSV format" -s "$system_prompt" --image -)
+  # Process the image with Gemini model using attachment syntax
+  csv_data=$(llm -m "gemini-2.0-flash" prompt "Extract this spreadsheet into CSV format" -s "$system_prompt" -a "$1")
   
   if [ -z "$csv_data" ]; then
     echo "Error: Failed to extract data from image"
