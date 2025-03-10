@@ -43,3 +43,12 @@ zstyle ':completion:*:messages' format '%d'
 zstyle ':completion:*:warnings' format "$fg[red]No matches for:$reset_color %d"
 zstyle ':completion:*:corrections' format '%B%d (errors: %e)%b'
 zstyle ':completion:*' group-name ''
+
+# Add completion for uv and uvx Python package manager
+if command -v uv &>/dev/null; then
+  eval "$(uv generate-shell-completion zsh)"
+fi
+
+if command -v uvx &>/dev/null; then
+  eval "$(uvx --generate-shell-completion zsh)"
+fi
