@@ -332,7 +332,7 @@ fi
 alias path='echo -e ${PATH//:/\\n}'
 
 # Displays information about the system.
-for command in winfetch neofetch screenfetch; do
+for command in fastfetch winfetch neofetch screenfetch; do
     if type $command &> /dev/null; then
         alias sysinfo='$command'
         break
