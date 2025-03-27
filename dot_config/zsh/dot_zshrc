@@ -66,3 +66,12 @@ source $ZDOTDIR/scripts.zsh
 export STARSHIP_CACHE=$XDG_CACHE_HOME/starship/
 export STARSHIP_CONFIG=$XDG_CONFIG_HOME/starship/starship.toml
 eval "$(starship init zsh)"
+
+# +---------+
+# | PLUGINS |
+# +---------+
+
+#zsh-syntax-highlighting
+$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+
