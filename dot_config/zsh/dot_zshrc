@@ -47,11 +47,14 @@ source $ZDOTDIR/aliases/aliases
 # | AUTO-COMPLETION |
 # +-----------------+
 
-autoload -U compinit; compinit
 
-_comp_options+=(globdots) # With hidden files
 
 source $ZDOTDIR/completion.zsh
+
+autoload -U compinit; compinit
+
+_comp_options+=(globdots)
+ 
 
 # +---------+
 # | SCRIPTS |
