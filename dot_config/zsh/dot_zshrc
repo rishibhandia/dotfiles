@@ -7,6 +7,8 @@
 
 eval "$(navi widget zsh)"
 
+export PATH="/usr/local/sbin:$PATH"
+
 # +------------+
 # | NAVIGATION |
 # +------------+
@@ -82,6 +84,6 @@ eval "$(starship init zsh)"
 # +---------+
 
 #zsh-syntax-highlighting
-$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 
