@@ -19,11 +19,7 @@
 [ ! -z "$ZSH_DEBUG" ] && printf "Sourcing file %s (path: %s)\n" "${(%):-%N}" "${(%):-%x}"
 
 
-#adding Homebrew's completionns in zsh
-if type brew &>/dev/null
-then
-  FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
-fi
+
 
 # Do menu-driven completion.
 zstyle ':completion:*' menu select

@@ -47,11 +47,18 @@ source $ZDOTDIR/aliases/aliases
 # | AUTO-COMPLETION |
 # +-----------------+
 
+#adding Homebrew's completionns in zsh
+
+if type brew &>/dev/null
+then
+  FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+fi
+
+autoload -U compinit; compinit
 
 
 source $ZDOTDIR/completion.zsh
 
-autoload -U compinit; compinit
 
 _comp_options+=(globdots)
  
