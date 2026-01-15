@@ -43,7 +43,7 @@ fi
 info "Installing packages from Brewfile..."
 
 # Run brew bundle
-if brew bundle --file="$BREWFILE" --no-lock; then
+if brew bundle --file="$BREWFILE"; then
     success "Packages installed successfully"
 else
     warn "Some packages may have failed to install. Check output above."
