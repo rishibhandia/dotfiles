@@ -41,7 +41,15 @@ shell-integration-features = cursor,sudo,title
 # Launch with tmux
 # =============================================================================
 # Attach to existing session "main" or create new one
-command = tmux new-session -A -s main
+{{- if eq .chezmoi.os "darwin" }}
+{{-   if eq .chezmoi.arch "arm64" }}
+command = /opt/homebrew/bin/tmux new-session -A -s main
+{{-   else }}
+command = /usr/local/bin/tmux new-session -A -s main
+{{-   end }}
+{{- else }}
+command = /home/linuxbrew/.linuxbrew/bin/tmux new-session -A -s main
+{{- end }}
 
 # =============================================================================
 # Terminal behavior
