@@ -30,6 +30,7 @@ brew "duf"                    # Better df (disk usage)
 # =============================================================================
 # CLI Tools - Utilities
 # =============================================================================
+brew "duti"                   # Set default applications
 brew "tree"                   # Directory listing
 brew "curl"                   # HTTP client
 brew "wget"                   # HTTP client
