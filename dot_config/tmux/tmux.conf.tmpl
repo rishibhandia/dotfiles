@@ -1,7 +1,14 @@
+# =============================================================================
+# Terminal settings (Ghostty/modern terminal compatibility)
+# =============================================================================
+set -g default-terminal "tmux-256color"
+set -ag terminal-overrides ",xterm-256color:RGB"
+set -ag terminal-overrides ",xterm-ghostty:RGB"
 set-option -g allow-passthrough on
 
-
-# Enable mouse support
+# =============================================================================
+# Mouse & Input
+# =============================================================================
 set -g mouse on
 
 # Show pane ID and time in status bar

@@ -1,0 +1,69 @@
+# Ghostty Configuration
+# https://ghostty.org/docs/config
+
+# =============================================================================
+# Font
+# =============================================================================
+font-family = "Hack Nerd Font Mono"
+font-size = 12
+
+# =============================================================================
+# Theme (matches neovim catppuccin-macchiato)
+# =============================================================================
+theme = catppuccin-macchiato
+
+# =============================================================================
+# Window
+# =============================================================================
+window-padding-x = 8
+window-padding-y = 8
+window-decoration = true
+macos-titlebar-style = tabs
+
+# =============================================================================
+# Cursor
+# =============================================================================
+cursor-style = block
+cursor-style-blink = false
+
+# =============================================================================
+# Shell Integration
+# =============================================================================
+shell-integration = zsh
+shell-integration-features = cursor,sudo,title
+
+# =============================================================================
+# Terminal behavior
+# =============================================================================
+scrollback-limit = 10000
+copy-on-select = clipboard
+confirm-close-surface = false
+
+# =============================================================================
+# Mouse
+# =============================================================================
+mouse-hide-while-typing = true
+
+# =============================================================================
+# Keybindings (similar to iTerm2)
+# =============================================================================
+# Cmd+T for new tab
+keybind = super+t=new_tab
+# Cmd+N for new window
+keybind = super+n=new_window
+# Cmd+W to close tab/pane
+keybind = super+w=close_surface
+# Cmd+D for vertical split
+keybind = super+d=new_split:right
+# Cmd+Shift+D for horizontal split
+keybind = super+shift+d=new_split:down
+# Navigate splits with Cmd+Option+Arrow
+keybind = super+alt+left=goto_split:left
+keybind = super+alt+right=goto_split:right
+keybind = super+alt+up=goto_split:top
+keybind = super+alt+down=goto_split:bottom
+# Tab navigation
+keybind = super+shift+left_bracket=previous_tab
+keybind = super+shift+right_bracket=next_tab
+# Cmd+K to clear screen
+keybind = super+k=clear_screen
