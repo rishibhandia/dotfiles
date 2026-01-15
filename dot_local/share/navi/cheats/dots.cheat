@@ -1,0 +1,43 @@
+% dots, dotfiles, chezmoi
+
+# Apply dotfiles to home directory
+dots apply
+
+# Apply dotfiles with verbose output
+dots apply -v
+
+# Show what would change before applying
+dots diff
+
+# Show status of managed files
+dots status
+
+# Pull latest changes and apply
+dots update
+
+# Edit a dotfile (opens source in editor)
+dots edit <file>
+
+# Add a file to be managed by chezmoi
+dots add <file>
+
+# Change to dotfiles source directory
+dots cd
+
+# Run git commands in dotfiles directory
+dots git <git_command>
+
+# Check chezmoi configuration for issues
+dots doctor
+
+# Show template data (name, email, OS, etc.)
+dots data
+
+# Re-run chezmoi init
+dots re-init
+
+# Run dotfiles setup tests
+dots test
+
+$ file: find ~ -maxdepth 3 -type f -name ".*" 2>/dev/null | head -20
+$ git_command: echo -e "status\npull\npush\nlog\ndiff\nadd .\ncommit"

@@ -1,0 +1,140 @@
+% aliases, shortcuts, custom
+
+; Navigation
+# Go to previous directory
+cd-
+
+# Go up one directory
+..
+
+# Go up two directories
+...
+
+# Go up three directories
+....
+
+# Go to Downloads
+dls
+
+# Go to Documents
+docs
+
+# Go to Desktop
+dt
+
+# Go to Code/repos folder
+repos
+
+; Time & Date
+# Current date and time (ISO format)
+now
+
+# Current date only
+nowdate
+
+# Current time only
+nowtime
+
+# Unix timestamp
+timestamp
+
+# Current week number
+week
+
+; Networking
+# Show all IP addresses
+ips
+
+# Show local IP address
+localip
+
+# Show public/external IP
+publicip
+
+# Fast ping (30 times)
+fastping <host>
+
+# Flush DNS cache
+flushdns
+
+# Show listening ports
+ports
+
+; System
+# Reload shell
+reload
+
+# Clear screen
+c
+
+# Show system info
+sysinfo
+
+# Print PATH entries (one per line)
+path
+
+# Show drive mounts
+mnt
+
+; Files
+# List files (long format)
+l
+
+# List all files (including hidden)
+ll
+
+# List all files sorted by time
+lls
+
+# Find directories by name
+fd <name>
+
+# Find files by name
+ff <name>
+
+; macOS specific
+# Hide desktop icons
+hidedesktop
+
+# Show desktop icons
+showdesktop
+
+# Hide hidden files in Finder
+hidefiles
+
+# Show hidden files in Finder
+showfiles
+
+# Lock screen
+lock
+
+# Hibernate/sleep
+hibernate
+
+; Development
+# Git shortcut
+g <git_args>
+
+# Docker shortcut
+dk <docker_args>
+
+# Docker compose shortcut
+dco <compose_args>
+
+# Activate Python venv
+va
+
+# Create Python venv
+ve
+
+; Weather
+# Current weather
+weather
+
+# Weather forecast
+forecast
+
+$ host: echo -e "google.com\n8.8.8.8\nlocalhost"
+$ git_args: echo -e "status\npull\npush\nlog\ndiff"
+$ docker_args: echo -e "ps\nimages\nrun\nexec\nlogs"
+$ compose_args: echo -e "up -d\ndown\nlogs\nps"

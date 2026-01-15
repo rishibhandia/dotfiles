@@ -1,0 +1,54 @@
+% custom, functions, zsh
+
+# Extract any archive (auto-detects format)
+extract <archive>
+
+# Extract archive to current directory
+extract --here <archive>
+
+# Extract archive to specific directory
+extract -d <directory> <archive>
+
+# Extract with verbose output
+extract -v <archive>
+
+# Short alias for extract
+x <archive>
+
+# Create directory and cd into it
+mkcd <directory>
+
+# AI-powered git commit message
+gcm
+
+# Ask question about a webpage
+q "<url>" "<question>"
+
+# Ask question about a YouTube video
+qv "<youtube_url>" "<question>"
+
+# Copy file contents to clipboard
+cb <file>
+
+# Extract spreadsheet image to CSV
+sheet2csv <image_file>
+
+# Extract text from PDF using AI
+pdf2text <pdf_file>
+
+# Update all packages (brew, npm, etc.)
+update
+
+# Update everything including App Store
+update all
+
+# Search command history
+h <search_term>
+
+# Repeat a command N times
+repeat <count> <command>
+
+$ archive: find . -maxdepth 2 -type f \( -name "*.zip" -o -name "*.tar*" -o -name "*.gz" -o -name "*.rar" -o -name "*.7z" \) 2>/dev/null
+$ file: find . -maxdepth 2 -type f 2>/dev/null | head -20
+$ image_file: find . -maxdepth 2 -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" \) 2>/dev/null
+$ pdf_file: find . -maxdepth 2 -type f -name "*.pdf" 2>/dev/null

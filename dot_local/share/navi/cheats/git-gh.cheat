@@ -1,0 +1,107 @@
+% git, github, gh
+
+; Git basics
+# Check status
+git status
+
+# Stage all changes
+git add .
+
+# Stage specific file
+git add <file>
+
+# Commit with message
+git commit -m "<message>"
+
+# Push to remote
+git push
+
+# Pull from remote
+git pull
+
+# View commit history
+git log --oneline
+
+# View detailed log with graph
+git log --oneline --graph --all
+
+; Git branches
+# List branches
+git branch
+
+# Create new branch
+git checkout -b <branch_name>
+
+# Switch to branch
+git checkout <branch>
+
+# Delete branch
+git branch -d <branch>
+
+# Merge branch into current
+git merge <branch>
+
+; Git stash
+# Stash changes
+git stash
+
+# List stashes
+git stash list
+
+# Apply latest stash
+git stash pop
+
+# Apply specific stash
+git stash apply stash@{<n>}
+
+; Git diff
+# Show unstaged changes
+git diff
+
+# Show staged changes
+git diff --staged
+
+# Show diff between branches
+git diff <branch1>..<branch2>
+
+; GitHub CLI (gh)
+# View repo in browser
+gh repo view --web
+
+# Create pull request
+gh pr create
+
+# List pull requests
+gh pr list
+
+# View pull request
+gh pr view <pr_number>
+
+# Checkout pull request locally
+gh pr checkout <pr_number>
+
+# Create issue
+gh issue create
+
+# List issues
+gh issue list
+
+# View issue
+gh issue view <issue_number>
+
+# Clone a repo
+gh repo clone <owner>/<repo>
+
+# Fork a repo
+gh repo fork <owner>/<repo>
+
+# View workflow runs
+gh run list
+
+# View run details
+gh run view <run_id>
+
+$ file: git ls-files 2>/dev/null | head -20
+$ branch: git branch --format='%(refname:short)' 2>/dev/null
+$ pr_number: gh pr list --json number --jq '.[].number' 2>/dev/null | head -10
+$ issue_number: gh issue list --json number --jq '.[].number' 2>/dev/null | head -10

@@ -1,0 +1,47 @@
+% llm, ai, claude, openai
+
+# Send a prompt to default model
+llm "<prompt>"
+
+# Use specific model
+llm -m <model> "<prompt>"
+
+# Use system prompt
+llm "<prompt>" -s "<system_prompt>"
+
+# Continue previous conversation
+llm -c "<prompt>"
+
+# Attach a file (for vision models)
+llm "<prompt>" -a <file>
+
+# List available models
+llm models
+
+# Set default model
+llm models default <model>
+
+# List installed plugins
+llm plugins
+
+# View conversation logs
+llm logs
+
+# View specific conversation
+llm logs -c
+
+# List API keys
+llm keys
+
+# Set API key
+llm keys set <key_name>
+
+# Install a plugin
+llm install <plugin>
+
+# Chat mode (interactive)
+llm chat -m <model>
+
+$ model: echo -e "claude-3-5-sonnet-latest\nclaude-3-opus\ngpt-4o\ngpt-4o-mini\ngemini-2.0-flash\ngemini-1.5-pro"
+$ file: find . -maxdepth 2 -type f 2>/dev/null | head -20
+$ plugin: echo -e "llm-claude-3\nllm-gemini\nllm-ollama"

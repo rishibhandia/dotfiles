@@ -1,0 +1,133 @@
+% cli, modern, tools
+
+; bat - better cat
+# View file with syntax highlighting
+bat <file>
+
+# View file with line numbers
+bat -n <file>
+
+# View file plain (no decorations)
+bat -p <file>
+
+# Show non-printable characters
+bat -A <file>
+
+# View specific lines
+bat -r <start>:<end> <file>
+
+; fd - better find
+# Find files by name
+fd <pattern>
+
+# Find files by extension
+fd -e <extension>
+
+# Find only directories
+fd -t d <pattern>
+
+# Find only files
+fd -t f <pattern>
+
+# Find hidden files too
+fd -H <pattern>
+
+# Find and execute command on each
+fd <pattern> -x <command>
+
+; ripgrep (rg) - better grep
+# Search for pattern in current directory
+rg <pattern>
+
+# Search case-insensitive
+rg -i <pattern>
+
+# Search in specific file type
+rg -t <type> <pattern>
+
+# Search with context (lines before/after)
+rg -C <num> <pattern>
+
+# Search for whole words only
+rg -w <pattern>
+
+# Show only filenames with matches
+rg -l <pattern>
+
+# Search and replace (dry run)
+rg <pattern> -r <replacement>
+
+; fzf - fuzzy finder
+# Interactive file finder
+fzf
+
+# Find and open file in vim
+vim $(fzf)
+
+# Search command history
+history | fzf
+
+# Preview files while searching
+fzf --preview 'bat --color=always {}'
+
+# Multi-select mode
+fzf -m
+
+; zoxide - better cd
+# Jump to frequently used directory
+z <partial_path>
+
+# Interactive directory selection
+zi
+
+# Add current directory to database
+zoxide add .
+
+# List all tracked directories
+zoxide query -l
+
+; jq - JSON processor
+# Pretty print JSON
+jq '.' <json_file>
+
+# Extract specific field
+jq '.<field>' <json_file>
+
+# Extract nested field
+jq '.<parent>.<child>' <json_file>
+
+# Filter array elements
+jq '.[] | select(.<field> == "<value>")' <json_file>
+
+# Get array length
+jq '. | length' <json_file>
+
+# Get keys of object
+jq 'keys' <json_file>
+
+; yq - YAML processor
+# Pretty print YAML
+yq '.' <yaml_file>
+
+# Convert YAML to JSON
+yq -o json '.' <yaml_file>
+
+# Extract field from YAML
+yq '.<field>' <yaml_file>
+
+; btop - system monitor
+# Launch system monitor
+btop
+
+; duf - disk usage
+# Show disk usage
+duf
+
+# Show only local filesystems
+duf --only local
+
+$ file: find . -maxdepth 2 -type f 2>/dev/null | head -20
+$ extension: echo -e "py\njs\nts\ngo\nrs\nsh\njson\nyml\nmd"
+$ type: echo -e "py\njs\nts\ngo\nrust\nsh\njson\nyaml\nmd"
+$ json_file: find . -maxdepth 2 -type f -name "*.json" 2>/dev/null
+$ yaml_file: find . -maxdepth 2 -type f \( -name "*.yml" -o -name "*.yaml" \) 2>/dev/null
