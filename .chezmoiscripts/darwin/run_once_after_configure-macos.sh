@@ -2,7 +2,8 @@
 # Configure macOS system preferences
 # This runs once after dotfiles are applied
 
-set -e
+# Don't use set -e; some defaults commands may fail on different macOS versions
+# set -e
 
 # Colors
 GREEN='\033[0;32m'
@@ -112,15 +113,17 @@ defaults write com.apple.dock autohide -bool true
 defaults write com.apple.dock autohide-delay -float 0
 
 # =============================================================================
-# Safari
+# Safari (commented out - Safari is sandboxed in modern macOS)
 # =============================================================================
+# These settings require manual configuration in Safari preferences
+# or Full Disk Access for the terminal
 
-# Enable Safari's debug menu
-defaults write com.apple.Safari IncludeInternalDebugMenu -bool true
+# # Enable Safari's debug menu
+# defaults write com.apple.Safari IncludeInternalDebugMenu -bool true
 
-# Enable the Develop menu and the Web Inspector
-defaults write com.apple.Safari IncludeDevelopMenu -bool true
-defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
+# # Enable the Develop menu and the Web Inspector
+# defaults write com.apple.Safari IncludeDevelopMenu -bool true
+# defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
 
 # =============================================================================
 # Terminal
