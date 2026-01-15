@@ -1,0 +1,65 @@
+% tmux, terminal, multiplexer
+
+# Create new window
+ctrl+b c
+
+# Next window
+ctrl+b n
+
+# Previous window
+ctrl+b p
+
+# Go to window by number
+ctrl+b <window_number>
+
+# Rename current window
+ctrl+b ,
+
+# List windows
+ctrl+b w
+
+# Split pane vertically (side by side)
+ctrl+b %
+
+# Split pane horizontally (top/bottom)
+ctrl+b "
+
+# Switch to pane in direction
+ctrl+b <arrow_key>
+
+# Close current pane
+ctrl+b x
+
+# Toggle pane zoom (fullscreen)
+ctrl+b z
+
+# Detach from session
+ctrl+b d
+
+# List all sessions
+tmux ls
+
+# Attach to session
+tmux attach -t <session_name>
+
+# Create new named session
+tmux new -s <session_name>
+
+# Kill session
+tmux kill-session -t <session_name>
+
+# Scroll mode (then use arrows/pgup/pgdn, q to exit)
+ctrl+b [
+
+# Search backward in scroll mode
+ctrl+b [ then ?
+
+# Copy mode with vi keys
+ctrl+b [ then space to select, enter to copy
+
+# Paste buffer
+ctrl+b ]
+
+$ window_number: echo {0..9} | tr ' ' '\n'
+$ arrow_key: echo -e "up\ndown\nleft\nright"
+$ session_name: tmux ls -F '#S' 2>/dev/null || echo "main"
