@@ -49,8 +49,7 @@ brew "yt-dlp"                 # Video downloader
 # CLI Tools - Archive/Compression
 # =============================================================================
 brew "p7zip"                  # 7-Zip
-brew "unar"                   # Universal archive extractor
-brew "unrar"                  # RAR extractor
+brew "unar"                   # Universal archive extractor (handles RAR too)
 brew "pigz"                   # Parallel gzip
 brew "zopfli"                 # Better compression
 
@@ -99,14 +98,14 @@ cask "github"                 # GitHub Desktop
 # macOS Casks - Productivity
 # =============================================================================
 cask "logseq"                 # Note taking / PKM
-cask "mpv"                    # Video player
+cask "stolendata-mpv"         # Video player
 cask "skim"                   # PDF reader
 
 # =============================================================================
 # macOS Casks - Utilities
 # =============================================================================
-cask "tailscale"              # VPN/mesh network
-cask "ollama"                 # Local LLM runtime
+cask "tailscale-app"          # VPN/mesh network
+cask "ollama-app"             # Local LLM runtime
 cask "signal"                 # Secure messaging
 
 # =============================================================================
