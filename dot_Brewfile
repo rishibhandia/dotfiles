@@ -50,8 +50,7 @@ brew "zopfli"                 # Better compression
 # =============================================================================
 # Development - Languages & Runtimes
 # =============================================================================
-brew "uv"                     # Fast Python package manager
-brew "pipx"                   # Install Python CLI tools
+brew "uv"                     # Fast Python package manager & CLI tool runner
 brew "node"                   # Node.js
 brew "go"                     # Go language
 brew "rustup"                 # Rust toolchain manager
