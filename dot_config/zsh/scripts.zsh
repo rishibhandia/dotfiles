@@ -727,7 +727,7 @@ function cb() {
 }
 
 
-#Syncing with Katsumi Lab Google Drive 
+#Syncing with Katsumi Lab Google Drive
 #-------------------------------------------------------------------------------
 function sync_tise2() {
     target_dir="/Users/rishi/Documents/Scientific Data/NYU_Lab"
@@ -737,3 +737,152 @@ function sync_tise2() {
     fi
     rclone copy --drive-shared-with-me -v -M --check-first NYU_Katsumi_Lab:'Katsumi lab'/'Astrella and OPA'/Data/TiSe2_TPOP_2025/ ./TiSe2_TPOP_2025
 }
+
+
+# Dotfiles management
+# -----------------------------------------------------------------------------
+function dots() {
+    local CHEZMOI_DIR="${HOME}/.local/share/chezmoi"
+
+    # Show help if no arguments
+    if [ -z "$1" ]; then
+        cat << 'EOF'
+dots - Dotfiles management commands
+
+Usage: dots <command> [args]
+
+Commands:
+  apply [-v]     Apply dotfiles to home directory (-v for verbose)
+  diff           Show what would change
+  status         Show status of managed files
+  update         Pull latest changes from remote and apply
+  edit [file]    Edit a dotfile (opens source in $EDITOR)
+  add <file>     Add a file to be managed by chezmoi
+  cd             Change to dotfiles source directory
+  git <args>     Run git commands in dotfiles directory
+  doctor         Check chezmoi configuration for issues
+  data           Show template data (name, email, OS, etc.)
+  re-init        Re-run chezmoi init (regenerate config)
+  test           Run dotfiles setup tests
+  help           Show this help message
+
+Examples:
+  dots apply           # Apply all dotfiles
+  dots apply -v        # Apply with verbose output
+  dots diff            # Preview changes before applying
+  dots edit ~/.zshrc   # Edit zshrc source file
+  dots add ~/.somerc   # Start managing a new file
+  dots git status      # Check git status of dotfiles repo
+  dots git push        # Push dotfiles changes to remote
+EOF
+        return 0
+    fi
+
+    local cmd="$1"
+    shift
+
+    case "$cmd" in
+        apply)
+            if [ "$1" = "-v" ] || [ "$1" = "--verbose" ]; then
+                chezmoi apply --verbose
+            else
+                chezmoi apply "$@"
+            fi
+            ;;
+        diff)
+            chezmoi diff "$@"
+            ;;
+        status)
+            chezmoi status "$@"
+            ;;
+        update)
+            chezmoi update "$@"
+            ;;
+        edit)
+            if [ -z "$1" ]; then
+                # No file specified, open the source directory
+                ${EDITOR:-vim} "$CHEZMOI_DIR"
+            else
+                chezmoi edit "$@"
+            fi
+            ;;
+        add)
+            if [ -z "$1" ]; then
+                echo "Usage: dots add <file>"
+                return 1
+            fi
+            chezmoi add "$@"
+            ;;
+        cd)
+            cd "$CHEZMOI_DIR" || return 1
+            ;;
+        git)
+            git -C "$CHEZMOI_DIR" "$@"
+            ;;
+        doctor)
+            chezmoi doctor
+            ;;
+        data)
+            chezmoi data
+            ;;
+        re-init|reinit)
+            chezmoi init
+            ;;
+        test)
+            if [ -f "$CHEZMOI_DIR/scripts/test.sh" ]; then
+                bash "$CHEZMOI_DIR/scripts/test.sh"
+            else
+                echo "No test script found at $CHEZMOI_DIR/scripts/test.sh"
+                return 1
+            fi
+            ;;
+        help|--help|-h)
+            dots  # Call without args to show help
+            ;;
+        *)
+            echo "Unknown command: $cmd"
+            echo "Run 'dots help' for usage information"
+            return 1
+            ;;
+    esac
+}
+
+# Tab completion for dots command (zsh)
+if [ -n "$ZSH_VERSION" ]; then
+    _dots_completion() {
+        local -a commands
+        commands=(
+            'apply:Apply dotfiles to home directory'
+            'diff:Show what would change'
+            'status:Show status of managed files'
+            'update:Pull latest and apply'
+            'edit:Edit a dotfile'
+            'add:Add a file to chezmoi'
+            'cd:Change to dotfiles directory'
+            'git:Run git commands in dotfiles repo'
+            'doctor:Check chezmoi configuration'
+            'data:Show template data'
+            're-init:Re-run chezmoi init'
+            'test:Run setup tests'
+            'help:Show help message'
+        )
+
+        if (( CURRENT == 2 )); then
+            _describe 'command' commands
+        elif (( CURRENT == 3 )); then
+            case "${words[2]}" in
+                edit|add)
+                    _files
+                    ;;
+                git)
+                    # Delegate to git completion
+                    _git
+                    ;;
+                apply)
+                    _values 'options' '-v[verbose output]' '--verbose[verbose output]'
+                    ;;
+            esac
+        fi
+    }
+    compdef _dots_completion dots
+fi
