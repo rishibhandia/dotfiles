@@ -1,0 +1,122 @@
+# Brewfile - Homebrew packages for dotfiles
+# Install with: brew bundle --file=~/.Brewfile
+# Dump current packages: brew bundle dump --file=~/.Brewfile --force --describe
+
+# =============================================================================
+# Taps
+# =============================================================================
+tap "homebrew/bundle"
+tap "homebrew/cask-fonts"
+
+# =============================================================================
+# CLI Tools - Essential
+# =============================================================================
+brew "chezmoi"                # Dotfiles manager
+brew "git"                    # Version control
+brew "zsh"                    # Shell
+brew "starship"               # Cross-shell prompt
+brew "neovim"                 # Text editor
+brew "tmux"                   # Terminal multiplexer
+
+# =============================================================================
+# CLI Tools - Modern replacements
+# =============================================================================
+brew "bat"                    # Better cat
+brew "lsd"                    # Better ls
+brew "fd"                     # Better find
+brew "ripgrep"                # Better grep
+brew "broot"                  # Better tree/file navigator
+brew "btop"                   # Better top
+brew "fastfetch"              # System info display
+brew "fzf"                    # Fuzzy finder
+brew "zoxide"                 # Better cd (z command)
+brew "tldr"                   # Simplified man pages
+brew "duf"                    # Better df (disk usage)
+
+# =============================================================================
+# CLI Tools - Utilities
+# =============================================================================
+brew "tree"                   # Directory listing
+brew "curl"                   # HTTP client
+brew "wget"                   # HTTP client
+brew "jq"                     # JSON processor
+brew "yq"                     # YAML processor
+brew "rclone"                 # Cloud storage sync
+brew "navi"                   # Interactive cheatsheet
+brew "yt-dlp"                 # Video downloader
+
+# =============================================================================
+# CLI Tools - Archive/Compression
+# =============================================================================
+brew "p7zip"                  # 7-Zip
+brew "unar"                   # Universal archive extractor
+brew "unrar"                  # RAR extractor
+brew "pigz"                   # Parallel gzip
+brew "zopfli"                 # Better compression
+
+# =============================================================================
+# Development - Languages & Runtimes
+# =============================================================================
+brew "uv"                     # Fast Python package manager
+brew "pipx"                   # Install Python CLI tools
+brew "node"                   # Node.js
+brew "go"                     # Go language
+brew "rustup"                 # Rust toolchain manager
+
+# =============================================================================
+# Development - Tools
+# =============================================================================
+brew "gh"                     # GitHub CLI
+brew "ruff"                   # Fast Python linter
+brew "shellcheck"             # Shell script linter
+brew "shfmt"                  # Shell script formatter
+
+# =============================================================================
+# AI/LLM Tools
+# =============================================================================
+brew "llm"                    # CLI for LLMs
+
+# =============================================================================
+# Zsh plugins
+# =============================================================================
+brew "zsh-syntax-highlighting" # Fish-like syntax highlighting
+brew "zsh-autosuggestions"     # Fish-like autosuggestions
+brew "zsh-completions"         # Additional zsh completions
+
+# =============================================================================
+# macOS Casks - Core
+# =============================================================================
+cask "1password"              # Password manager
+cask "1password-cli"          # 1Password CLI
+
+# =============================================================================
+# macOS Casks - Development
+# =============================================================================
+cask "zed"                    # Code editor
+cask "github"                 # GitHub Desktop
+
+# =============================================================================
+# macOS Casks - Productivity
+# =============================================================================
+cask "logseq"                 # Note taking / PKM
+cask "mpv"                    # Video player
+cask "skim"                   # PDF reader
+
+# =============================================================================
+# macOS Casks - Utilities
+# =============================================================================
+cask "tailscale"              # VPN/mesh network
+cask "ollama"                 # Local LLM runtime
+cask "signal"                 # Secure messaging
+
+# =============================================================================
+# Fonts
+# =============================================================================
+cask "font-hack-nerd-font"        # Hack font with icons
+cask "font-meslo-lg-nerd-font"    # Meslo font for terminal
+
+# =============================================================================
+# Mac App Store (requires: brew install mas)
+# =============================================================================
+brew "mas"                    # Mac App Store CLI
+# mas "Xcode", id: 497799835
