@@ -7,6 +7,9 @@
 font-family = "Hack Nerd Font Mono"
 font-size = 12
 
+# Font rendering for non-retina displays
+font-thicken = true
+
 # =============================================================================
 # Theme (matches neovim catppuccin-macchiato)
 # =============================================================================
