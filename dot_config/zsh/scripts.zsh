@@ -886,3 +886,98 @@ if [ -n "$ZSH_VERSION" ]; then
     }
     compdef _dots_completion dots
 fi
+
+# =============================================================================
+# Useful functions from mathiasbynens/dotfiles
+# =============================================================================
+
+# Determine size of a file or total size of a directory
+function fs() {
+    if du -b /dev/null > /dev/null 2>&1; then
+        local arg=-sbh
+    else
+        local arg=-sh
+    fi
+    if [[ -n "$@" ]]; then
+        du $arg -- "$@"
+    else
+        du $arg .[^.]* ./*
+    fi
+}
+
+# Start an HTTP server from a directory, optionally specifying the port
+function server() {
+    local port="${1:-8000}"
+    sleep 1 && open "http://localhost:${port}/" &
+    python3 -m http.server "$port"
+}
+
+# Create a .tar.gz archive, using `zopfli`, `pigz` or `gzip` for compression
+function targz() {
+    local tmpFile="${@%/}.tar"
+    tar -cvf "${tmpFile}" --exclude=".DS_Store" "${@}" || return 1
+
+    size=$(
+        stat -f"%z" "${tmpFile}" 2> /dev/null; # macOS `stat`
+        stat -c"%s" "${tmpFile}" 2> /dev/null;  # GNU `stat`
+    )
+
+    local cmd=""
+    if (( size < 52428800 )) && hash zopfli 2> /dev/null; then
+        cmd="zopfli"
+    elif hash pigz 2> /dev/null; then
+        cmd="pigz"
+    else
+        cmd="gzip"
+    fi
+
+    echo "Compressing .tar ($((size / 1000)) kB) using \`${cmd}\`..."
+    "${cmd}" -v "${tmpFile}" || return 1
+    [ -f "${tmpFile}" ] && rm "${tmpFile}"
+
+    zippedSize=$(
+        stat -f"%z" "${tmpFile}.gz" 2> /dev/null; # macOS `stat`
+        stat -c"%s" "${tmpFile}.gz" 2> /dev/null; # GNU `stat`
+    )
+
+    echo "${tmpFile}.gz ($((zippedSize / 1000)) kB) created successfully."
+}
+
+# Compare original and gzipped file size
+function gz() {
+    local origsize=$(wc -c < "$1")
+    local gzipsize=$(gzip -c "$1" | wc -c)
+    local ratio=$(echo "$gzipsize * 100 / $origsize" | bc -l)
+    printf "orig: %d bytes\n" "$origsize"
+    printf "gzip: %d bytes (%2.2f%%)\n" "$gzipsize" "$ratio"
+}
+
+# `tre` is a shorthand for `tree` with hidden files and color enabled, ignoring
+# the `.git` directory, listing directories first. The output gets piped into
+# `less` with options to preserve color and line numbers, unless the output is
+# small enough for one screen.
+function tre() {
+    tree -aC -I '.git|node_modules|.venv|__pycache__' --dirsfirst "$@" | less -FRNX
+}
+
+# Remove .DS_Store files recursively
+function cleanup() {
+    find . -type f -name '*.DS_Store' -ls -delete
+}
+
+# Empty the Trash on all mounted volumes and the main HDD.
+# Also, clear Apple's System Logs to improve shell startup speed.
+# Finally, clear download history from quarantine.
+function emptytrash() {
+    sudo rm -rfv /Volumes/*/.Trashes 2>/dev/null
+    sudo rm -rfv ~/.Trash 2>/dev/null
+    sudo rm -rfv /private/var/log/asl/*.asl 2>/dev/null
+    sqlite3 ~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV* 'delete from LSQuarantineEvent' 2>/dev/null
+    echo "Trash emptied and system logs cleared."
+}
+
+# Kill all Chrome tab processes (useful when Chrome is eating CPU)
+function chromekill() {
+    pgrep -f '[C]hrome Helper --type=renderer' | xargs kill -9
+    echo "Chrome renderer processes killed."
+}

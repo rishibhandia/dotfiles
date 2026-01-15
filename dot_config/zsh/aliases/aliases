@@ -16,8 +16,36 @@
 #If debug flag enabled (ZSH_DEBUG = 1), will print file path and name when sourced
 [ ! -z "$ZSH_DEBUG" ] && printf "Sourcing file %s (path: %s)\n" "${(%):-%N}" "${(%):-%x}"
 
-# Redefine standard commands to improve their behavior
-# -----------------------------------------------------------------------------
+# =============================================================================
+# Helper function: alias only if command exists
+# =============================================================================
+alias_if_exists() {
+    command -v "$2" &> /dev/null && alias "$1"="$2"
+}
+
+# =============================================================================
+# Interactive-only aliases (avoid tripping Claude Code and other agents)
+# These override standard commands, so only load in interactive shells
+# =============================================================================
+if [[ -o interactive ]]; then
+    # Modern CLI replacements (only if installed)
+    alias_if_exists cat bat
+    alias_if_exists top btop
+
+    # Safe command defaults with confirmations
+    alias cp='cp -iv'
+    alias mv='mv -iv'
+    alias rm='rm -iv'
+
+    # Editor aliases
+    alias vim='nvim'
+    alias vi='nvim'
+    alias edit='nvim'
+fi
+
+# =============================================================================
+# Safe aliases (OK for non-interactive shells)
+# =============================================================================
 
 # Starts calculator with math support.
 alias bc='bc -l'
@@ -99,12 +127,6 @@ alias .5='cd ../../../../..'
 # | Shell commands |
 # +----------------+
 
-
-# Makes file commands verbosely (-v) and interactively (-i)
-alias cp='cp -iv'
-alias mv='mv -iv'
-alias rm='rm -iv'
-
 # Copies a file securely.
 alias cpv='rsync -ah --info=progress2'
 
@@ -184,16 +206,10 @@ alias fgrep='fgrep --color=auto'
 # | Neovim |
 # +--------+
 
-alias vim='nvim'
-alias vi='nvim'
+# vim/vi/edit aliases moved to interactive-only section above
 alias svim='sudoedit'
-alias dvim="vim -u /usr/share/nvim/archlinux.vim" # nvim with default config
-
-
-# Sets editors and defaults.
-alias edit='vim'
 alias svi='sudo vi'
-alias vis='vim "+set si"'
+alias vis='nvim "+set si"'
 
 
 
@@ -207,16 +223,7 @@ alias ports='sudo netstat -tulanp'
 # +-------+
 # |  top  |
 # +-------+
-
-if type 'atop' &> /dev/null; then
-    alias top='atop'
-elif type 'htop' &> /dev/null; then
-    alias top='htop'
-elif type 'ntop' &> /dev/null; then
-    if [[ "$OSTYPE" =~ ^(cygwin|mingw|msys) ]]; then
-        alias top='ntop'
-    fi
-fi
+# top alias moved to interactive-only section above (uses btop)
 
 
 #+------------+

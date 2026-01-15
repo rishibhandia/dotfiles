@@ -52,3 +52,30 @@ $ archive: find . -maxdepth 2 -type f \( -name "*.zip" -o -name "*.tar*" -o -nam
 $ file: find . -maxdepth 2 -type f 2>/dev/null | head -20
 $ image_file: find . -maxdepth 2 -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" \) 2>/dev/null
 $ pdf_file: find . -maxdepth 2 -type f -name "*.pdf" 2>/dev/null
+
+; Utility functions (from mathiasbynens)
+# Show file/directory sizes
+fs <path>
+
+# Start local HTTP server (opens browser)
+server <port>
+
+# Create optimized .tar.gz archive (uses zopfli/pigz if available)
+targz <directory>
+
+# Compare original vs gzip compressed size
+gz <file>
+
+# Tree view ignoring .git, node_modules, etc.
+tre <directory>
+
+# Remove all .DS_Store files recursively
+cleanup
+
+# Empty system trash and clear logs
+emptytrash
+
+# Kill Chrome renderer processes (when eating CPU)
+chromekill
+
+$ port: echo -e "8000\n3000\n5000\n8080"
