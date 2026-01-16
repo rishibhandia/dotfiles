@@ -112,18 +112,22 @@ Scripts that run automatically during `chezmoi apply`:
 - Packages auto-install when package files change via `run_onchange` scripts
 
 ### Claude Code Skills
-The skills marketplace is automatically set up on `chezmoi apply`. Install skills in Claude Code:
+Skills are synced via chezmoi to `~/.claude/skills/`. Included skills:
+- **pdf** - PDF manipulation and form extraction
+- **xlsx** - Excel spreadsheet creation
+- **pptx** - PowerPoint presentations
+- **docx** - Word document creation
+- **skill-creator** - Create new custom skills
+- **theme-factory** - Generate color themes
+- **doc-coauthoring** - Document collaboration
 
+**Adding more skills from the marketplace:**
 ```
-/install pdf              # PDF manipulation and forms
-/install xlsx             # Excel spreadsheet work
-/install pptx             # PowerPoint presentations
-/install docx             # Word document creation
-/install theme-factory    # Theme generation
-/install doc-coauthoring  # Document collaboration
-/install internal-comms   # Professional communications
-/install slack-gif-creator # Slack GIF creation
+/plugin marketplace add anthropics/skills              # Register marketplace (one-time)
+/plugin install example-skills@anthropic-agent-skills  # Install a bundle
 ```
+
+**Custom skills:** Create a folder with a `SKILL.md` file containing YAML frontmatter (`name`, `description`) and markdown instructions. Add to `dot_claude/skills/` in this repo.
 
 ## Testing
 
