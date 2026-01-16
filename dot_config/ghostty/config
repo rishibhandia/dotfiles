@@ -41,7 +41,8 @@ shell-integration-features = cursor,sudo,title
 # Launch with tmux
 # =============================================================================
 # Attach to existing session "main" or create new one
-command = tmux new-session -A -s main
+# Use login shell to ensure PATH includes Homebrew (works on Intel and Apple Silicon)
+command = /bin/zsh -lc 'tmux new-session -A -s main'
 
 # =============================================================================
 # Terminal behavior
