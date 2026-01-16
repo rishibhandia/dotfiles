@@ -300,19 +300,23 @@ print_next_steps() {
     echo ""
     echo "  2. If errors occurred, run: chezmoi apply --keep-going"
     echo ""
-    echo "  3. For 1Password integration:"
-    if [ "$os" = "darwin" ]; then
-        echo "     - Install 1Password from App Store or: brew install --cask 1password"
-        echo "     - Enable CLI integration in 1Password > Settings > Developer"
-    else
-        echo "     - Install 1Password CLI: https://1password.com/downloads/command-line/"
+
+    # Only show 1Password instructions if not signed in
+    if ! command_exists op || ! op whoami >/dev/null 2>&1; then
+        echo "  3. For 1Password integration (required for API keys):"
+        if [ "$os" = "darwin" ]; then
+            echo "     - Install 1Password from App Store or: brew install --cask 1password"
+            echo "     - Enable CLI integration in 1Password > Settings > Developer"
+        else
+            echo "     - Install 1Password CLI: https://1password.com/downloads/command-line/"
+        fi
+        echo "     - Sign in: op signin"
+        echo "     - Re-run: chezmoi apply"
+        echo ""
     fi
-    echo "     - Sign in: op signin"
-    echo "     - Re-run: chezmoi apply"
-    echo ""
 
     if [ "$os" = "linux" ]; then
-        echo "  4. Log out and back in for shell change to take effect"
+        echo "  3. Log out and back in for shell change to take effect"
         echo ""
     fi
 
@@ -329,6 +333,59 @@ print_next_steps() {
         echo "  make macos        - Apply macOS system preferences"
         echo ""
     fi
+}
+
+# Setup 1Password CLI
+setup_onepassword() {
+    # Check if op is installed (should be after Brewfile packages are installed)
+    if ! command_exists op; then
+        warn "1Password CLI (op) not found. Skipping 1Password setup."
+        warn "Some dotfiles templates require 1Password for API keys."
+        return 0
+    fi
+
+    # Check if already signed in
+    if op whoami >/dev/null 2>&1; then
+        success "1Password CLI already signed in"
+        return 0
+    fi
+
+    echo ""
+    info "1Password CLI is installed but not signed in."
+    info "Your dotfiles use 1Password to securely store API keys."
+    echo ""
+
+    # Ask user if they want to sign in now
+    printf "${YELLOW}Would you like to sign in to 1Password now? [Y/n] ${NC}"
+    read -r response
+
+    case "$response" in
+        [nN][oO]|[nN])
+            warn "Skipping 1Password sign-in."
+            warn "Run 'op signin' and then 'chezmoi apply' later to complete setup."
+            return 0
+            ;;
+        *)
+            info "Starting 1Password sign-in..."
+            echo ""
+            echo "If you haven't added an account yet, run: op account add"
+            echo "Otherwise, signing in now..."
+            echo ""
+
+            if op signin; then
+                success "1Password sign-in successful"
+
+                info "Re-applying dotfiles with 1Password integration..."
+                chezmoi apply --keep-going || {
+                    warn "Some errors occurred during apply."
+                }
+                success "Dotfiles re-applied with 1Password secrets"
+            else
+                warn "1Password sign-in failed or was cancelled."
+                warn "Run 'op signin' and then 'chezmoi apply' later to complete setup."
+            fi
+            ;;
+    esac
 }
 
 # Change default shell to zsh
@@ -404,10 +461,13 @@ main() {
     # Step 4: Initialize dotfiles
     init_dotfiles
 
-    # Step 5: Set zsh as default shell
+    # Step 5: Setup 1Password (prompts for sign-in if needed)
+    setup_onepassword
+
+    # Step 6: Set zsh as default shell
     set_zsh_default
 
-    # Step 6: Show next steps
+    # Step 7: Show next steps
     print_next_steps
 }
 
