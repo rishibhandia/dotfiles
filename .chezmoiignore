@@ -1,0 +1,5 @@
+# macOS-only skills (require macOS apps)
+{{ if ne .chezmoi.os "darwin" }}
+dot_claude/skills/things
+dot_claude/skills/fantastical
+{{ end }}
