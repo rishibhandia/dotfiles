@@ -41,15 +41,7 @@ shell-integration-features = cursor,sudo,title
 # Launch with tmux
 # =============================================================================
 # Attach to existing session "main" or create new one
-{{- if eq .chezmoi.os "darwin" }}
-{{-   if eq .chezmoi.arch "arm64" }}
-command = /opt/homebrew/bin/tmux new-session -A -s main
-{{-   else }}
 command = /usr/local/bin/tmux new-session -A -s main
-{{-   end }}
-{{- else }}
-command = /home/linuxbrew/.linuxbrew/bin/tmux new-session -A -s main
-{{- end }}
 
 # =============================================================================
 # Terminal behavior
@@ -86,3 +78,5 @@ keybind = super+shift+left_bracket=previous_tab
 keybind = super+shift+right_bracket=next_tab
 # Cmd+K to clear screen
 keybind = super+k=clear_screen
+# Shift+Enter for multi-line input (Claude Code, etc.)
+keybind = shift+enter=text:\x1b[13;2u
