@@ -22,17 +22,17 @@ TESTS_SKIPPED=0
 # Test result functions
 pass() {
     printf "${GREEN}✓${NC} %s\n" "$1"
-    ((TESTS_PASSED++))
+    ((++TESTS_PASSED))
 }
 
 fail() {
     printf "${RED}✗${NC} %s\n" "$1"
-    ((TESTS_FAILED++))
+    ((++TESTS_FAILED))
 }
 
 skip() {
     printf "${YELLOW}○${NC} %s (skipped)\n" "$1"
-    ((TESTS_SKIPPED++))
+    ((++TESTS_SKIPPED))
 }
 
 info() {
