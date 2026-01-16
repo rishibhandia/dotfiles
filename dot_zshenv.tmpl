@@ -44,9 +44,9 @@ export VIMCONFIG="$XDG_CONFIG_HOME/nvim"
 
 # uv path
 {{- if eq .chezmoi.os "darwin" }}
-export PATH="/Users/{{ .chezmoi.username }}/.local/share/../bin:$PATH"
+export PATH="/Users/{{ .chezmoi.username }}/.local/bin:$PATH"
 {{- else }}
-export PATH="/home/{{ .chezmoi.username }}/.local/share/../bin:$PATH"
+export PATH="/home/{{ .chezmoi.username }}/.local/bin:$PATH"
 {{- end }}
 
 # API Keys from 1Password

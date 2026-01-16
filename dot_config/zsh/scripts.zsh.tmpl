@@ -727,16 +727,24 @@ function cb() {
 }
 
 
-#Syncing with Katsumi Lab Google Drive
+{{- if .personal }}
+# Lab data sync (config stored in 1Password)
 #-------------------------------------------------------------------------------
+{{- $targetDir := "" }}{{ $rcloneRemote := "" }}{{ $localFolder := "" }}
+{{- range (onepassword "Lab Sync Config").fields }}
+{{-   if eq .label "target_dir" }}{{ $targetDir = .value }}{{ end }}
+{{-   if eq .label "rclone_remote" }}{{ $rcloneRemote = .value }}{{ end }}
+{{-   if eq .label "local_folder" }}{{ $localFolder = .value }}{{ end }}
+{{- end }}
 function sync_tise2() {
-    target_dir="/Users/rishi/Documents/Scientific Data/NYU_Lab"
+    target_dir="{{ $targetDir }}"
     if [ "$PWD" != "$target_dir" ]; then
-        echo "Changing directory to NYU_Lab..."
+        echo "Changing directory to lab folder..."
         cd "$target_dir"
     fi
-    rclone copy --drive-shared-with-me -v -M --check-first NYU_Katsumi_Lab:'Katsumi lab'/'Astrella and OPA'/Data/TiSe2_TPOP_2025/ ./TiSe2_TPOP_2025
+    rclone copy --drive-shared-with-me -v -M --check-first '{{ $rcloneRemote }}' './{{ $localFolder }}'
 }
+{{- end }}
 
 
 # Dotfiles management
