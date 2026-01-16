@@ -5,6 +5,19 @@
 #If debug flag enabled (ZSH_DEBUG = 1), will print file path and name when sourced
 [ ! -z "$ZSH_DEBUG" ] && printf "Sourcing file %s (path: %s)\n" "${(%):-%N}" "${(%):-%x}"
 
+# +-----------------------+
+# | HOMEBREW PATH FIX     |
+# +-----------------------+
+# macOS's /etc/zprofile runs path_helper which reorders PATH, putting system
+# directories before Homebrew. Re-add Homebrew to ensure it takes priority.
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+elif [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+
 eval "$(navi widget zsh)"
 
 # +------------+
