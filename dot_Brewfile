@@ -95,7 +95,7 @@ cask "github"                 # GitHub Desktop
 # macOS Casks - Productivity
 # =============================================================================
 cask "logseq"                 # Note taking / PKM
-cask "stolendata-mpv"         # Video player
+cask "mpv"                    # Video player
 cask "skim"                   # PDF reader
 
 # =============================================================================
