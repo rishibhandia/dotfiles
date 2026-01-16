@@ -108,7 +108,22 @@ Scripts that run automatically during `chezmoi apply`:
 
 ### Package Management
 - `dot_Brewfile` → `~/.Brewfile` - Homebrew packages for macOS/Linux
-- Packages auto-install when Brewfile changes via `run_onchange` script
+- `dot_Scoopfile` → `~/.Scoopfile` - Scoop packages for Windows
+- Packages auto-install when package files change via `run_onchange` scripts
+
+### Claude Code Skills
+The skills marketplace is automatically set up on `chezmoi apply`. Install skills in Claude Code:
+
+```
+/install pdf              # PDF manipulation and forms
+/install xlsx             # Excel spreadsheet work
+/install pptx             # PowerPoint presentations
+/install docx             # Word document creation
+/install theme-factory    # Theme generation
+/install doc-coauthoring  # Document collaboration
+/install internal-comms   # Professional communications
+/install slack-gif-creator # Slack GIF creation
+```
 
 ## Testing
 
