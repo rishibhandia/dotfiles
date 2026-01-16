@@ -6,7 +6,6 @@
 # =============================================================================
 ServerAliveInterval 15
 ServerAliveCountMax 3
-HostKeyAlgorithms=+ssh-dss
 
 {{- if eq .chezmoi.os "darwin" }}
 # Colima (Docker) SSH configs
@@ -30,16 +29,16 @@ Host github.com
     Hostname ssh.github.com
     Port 443
     User git
-    IdentityFile ~/.ssh/personal_github.pub
+    IdentityFile ~/.ssh/personal_github
 
 # =============================================================================
 # Personal machines
 # =============================================================================
 Host Mac-mini.local
-    IdentityFile ~/.ssh/personal_id_ed25519.pub
+    IdentityFile ~/.ssh/personal_id_ed25519
 
 Host 100.117.214.99
-    IdentityFile ~/.ssh/personal_id_ed25519.pub
+    IdentityFile ~/.ssh/personal_id_ed25519
 
 # =============================================================================
 # MARCC (JHU HPC)
@@ -54,25 +53,22 @@ Host login.marcc.jhu.edu
 # NYU HPC (Greene)
 # =============================================================================
 Host greene.hpc.nyu.edu dtn.hpc.nyu.edu gw.hpc.nyu.edu
-    StrictHostKeyChecking no
+    # accept-new: Accept new host keys, but reject changed keys (MITM protection)
+    StrictHostKeyChecking accept-new
     ServerAliveInterval 60
-    ForwardAgent yes
-    UserKnownHostsFile /dev/null
     LogLevel ERROR
+    User rb3926
 
 Host hpcgwtunnel
     HostName gw.hpc.nyu.edu
     ForwardX11 no
-    StrictHostKeyChecking no
+    StrictHostKeyChecking accept-new
     LocalForward 8027 greene.hpc.nyu.edu:22
-    UserKnownHostsFile /dev/null
     User rb3926
 
 Host greene
     HostName localhost
     Port 8027
-    ForwardX11 yes
-    StrictHostKeyChecking no
-    UserKnownHostsFile /dev/null
+    StrictHostKeyChecking accept-new
     LogLevel ERROR
     User rb3926
