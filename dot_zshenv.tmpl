@@ -42,12 +42,22 @@ setopt EXTENDED_HISTORY
 export SCREENSHOT="$HOME/Pictures/screenshots"
 export VIMCONFIG="$XDG_CONFIG_HOME/nvim"
 
-# uv path
+# Homebrew
 {{- if eq .chezmoi.os "darwin" }}
-export PATH="/Users/{{ .chezmoi.username }}/.local/bin:$PATH"
-{{- else }}
-export PATH="/home/{{ .chezmoi.username }}/.local/bin:$PATH"
+{{-   if eq .chezmoi.arch "arm64" }}
+# Apple Silicon Mac
+eval "$(/opt/homebrew/bin/brew shellenv)"
+{{-   else }}
+# Intel Mac
+eval "$(/usr/local/bin/brew shellenv)"
+{{-   end }}
+{{- else if eq .chezmoi.os "linux" }}
+# Linux
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 {{- end }}
+
+# Local bin
+export PATH="$HOME/.local/bin:$PATH"
 
 # API Keys from 1Password
 {{- with (onepassword "OpenAI API Key").fields -}}
