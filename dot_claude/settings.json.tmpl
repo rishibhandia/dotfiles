@@ -4,6 +4,14 @@
   "env": {
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1"
   },
+{{- if eq .chezmoi.os "darwin" }}
+  "mcpServers": {
+    "things3": {
+      "command": "{{ .chezmoi.homeDir }}/.cargo/bin/things3",
+      "args": ["-d", "{{ .chezmoi.homeDir }}/Library/Group Containers/JLMPQHK86H.com.culturedcode.ThingsMac/ThingsData-FPAM5/Things Database.thingsdatabase/main.sqlite", "mcp"]
+    }
+  },
+{{- end }}
   "permissions": {
     "allow": [
       "Read(**)",

@@ -1,0 +1,58 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Install cargo packages from Cargofile
+# Cargofile hash: {{ include "dot_Cargofile" | sha256sum }}
+
+$ErrorActionPreference = "Continue"
+
+function Write-Info { param($Message) Write-Host "[INFO] $Message" -ForegroundColor Blue }
+function Write-Success { param($Message) Write-Host "[OK] $Message" -ForegroundColor Green }
+function Write-Warn { param($Message) Write-Host "[WARN] $Message" -ForegroundColor Yellow }
+
+# 1. Check for cargo, install rustup if missing
+if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
+    Write-Info "Installing Rust via rustup..."
+    $rustupUrl = "https://win.rustup.rs/x86_64"
+    $rustupExe = "$env:TEMP\rustup-init.exe"
+    try {
+        Invoke-WebRequest -Uri $rustupUrl -OutFile $rustupExe
+        & $rustupExe -y
+        Remove-Item $rustupExe -ErrorAction SilentlyContinue
+        Write-Success "Rust installed"
+    } catch {
+        Write-Warn "Rust installation failed: $_"
+    }
+}
+
+# 2. Update PATH to include cargo
+$cargoPath = "$env:USERPROFILE\.cargo\bin"
+if (Test-Path $cargoPath) {
+    $env:PATH = "$cargoPath;$env:PATH"
+}
+
+# 3. Install packages from Cargofile (base only, no darwin packages)
+$Cargofile = "{{ .chezmoi.sourceDir }}\dot_Cargofile"
+if (Test-Path $Cargofile) {
+    Get-Content $Cargofile | ForEach-Object {
+        # Remove comments and trim
+        $line = $_ -replace '#.*$', ''
+        $line = $line.Trim()
+        if ($line -ne '') {
+            # Check if already installed
+            $installed = cargo install --list 2>$null | Select-String "^$line "
+            if ($installed) {
+                Write-Success "$line already installed"
+            } else {
+                Write-Info "Installing $line..."
+                cargo install $line 2>$null
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Success "$line installed"
+                } else {
+                    Write-Warn "Failed to install $line"
+                }
+            }
+        }
+    }
+}
+
+Write-Success "Cargo packages installation complete"
+{{ end -}}

@@ -1,0 +1,67 @@
+{{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") -}}
+#!/bin/bash
+# Install cargo packages from Cargofile
+# Cargofile hash: {{ include "dot_Cargofile" | sha256sum }}
+{{- if eq .chezmoi.os "darwin" }}
+# Cargofile.darwin hash: {{ include "dot_Cargofile.darwin" | sha256sum }}
+{{- end }}
+
+set -e
+
+# Colors
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+info() { printf "${BLUE}[INFO]${NC} %s\n" "$1"; }
+success() { printf "${GREEN}[OK]${NC} %s\n" "$1"; }
+warn() { printf "${YELLOW}[WARN]${NC} %s\n" "$1"; }
+
+# 1. Source cargo env first (if it exists)
+if [ -f "$HOME/.cargo/env" ]; then
+    . "$HOME/.cargo/env"
+fi
+
+# 2. Check for cargo, install rustup if missing
+if ! command -v cargo &>/dev/null && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
+    info "Installing Rust via rustup..."
+    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; then
+        success "Rust installed"
+        . "$HOME/.cargo/env"
+    else
+        warn "Rust installation failed"
+        exit 1
+    fi
+fi
+
+# 3. Helper to install from a Cargofile
+install_from_file() {
+    local file="$1"
+    [ -f "$file" ] || return 0
+    while IFS= read -r package || [[ -n "$package" ]]; do
+        # Skip empty lines and comments
+        [[ -z "$package" || "$package" =~ ^[[:space:]]*# ]] && continue
+        # Trim whitespace
+        package=$(echo "$package" | xargs)
+        [ -z "$package" ] && continue
+
+        if cargo install --list | grep -q "^$package "; then
+            success "$package already installed"
+        else
+            info "Installing $package..."
+            cargo install "$package" || warn "Failed to install $package"
+        fi
+    done < "$file"
+}
+
+# 4. Install from base Cargofile (all platforms)
+install_from_file "{{ .chezmoi.sourceDir }}/dot_Cargofile"
+
+# 5. On macOS: also install from Cargofile.darwin
+{{- if eq .chezmoi.os "darwin" }}
+install_from_file "{{ .chezmoi.sourceDir }}/dot_Cargofile.darwin"
+{{- end }}
+
+success "Cargo packages installation complete"
+{{ end -}}

@@ -1,0 +1,3 @@
+# Cargo packages to install (cross-platform)
+# Platform-specific packages are handled in separate files
+# Add one package per line, comments start with #
