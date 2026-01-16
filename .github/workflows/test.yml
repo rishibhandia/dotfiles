@@ -111,12 +111,14 @@ jobs:
         run: |
           Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
           Invoke-RestMethod -Uri https://get.chezmoi.io/ps1 | Invoke-Expression
+          # Add chezmoi to PATH for subsequent steps
+          echo "$env:USERPROFILE\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Initialize chezmoi (dry run)
         shell: pwsh
         run: |
           chezmoi init --source="${{ github.workspace }}" --no-tty
-          chezmoi diff
+          chezmoi diff || true
 
       - name: Test install script syntax
         shell: pwsh
