@@ -1,0 +1,98 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Install packages from Scoopfile
+# This runs whenever the Scoopfile changes
+# Scoopfile hash: {{ include "dot_Scoopfile" | sha256sum }}
+
+$ErrorActionPreference = "Continue"
+
+function Write-Info { param($Message) Write-Host "[INFO] $Message" -ForegroundColor Blue }
+function Write-Success { param($Message) Write-Host "[OK] $Message" -ForegroundColor Green }
+function Write-Warn { param($Message) Write-Host "[WARN] $Message" -ForegroundColor Yellow }
+
+# Ensure scoop is in PATH
+$env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
+
+# Check if Scoop is available
+if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+    Write-Warn "Scoop not found. Skipping package installation."
+    exit 0
+}
+
+$ScoopfilePath = "{{ .chezmoi.sourceDir }}\dot_Scoopfile"
+
+if (-not (Test-Path $ScoopfilePath)) {
+    Write-Warn "Scoopfile not found at $ScoopfilePath"
+    exit 0
+}
+
+Write-Info "Installing packages from Scoopfile..."
+
+# Parse Scoopfile and install packages
+$packages = Get-Content $ScoopfilePath | ForEach-Object {
+    # Remove comments and trim whitespace
+    $line = $_ -replace '#.*$', ''
+    $line = $line.Trim()
+
+    # Skip empty lines
+    if ($line -eq '') { return }
+
+    # Return the package spec (bucket/package or just package)
+    $line
+}
+
+$totalPackages = ($packages | Measure-Object).Count
+$installed = 0
+$failed = 0
+
+foreach ($package in $packages) {
+    if (-not $package) { continue }
+
+    # Parse bucket/package format
+    if ($package -match '^([^/]+)/(.+)$') {
+        $bucket = $Matches[1]
+        $packageName = $Matches[2]
+    } else {
+        $bucket = "main"
+        $packageName = $package
+    }
+
+    # Check if already installed
+    $installedApps = scoop list 2>$null | Select-String -Pattern "^\s*$packageName\s"
+    if ($installedApps) {
+        Write-Success "$packageName already installed"
+        $installed++
+        continue
+    }
+
+    # Install the package
+    Write-Info "Installing $packageName..."
+    try {
+        if ($bucket -eq "main") {
+            scoop install $packageName 2>&1 | Out-Null
+        } else {
+            scoop install "$bucket/$packageName" 2>&1 | Out-Null
+        }
+
+        if ($LASTEXITCODE -eq 0) {
+            Write-Success "$packageName installed"
+            $installed++
+        } else {
+            Write-Warn "Failed to install $packageName"
+            $failed++
+        }
+    } catch {
+        Write-Warn "Failed to install $packageName : $_"
+        $failed++
+    }
+}
+
+# Update all packages
+Write-Info "Updating installed packages..."
+scoop update * 2>&1 | Out-Null
+
+# Cleanup old versions
+Write-Info "Cleaning up old versions..."
+scoop cleanup * 2>&1 | Out-Null
+
+Write-Success "Package installation complete ($installed installed, $failed failed)"
+{{ end -}}

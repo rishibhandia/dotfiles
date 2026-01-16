@@ -1,0 +1,87 @@
+# Scoopfile - Scoop packages for Windows
+# Install with the chezmoi run_onchange script
+# Format: bucket/package or just package (defaults to main bucket)
+
+# =============================================================================
+# Core - Install these first
+# =============================================================================
+extras/windows-terminal           # Modern Windows terminal
+main/pwsh                         # PowerShell Core (cross-platform)
+
+# =============================================================================
+# CLI Tools - Essential
+# =============================================================================
+main/chezmoi                      # Dotfiles manager
+main/git                          # Version control
+main/starship                     # Cross-shell prompt
+main/neovim                       # Text editor
+
+# =============================================================================
+# CLI Tools - Modern replacements
+# =============================================================================
+main/bat                          # Better cat
+main/lsd                          # Better ls
+main/fd                           # Better find
+main/ripgrep                      # Better grep
+main/broot                        # Better tree/file navigator
+main/btop                         # Better top
+main/fastfetch                    # System info display
+main/fzf                          # Fuzzy finder
+main/zoxide                       # Better cd (z command)
+main/tldr                         # Simplified man pages
+main/duf                          # Better df (disk usage)
+
+# =============================================================================
+# CLI Tools - Utilities
+# =============================================================================
+main/curl                         # HTTP client
+main/wget                         # HTTP client
+main/jq                           # JSON processor
+main/yq                           # YAML processor
+main/rclone                       # Cloud storage sync
+main/navi                         # Interactive cheatsheet
+main/yt-dlp                       # Video downloader
+
+# =============================================================================
+# CLI Tools - Archive/Compression
+# =============================================================================
+main/7zip                         # Archive utility
+main/unar                         # Universal archive extractor
+
+# =============================================================================
+# Development - Languages & Runtimes
+# =============================================================================
+main/uv                           # Fast Python package manager
+main/nodejs                       # Node.js
+main/go                           # Go language
+main/rustup                       # Rust toolchain manager
+
+# =============================================================================
+# Development - Tools
+# =============================================================================
+main/gh                           # GitHub CLI
+main/shellcheck                   # Shell script linter
+main/shfmt                        # Shell script formatter
+
+# =============================================================================
+# AI/LLM Tools
+# =============================================================================
+main/ollama                       # Local LLM runtime
+
+# =============================================================================
+# GUI Applications (extras bucket)
+# =============================================================================
+extras/1password                  # Password manager
+extras/1password-cli              # 1Password CLI
+extras/github                     # GitHub Desktop
+extras/logseq                     # Note taking / PKM
+extras/mpv                        # Video player
+extras/sumatrapdf                 # PDF reader (skim alternative)
+extras/tailscale                  # VPN/mesh network
+extras/signal                     # Secure messaging
+
+# =============================================================================
+# Fonts (nerd-fonts bucket)
+# =============================================================================
+nerd-fonts/Hack-NF                # Hack font with icons
+nerd-fonts/Meslo-NF               # Meslo font for terminal

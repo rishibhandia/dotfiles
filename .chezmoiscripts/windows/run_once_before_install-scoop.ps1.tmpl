@@ -1,0 +1,55 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Install Scoop package manager for Windows
+# This runs once on first chezmoi apply
+
+$ErrorActionPreference = "Stop"
+
+function Write-Info { param($Message) Write-Host "[INFO] $Message" -ForegroundColor Blue }
+function Write-Success { param($Message) Write-Host "[OK] $Message" -ForegroundColor Green }
+function Write-Warn { param($Message) Write-Host "[WARN] $Message" -ForegroundColor Yellow }
+
+# Check if Scoop is already installed
+if (Get-Command scoop -ErrorAction SilentlyContinue) {
+    Write-Success "Scoop is already installed"
+} else {
+    Write-Info "Installing Scoop..."
+
+    # Set execution policy for current user (required for Scoop)
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+
+    # Install Scoop
+    try {
+        Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+        Write-Success "Scoop installed successfully"
+    } catch {
+        Write-Warn "Failed to install Scoop: $_"
+        exit 1
+    }
+}
+
+# Ensure scoop is in PATH for this session
+$env:PATH = "$env:USERPROFILE\scoop\shims;$env:PATH"
+
+# Add required buckets
+Write-Info "Adding Scoop buckets..."
+
+$buckets = @("extras", "nerd-fonts")
+
+foreach ($bucket in $buckets) {
+    $existingBuckets = scoop bucket list 2>$null | Select-String -Pattern "^$bucket$"
+    if ($existingBuckets) {
+        Write-Success "Bucket '$bucket' already added"
+    } else {
+        Write-Info "Adding bucket '$bucket'..."
+        scoop bucket add $bucket
+    }
+}
+
+# Install git first (required for bucket updates)
+if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+    Write-Info "Installing git (required for Scoop)..."
+    scoop install git
+}
+
+Write-Success "Scoop setup complete"
+{{ end -}}
