@@ -1,0 +1,52 @@
+#!/bin/bash
+# Install CLI tools that aren't available via Homebrew
+# Runs once after dotfiles are applied
+
+{{ if eq .chezmoi.os "darwin" "linux" -}}
+set -e
+
+# Colors
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+info() { printf "${BLUE}[INFO]${NC} %s\n" "$1"; }
+success() { printf "${GREEN}[OK]${NC} %s\n" "$1"; }
+warn() { printf "${YELLOW}[WARN]${NC} %s\n" "$1"; }
+
+# -----------------------------------------------------------------------------
+# Claude Code (Anthropic's AI coding assistant)
+# https://claude.ai/code
+# -----------------------------------------------------------------------------
+if command -v claude &>/dev/null; then
+    success "Claude Code already installed"
+else
+    info "Installing Claude Code..."
+    if curl -fsSL https://claude.ai/install.sh | sh; then
+        success "Claude Code installed"
+    else
+        warn "Claude Code installation failed"
+    fi
+fi
+
+# -----------------------------------------------------------------------------
+# Shell Sage (AI-powered shell assistant)
+# https://github.com/AnswerDotAI/shell_sage
+# -----------------------------------------------------------------------------
+if command -v ssage &>/dev/null; then
+    success "Shell Sage already installed"
+else
+    if command -v uv &>/dev/null; then
+        info "Installing Shell Sage via uv..."
+        if uv tool install shell_sage; then
+            success "Shell Sage installed"
+        else
+            warn "Shell Sage installation failed"
+        fi
+    else
+        warn "uv not found, skipping Shell Sage installation"
+    fi
+fi
+
+{{ end -}}

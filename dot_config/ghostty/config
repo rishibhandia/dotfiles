@@ -41,7 +41,7 @@ shell-integration-features = cursor,sudo,title
 # Launch with tmux
 # =============================================================================
 # Attach to existing session "main" or create new one
-command = /usr/local/bin/tmux new-session -A -s main
+command = tmux new-session -A -s main
 
 # =============================================================================
 # Terminal behavior
