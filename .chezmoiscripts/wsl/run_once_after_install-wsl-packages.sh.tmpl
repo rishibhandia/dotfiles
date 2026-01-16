@@ -1,0 +1,83 @@
+{{- if eq .chezmoi.os "linux" -}}
+#!/bin/bash
+# Install WSL-specific packages (tmux, shell-sage)
+# This only runs in WSL environments
+
+set -e
+
+# Check if we're in WSL
+if [[ ! -f /proc/version ]] || ! grep -qi "microsoft\|wsl" /proc/version 2>/dev/null; then
+    exit 0
+fi
+
+# Colors
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+info() { printf "${BLUE}[INFO]${NC} %s\n" "$1"; }
+success() { printf "${GREEN}[OK]${NC} %s\n" "$1"; }
+warn() { printf "${YELLOW}[WARN]${NC} %s\n" "$1"; }
+
+info "Detected WSL environment - installing WSL-specific packages..."
+
+# =============================================================================
+# Install tmux (required for shell-sage)
+# =============================================================================
+
+if command -v tmux &>/dev/null; then
+    success "tmux already installed"
+else
+    info "Installing tmux..."
+    if command -v apt-get &>/dev/null; then
+        sudo apt-get update -qq
+        sudo apt-get install -y tmux
+        success "tmux installed via apt"
+    elif command -v brew &>/dev/null; then
+        brew install tmux
+        success "tmux installed via Homebrew"
+    else
+        warn "Could not install tmux - no supported package manager found"
+    fi
+fi
+
+# =============================================================================
+# Install shell-sage (AI shell assistant)
+# =============================================================================
+
+if command -v ssage &>/dev/null; then
+    success "shell-sage already installed"
+else
+    info "Installing shell-sage..."
+
+    # Prefer uv for installation
+    if command -v uv &>/dev/null; then
+        uv tool install shell-sage
+        success "shell-sage installed via uv"
+    elif command -v pipx &>/dev/null; then
+        pipx install shell-sage
+        success "shell-sage installed via pipx"
+    elif command -v pip3 &>/dev/null; then
+        pip3 install --user shell-sage
+        success "shell-sage installed via pip3"
+    else
+        warn "Could not install shell-sage - no Python package manager found"
+        warn "Install uv first: curl -LsSf https://astral.sh/uv/install.sh | sh"
+    fi
+fi
+
+# =============================================================================
+# Install additional WSL utilities
+# =============================================================================
+
+# Install wslu (WSL utilities) if available
+if command -v apt-get &>/dev/null; then
+    if ! command -v wslview &>/dev/null; then
+        info "Installing wslu (WSL utilities)..."
+        sudo apt-get install -y wslu 2>/dev/null || warn "wslu not available in repos"
+    fi
+fi
+
+success "WSL package installation complete"
+{{ end -}}

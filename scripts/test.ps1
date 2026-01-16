@@ -203,6 +203,65 @@ function Test-1Password {
 }
 
 # =============================================================================
+# Tests: WSL (Windows Subsystem for Linux)
+# =============================================================================
+
+function Test-WSL {
+    Section "WSL (Windows Subsystem for Linux)"
+
+    # Check if WSL is available
+    if (-not (Test-CommandExists "wsl")) {
+        Skip "WSL not installed"
+        return
+    }
+
+    Pass "WSL is installed"
+
+    # Check WSL version
+    try {
+        $wslVersion = wsl --version 2>$null | Select-String -Pattern "WSL version"
+        if ($wslVersion) {
+            Pass "WSL version: $($wslVersion -replace 'WSL version: ', '')"
+        }
+    } catch {
+        Skip "Could not determine WSL version"
+    }
+
+    # Check for default distro
+    $defaultDistro = wsl -l -q 2>$null | Select-Object -First 1
+    if ($defaultDistro) {
+        Pass "Default WSL distro: $($defaultDistro.Trim())"
+    } else {
+        Skip "No WSL distro installed"
+        return
+    }
+
+    # Check if dotfiles are set up in WSL
+    $wslChezmoiDir = wsl test -d ~/.local/share/chezmoi 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        Pass "Chezmoi initialized in WSL"
+    } else {
+        Skip "Chezmoi not initialized in WSL"
+    }
+
+    # Check if tmux is available in WSL (required for shell-sage)
+    $wslTmux = wsl which tmux 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        Pass "tmux available in WSL (required for shell-sage)"
+    } else {
+        Skip "tmux not installed in WSL"
+    }
+
+    # Check if shell-sage is available in WSL
+    $wslShellSage = wsl which ssage 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        Pass "shell-sage available in WSL"
+    } else {
+        Skip "shell-sage not installed in WSL"
+    }
+}
+
+# =============================================================================
 # Tests: Chezmoi State
 # =============================================================================
 
@@ -255,6 +314,7 @@ function Main {
     Test-GitConfig
     Test-Scoop
     Test-1Password
+    Test-WSL
     Test-ChezmoiState
 
     Section "Summary"

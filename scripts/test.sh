@@ -65,7 +65,11 @@ is_macos() {
 }
 
 is_linux() {
-    [[ "$(uname -s)" == "Linux" ]]
+    [[ "$(uname -s)" == "Linux" ]] && ! is_wsl
+}
+
+is_wsl() {
+    [[ -f /proc/version ]] && grep -qi "microsoft\|wsl" /proc/version 2>/dev/null
 }
 
 # =============================================================================
@@ -214,13 +218,20 @@ test_shell_config() {
     fi
 
     # Check for syntax highlighting
+    local syntax_hl=""
     if is_macos; then
-        local syntax_hl="/opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+        syntax_hl="/opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
         if [[ ! -f "$syntax_hl" ]]; then
             syntax_hl="/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
         fi
+    elif is_wsl; then
+        # WSL can use system package or Homebrew
+        syntax_hl="/usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+        if [[ ! -f "$syntax_hl" ]]; then
+            syntax_hl="/home/linuxbrew/.linuxbrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+        fi
     else
-        local syntax_hl="/home/linuxbrew/.linuxbrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+        syntax_hl="/home/linuxbrew/.linuxbrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
     fi
 
     if file_exists "$syntax_hl"; then
@@ -351,6 +362,56 @@ test_macos_specific() {
 }
 
 # =============================================================================
+# Tests: WSL Specific
+# =============================================================================
+
+test_wsl_specific() {
+    if ! is_wsl; then
+        return
+    fi
+
+    section "WSL Specific"
+
+    # Check WSL version
+    local wsl_version
+    if [[ -f /proc/version ]]; then
+        if grep -qi "WSL2" /proc/version 2>/dev/null; then
+            pass "Running WSL2"
+        else
+            pass "Running WSL1"
+        fi
+    fi
+
+    # Check Windows interop
+    if [[ -x /mnt/c/Windows/System32/cmd.exe ]]; then
+        pass "Windows interop available"
+    else
+        skip "Windows interop not available"
+    fi
+
+    # Check tmux (required for shell-sage)
+    if command_exists tmux; then
+        pass "tmux installed (required for shell-sage)"
+    else
+        fail "tmux not installed (required for shell-sage)"
+    fi
+
+    # Check shell-sage
+    if command_exists ssage; then
+        pass "shell-sage installed"
+    else
+        skip "shell-sage not installed"
+    fi
+
+    # Check if Windows Terminal is the host
+    if [[ -n "${WT_SESSION:-}" ]]; then
+        pass "Running in Windows Terminal"
+    else
+        skip "Not running in Windows Terminal"
+    fi
+}
+
+# =============================================================================
 # Tests: Chezmoi State
 # =============================================================================
 
@@ -411,6 +472,7 @@ main() {
     test_homebrew
     test_1password
     test_macos_specific
+    test_wsl_specific
     test_chezmoi_state
 
     # Summary
