@@ -24,7 +24,6 @@ brew "btop"                   # Better top
 brew "fastfetch"              # System info display
 brew "fzf"                    # Fuzzy finder
 brew "zoxide"                 # Better cd (z command)
-brew "tldr"                   # Simplified man pages
 brew "duf"                    # Better df (disk usage)
 
 # =============================================================================
@@ -46,7 +45,6 @@ brew "yt-dlp"                 # Video downloader
 brew "p7zip"                  # 7-Zip
 brew "unar"                   # Universal archive extractor (handles RAR too)
 brew "pigz"                   # Parallel gzip
-brew "zopfli"                 # Better compression
 
 # =============================================================================
 # Development - Languages & Runtimes
