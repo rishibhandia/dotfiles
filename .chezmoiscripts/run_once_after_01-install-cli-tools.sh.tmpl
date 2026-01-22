@@ -1,8 +1,8 @@
+{{ if eq .chezmoi.os "darwin" "linux" -}}
 #!/bin/bash
 # Install CLI tools that aren't available via Homebrew
 # Runs once after dotfiles are applied
 
-{{ if eq .chezmoi.os "darwin" "linux" -}}
 set -e
 
 # Colors
