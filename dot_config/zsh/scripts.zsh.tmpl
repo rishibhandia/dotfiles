@@ -747,6 +747,186 @@ function sync_tise2() {
 {{- end }}
 
 
+# Brewfile management helpers
+# -----------------------------------------------------------------------------
+_dots_brew() {
+    local BREWFILE="${HOME}/.local/share/chezmoi/dot_Brewfile"
+    local subcmd="${1:-}"
+    [ $# -gt 0 ] && shift
+
+    case "$subcmd" in
+        add) _dots_brew_add "$BREWFILE" "$@" ;;
+        remove|rm) _dots_brew_remove "$BREWFILE" "$@" ;;
+        list|ls) _dots_brew_list "$BREWFILE" "$@" ;;
+        *)
+            cat << 'EOF'
+Usage: dots brew <command> [args]
+
+Commands:
+  add <package>     Add package to Brewfile (auto-detects brew/cask)
+  remove <package>  Remove package from Brewfile
+  list              List packages in Brewfile
+
+Options:
+  add --cask        Force cask type (skip auto-detection)
+  list --cask       Show only casks
+  list --brew       Show only formulas
+
+Examples:
+  dots brew add htop         # Add formula (auto-detected)
+  dots brew add raycast      # Add cask (auto-detected)
+  dots brew add docker --cask  # Force cask
+  dots brew remove htop      # Remove from Brewfile
+  dots brew list             # List all packages
+EOF
+            return 1
+            ;;
+    esac
+}
+
+_dots_brew_add() {
+    local brewfile="$1"
+    shift
+    local pkg=""
+    local force_cask=false
+
+    # Parse arguments
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --cask) force_cask=true; shift ;;
+            -*) echo "Unknown option: $1"; return 1 ;;
+            *) pkg="$1"; shift ;;
+        esac
+    done
+
+    if [ -z "$pkg" ]; then
+        echo "Usage: dots brew add <package> [--cask]"
+        return 1
+    fi
+
+    # Check if already in Brewfile
+    if grep -qE "^(brew|cask) \"${pkg}\"" "$brewfile" 2>/dev/null; then
+        echo "Package '$pkg' is already in Brewfile"
+        return 1
+    fi
+
+    local pkg_type=""
+    local description=""
+
+    if [ "$force_cask" = true ]; then
+        # User forced cask
+        if ! brew info --cask "$pkg" >/dev/null 2>&1; then
+            echo "Error: Cask '$pkg' not found in Homebrew"
+            return 1
+        fi
+        pkg_type="cask"
+        description=$(brew info --cask --json=v2 "$pkg" 2>/dev/null | jq -r '.casks[0].desc // empty')
+    else
+        # Auto-detect: try cask first (more specific), then formula
+        if brew info --cask "$pkg" >/dev/null 2>&1; then
+            pkg_type="cask"
+            description=$(brew info --cask --json=v2 "$pkg" 2>/dev/null | jq -r '.casks[0].desc // empty')
+        elif brew info --formula "$pkg" >/dev/null 2>&1; then
+            pkg_type="brew"
+            description=$(brew info --formula --json=v2 "$pkg" 2>/dev/null | jq -r '.formulae[0].desc // empty')
+        else
+            echo "Error: Package '$pkg' not found in Homebrew (tried both formula and cask)"
+            return 1
+        fi
+    fi
+
+    # Build the line to add
+    local line
+    if [ -n "$description" ]; then
+        # Truncate description if too long (keep line under ~80 chars)
+        if [ ${#description} -gt 40 ]; then
+            description="${description:0:37}..."
+        fi
+        # Pad to align comments
+        local padding=$((26 - ${#pkg} - ${#pkg_type}))
+        [ $padding -lt 1 ] && padding=1
+        line="${pkg_type} \"${pkg}\"$(printf '%*s' $padding '')# ${description}"
+    else
+        line="${pkg_type} \"${pkg}\""
+    fi
+
+    # Append to Brewfile
+    echo "$line" >> "$brewfile"
+    echo "Added: $line"
+    echo ""
+    echo "Next steps:"
+    echo "  dots apply     # Sync Brewfile to ~/ and install packages"
+    echo "  dots git add . && dots git commit -m 'Add $pkg to Brewfile'"
+}
+
+_dots_brew_remove() {
+    local brewfile="$1"
+    shift
+    local pkg="$1"
+
+    if [ -z "$pkg" ]; then
+        echo "Usage: dots brew remove <package>"
+        return 1
+    fi
+
+    # Check if package exists in Brewfile
+    if ! grep -qE "^(brew|cask) \"${pkg}\"" "$brewfile" 2>/dev/null; then
+        echo "Package '$pkg' not found in Brewfile"
+        return 1
+    fi
+
+    # Remove the line (handle macOS vs GNU sed, use -E for extended regex)
+    if [[ "$(uname)" == "Darwin" ]]; then
+        sed -i '' -E "/^(brew|cask) \"${pkg}\"/d" "$brewfile"
+    else
+        sed -i -E "/^(brew|cask) \"${pkg}\"/d" "$brewfile"
+    fi
+
+    echo "Removed '$pkg' from Brewfile"
+    echo ""
+    echo "Note: Package is still installed. To uninstall:"
+    echo "  brew uninstall $pkg"
+}
+
+_dots_brew_list() {
+    local brewfile="$1"
+    shift
+    local filter="all"
+
+    # Parse arguments
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --cask) filter="cask"; shift ;;
+            --brew|--formula) filter="brew"; shift ;;
+            -*) echo "Unknown option: $1"; return 1 ;;
+            *) shift ;;
+        esac
+    done
+
+    if [ ! -f "$brewfile" ]; then
+        echo "Brewfile not found: $brewfile"
+        return 1
+    fi
+
+    case "$filter" in
+        cask)
+            echo "=== Casks ==="
+            grep '^cask "' "$brewfile" | sed 's/cask "\([^"]*\)".*/\1/' | sort
+            ;;
+        brew)
+            echo "=== Formulas ==="
+            grep '^brew "' "$brewfile" | sed 's/brew "\([^"]*\)".*/\1/' | sort
+            ;;
+        all)
+            echo "=== Formulas ==="
+            grep '^brew "' "$brewfile" | sed 's/brew "\([^"]*\)".*/\1/' | sort
+            echo ""
+            echo "=== Casks ==="
+            grep '^cask "' "$brewfile" | sed 's/cask "\([^"]*\)".*/\1/' | sort
+            ;;
+    esac
+}
+
 # Dotfiles management
 # -----------------------------------------------------------------------------
 function dots() {
@@ -772,6 +952,7 @@ Commands:
   data           Show template data (name, email, OS, etc.)
   re-init        Re-run chezmoi init (regenerate config)
   test           Run dotfiles setup tests
+  brew <cmd>     Manage Brewfile (add/remove/list packages)
   help           Show this help message
 
 Examples:
@@ -782,6 +963,8 @@ Examples:
   dots add ~/.somerc   # Start managing a new file
   dots git status      # Check git status of dotfiles repo
   dots git push        # Push dotfiles changes to remote
+  dots brew add htop   # Add package to Brewfile
+  dots brew list       # List packages in Brewfile
 EOF
         return 0
     fi
@@ -844,6 +1027,9 @@ EOF
                 return 1
             fi
             ;;
+        brew)
+            _dots_brew "$@"
+            ;;
         help|--help|-h)
             dots  # Call without args to show help
             ;;
@@ -872,6 +1058,7 @@ if [ -n "$ZSH_VERSION" ]; then
             'data:Show template data'
             're-init:Re-run chezmoi init'
             'test:Run setup tests'
+            'brew:Manage Brewfile packages'
             'help:Show help message'
         )
 
@@ -888,6 +1075,28 @@ if [ -n "$ZSH_VERSION" ]; then
                     ;;
                 apply)
                     _values 'options' '-v[verbose output]' '--verbose[verbose output]'
+                    ;;
+                brew)
+                    local -a brew_cmds
+                    brew_cmds=(
+                        'add:Add package to Brewfile'
+                        'remove:Remove package from Brewfile'
+                        'list:List packages in Brewfile'
+                    )
+                    _describe 'brew command' brew_cmds
+                    ;;
+            esac
+        elif (( CURRENT == 4 )); then
+            case "${words[2]}" in
+                brew)
+                    case "${words[3]}" in
+                        add)
+                            _values 'options' '--cask[Force cask type]'
+                            ;;
+                        list)
+                            _values 'options' '--cask[Show only casks]' '--brew[Show only formulas]'
+                            ;;
+                    esac
                     ;;
             esac
         fi
