@@ -63,8 +63,8 @@
     type = "archive-file"
     url = {{ gitHubLatestReleaseAssetURL "cli/cli" "gh_*_windows_amd64.zip" | quote }}
     executable = true
-    stripComponents = 2
-    path = "gh.exe"
+    stripComponents = 1
+    path = "bin/gh.exe"
 
 [".local/bin/duf.exe"]
     type = "archive-file"
