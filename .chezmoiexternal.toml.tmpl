@@ -7,19 +7,22 @@
     type = "archive-file"
     url = {{ gitHubLatestReleaseAssetURL "BurntSushi/ripgrep" "ripgrep-*-x86_64-pc-windows-msvc.zip" | quote }}
     executable = true
-    path = "*/rg.exe"
+    stripComponents = 1
+    path = "rg.exe"
 
 [".local/bin/fd.exe"]
     type = "archive-file"
     url = {{ gitHubLatestReleaseAssetURL "sharkdp/fd" "fd-*-x86_64-pc-windows-msvc.zip" | quote }}
     executable = true
-    path = "*/fd.exe"
+    stripComponents = 1
+    path = "fd.exe"
 
 [".local/bin/bat.exe"]
     type = "archive-file"
     url = {{ gitHubLatestReleaseAssetURL "sharkdp/bat" "bat-*-x86_64-pc-windows-msvc.zip" | quote }}
     executable = true
-    path = "*/bat.exe"
+    stripComponents = 1
+    path = "bat.exe"
 
 [".local/bin/fzf.exe"]
     type = "archive-file"
@@ -43,6 +46,7 @@
     type = "archive-file"
     url = {{ gitHubLatestReleaseAssetURL "lsd-rs/lsd" "lsd-*-x86_64-pc-windows-msvc.zip" | quote }}
     executable = true
+    stripComponents = 1
     path = "lsd.exe"
 
 [".local/bin/jq.exe"]
@@ -59,7 +63,8 @@
     type = "archive-file"
     url = {{ gitHubLatestReleaseAssetURL "cli/cli" "gh_*_windows_amd64.zip" | quote }}
     executable = true
-    path = "*/bin/gh.exe"
+    stripComponents = 2
+    path = "gh.exe"
 
 [".local/bin/duf.exe"]
     type = "archive-file"
