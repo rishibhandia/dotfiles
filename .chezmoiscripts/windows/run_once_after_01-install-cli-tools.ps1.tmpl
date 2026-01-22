@@ -1,0 +1,29 @@
+{{- if eq .chezmoi.os "windows" -}}
+#Requires -Version 5.1
+# Install CLI tools that aren't available via Scoop/portable binaries
+# Runs once after dotfiles are applied
+
+$ErrorActionPreference = "Continue"
+
+# Colors
+function Write-Info { param($Message) Write-Host "[INFO] $Message" -ForegroundColor Blue }
+function Write-Success { param($Message) Write-Host "[OK] $Message" -ForegroundColor Green }
+function Write-Warn { param($Message) Write-Host "[WARN] $Message" -ForegroundColor Yellow }
+
+# -----------------------------------------------------------------------------
+# Claude Code (Anthropic's AI coding assistant)
+# https://claude.ai/code
+# -----------------------------------------------------------------------------
+if (Get-Command claude -ErrorAction SilentlyContinue) {
+    Write-Success "Claude Code already installed"
+} else {
+    Write-Info "Installing Claude Code..."
+    try {
+        Invoke-RestMethod https://claude.ai/install.ps1 | Invoke-Expression
+        Write-Success "Claude Code installed"
+    } catch {
+        Write-Warn "Claude Code installation failed: $_"
+    }
+}
+
+{{ end -}}

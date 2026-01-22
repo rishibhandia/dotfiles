@@ -20,14 +20,19 @@ Write-Host ""
 
 # Paths to remove
 $ToRemove = @(
-    (Join-Path $env:USERPROFILE ".local\bin"),         # Portable binaries
+    (Join-Path $env:USERPROFILE ".local\bin"),           # Portable binaries
     (Join-Path $env:USERPROFILE ".local\share\chezmoi"), # Chezmoi source
-    (Join-Path $env:USERPROFILE ".config\chezmoi"),    # Chezmoi config
-    (Join-Path $env:USERPROFILE ".config\powershell"), # PowerShell config
-    (Join-Path $env:USERPROFILE ".config\starship.toml"), # Starship config
-    (Join-Path $env:USERPROFILE ".config\git"),        # Git config
-    (Join-Path $env:USERPROFILE ".config\nvim"),       # Neovim config
-    (Join-Path $env:USERPROFILE ".gitconfig")          # Git config (legacy location)
+    (Join-Path $env:USERPROFILE ".config\chezmoi"),      # Chezmoi config
+    (Join-Path $env:USERPROFILE ".config\powershell"),   # PowerShell config
+    (Join-Path $env:USERPROFILE ".config\starship.toml"),# Starship config
+    (Join-Path $env:USERPROFILE ".config\git"),          # Git config
+    (Join-Path $env:USERPROFILE ".config\nvim"),         # Neovim config
+    (Join-Path $env:USERPROFILE ".gitconfig"),           # Git config (legacy location)
+    (Join-Path $env:USERPROFILE ".claude"),              # Claude Code config/data
+    (Join-Path $env:LOCALAPPDATA "Claude"),              # Claude Code app data
+    (Join-Path $env:APPDATA "Claude"),                   # Claude Code roaming data
+    (Join-Path $env:USERPROFILE ".cargo"),               # Rust/Cargo (if installed by script)
+    (Join-Path $env:USERPROFILE ".rustup")               # Rustup (if installed by script)
 )
 
 # Check what exists
@@ -93,19 +98,16 @@ Write-Host "==============================================" -ForegroundColor Cya
 Write-Host ""
 
 # Additional cleanup hints
-Write-Host "Additional cleanup you may want to do:" -ForegroundColor Yellow
+Write-Host "Additional manual cleanup:" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "1. Remove dotfiles profile from PowerShell profile:"
 Write-Host "   notepad `$PROFILE"
 Write-Host "   # Delete the line that sources profile.ps1"
 Write-Host ""
-Write-Host "2. If you installed chezmoi via Scoop:"
-Write-Host "   scoop uninstall chezmoi"
+Write-Host "2. Uninstall chezmoi:"
+Write-Host "   - Scoop:  scoop uninstall chezmoi"
+Write-Host "   - winget: winget uninstall twpayne.chezmoi"
 Write-Host ""
-Write-Host "3. If you installed chezmoi via winget:"
-Write-Host "   winget uninstall twpayne.chezmoi"
-Write-Host ""
-Write-Host "4. If you installed Claude Code:"
-Write-Host "   # Check installation method with: claude doctor"
-Write-Host "   # Then uninstall accordingly"
+Write-Host "3. Uninstall Claude Code (if npm installed):"
+Write-Host "   npm uninstall -g @anthropic-ai/claude-code"
 Write-Host ""
