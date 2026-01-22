@@ -1,20 +1,24 @@
 # =============================================================================
 # OS-specific scripts - ignore on other platforms
+# Note: .chezmoiignore uses TARGET paths, so remove run_once_/run_onchange_ prefixes
 # =============================================================================
 
-# macOS-only scripts
+# macOS-only scripts (darwin directory)
 {{ if ne .chezmoi.os "darwin" }}
-.chezmoiscripts/darwin
+.chezmoiscripts/darwin/configure-macos.sh
+.chezmoiscripts/darwin/set-default-terminal.sh
 {{ end }}
 
 # Windows-only scripts
 {{ if ne .chezmoi.os "windows" }}
-.chezmoiscripts/windows
+.chezmoiscripts/windows/install-scoop.ps1
+.chezmoiscripts/windows/install-packages.ps1
+.chezmoiscripts/windows/install-cargo-packages.ps1
 {{ end }}
 
 # WSL-only scripts
 {{ if not (and (eq .chezmoi.os "linux") (lookPath "wslpath")) }}
-.chezmoiscripts/wsl
+.chezmoiscripts/wsl/install-wsl-packages.sh
 {{ end }}
 
 # =============================================================================
