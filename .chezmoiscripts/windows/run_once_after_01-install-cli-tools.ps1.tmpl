@@ -12,17 +12,61 @@ function Write-Warn { param($Message) Write-Host "[WARN] $Message" -ForegroundCo
 
 # -----------------------------------------------------------------------------
 # Claude Code (Anthropic's AI coding assistant)
-# https://claude.ai/code
+# https://code.claude.com/docs/en/setup
+# Try: winget -> native installer -> npm (in order of preference)
 # -----------------------------------------------------------------------------
 if (Get-Command claude -ErrorAction SilentlyContinue) {
     Write-Success "Claude Code already installed"
 } else {
-    Write-Info "Installing Claude Code..."
-    try {
-        Invoke-RestMethod https://claude.ai/install.ps1 | Invoke-Expression
-        Write-Success "Claude Code installed"
-    } catch {
-        Write-Warn "Claude Code installation failed: $_"
+    $installed = $false
+
+    # Method 1: winget (if available)
+    if (-not $installed -and (Get-Command winget -ErrorAction SilentlyContinue)) {
+        Write-Info "Installing Claude Code via winget..."
+        try {
+            winget install Anthropic.ClaudeCode --accept-source-agreements --accept-package-agreements
+            if ($LASTEXITCODE -eq 0) {
+                Write-Success "Claude Code installed via winget"
+                Write-Info "Note: Run 'winget upgrade Anthropic.ClaudeCode' periodically to update"
+                $installed = $true
+            }
+        } catch {
+            Write-Warn "winget installation failed, trying alternative..."
+        }
+    }
+
+    # Method 2: Native installer (recommended by Anthropic)
+    if (-not $installed) {
+        Write-Info "Installing Claude Code via native installer..."
+        try {
+            Invoke-RestMethod https://claude.ai/install.ps1 | Invoke-Expression
+            if (Get-Command claude -ErrorAction SilentlyContinue) {
+                Write-Success "Claude Code installed via native installer"
+                $installed = $true
+            }
+        } catch {
+            Write-Warn "Native installer failed: $_"
+        }
+    }
+
+    # Method 3: npm (requires Node.js 18+)
+    if (-not $installed -and (Get-Command npm -ErrorAction SilentlyContinue)) {
+        Write-Info "Installing Claude Code via npm..."
+        try {
+            npm install -g @anthropic-ai/claude-code
+            if ($LASTEXITCODE -eq 0) {
+                Write-Success "Claude Code installed via npm"
+                $installed = $true
+            }
+        } catch {
+            Write-Warn "npm installation failed: $_"
+        }
+    }
+
+    if (-not $installed) {
+        Write-Warn "Claude Code installation failed. Install manually:"
+        Write-Warn "  winget install Anthropic.ClaudeCode"
+        Write-Warn "  OR: irm https://claude.ai/install.ps1 | iex"
     }
 }
 
