@@ -1,4 +1,25 @@
+# =============================================================================
+# OS-specific scripts - ignore on other platforms
+# =============================================================================
+
+# macOS-only scripts
+{{ if ne .chezmoi.os "darwin" }}
+.chezmoiscripts/darwin
+{{ end }}
+
+# Windows-only scripts
+{{ if ne .chezmoi.os "windows" }}
+.chezmoiscripts/windows
+{{ end }}
+
+# WSL-only scripts
+{{ if not (and (eq .chezmoi.os "linux") (lookPath "wslpath")) }}
+.chezmoiscripts/wsl
+{{ end }}
+
+# =============================================================================
 # macOS-only skills (require macOS apps)
+# =============================================================================
 {{ if ne .chezmoi.os "darwin" }}
 dot_claude/skills/things
 dot_claude/skills/fantastical
