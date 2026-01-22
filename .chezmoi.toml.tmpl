@@ -36,12 +36,14 @@
 {{-     $hostname = $computerName -}}
 {{-   end -}}
 {{- end -}}
+{{/* Detect portable mode on Windows (no Scoop available) */}}
 {{- if eq .chezmoi.os "windows" -}}
-{{-   $work = true -}}
 {{-   if not (lookPath "scoop") -}}
 {{-     $portable = true -}}
 {{-   end -}}
 {{- end -}}
+
+{{/* Determine machine type */}}
 {{- if not $ephemeral -}}
 {{-   if eq $hostname "rishi-macmini-2020" -}}
 {{-     $personal = true -}}
@@ -51,11 +53,18 @@
 {{-     $headless = true -}}
 {{-     $personal = true -}}
 {{-   else if stdinIsATTY -}}
-{{-     $headless = promptBoolOnce . "headless" "headless" -}}
-{{-     $ephemeral = promptBoolOnce . "ephemeral" "ephemeral" -}}
+{{/* Unknown machine - prompt for configuration */}}
+{{-     $personal = promptBoolOnce . "personal" "Is this a personal machine (has 1Password, personal secrets)" -}}
+{{-     if not $personal -}}
+{{-       $work = true -}}
+{{-     end -}}
+{{-     $headless = promptBoolOnce . "headless" "Is this a headless machine (no display)" -}}
+{{-     $ephemeral = promptBoolOnce . "ephemeral" "Is this an ephemeral machine (temporary, cloud VM)" -}}
 {{-   else -}}
+{{/* Non-interactive, unknown machine - assume ephemeral work machine */}}
 {{-     $ephemeral = true -}}
 {{-     $headless = true -}}
+{{-     $work = true -}}
 {{-   end -}}
 {{- end -}}
 {{- $email := "rishi@bhandia.com" -}}

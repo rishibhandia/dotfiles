@@ -6,6 +6,11 @@
 # Environment variables:
 #   $env:DOTFILES_DEBUG = 1     - Enable debug output
 #   $env:DOTFILES_BRANCH = "xxx" - Use a specific branch (default: main)
+#
+# This script automatically detects the best installation method:
+#   1. If Scoop is available → use Scoop for all packages
+#   2. If winget is available → use winget for chezmoi, portable binaries for tools
+#   3. Otherwise → download portable chezmoi, portable binaries for tools
 
 #Requires -Version 5.1
 $ErrorActionPreference = "Stop"
@@ -24,92 +29,100 @@ function Write-Debug {
     if ($env:DOTFILES_DEBUG -eq "1") { Write-Host "[DEBUG] $Message" }
 }
 
-# Check if running as admin
-function Test-Admin {
-    $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
-    $principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
-    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-}
-
 # Check if command exists
 function Test-Command {
     param($Command)
     return $null -ne (Get-Command $Command -ErrorAction SilentlyContinue)
 }
 
-# Install Scoop package manager
-function Install-Scoop {
+# Detect installation mode
+function Get-InstallMode {
     if (Test-Command "scoop") {
-        Write-Success "Scoop already installed"
-        return
+        return "scoop"
     }
-
-    Write-Info "Installing Scoop package manager..."
-
-    # Set execution policy for current user if needed
-    $policy = Get-ExecutionPolicy -Scope CurrentUser
-    if ($policy -eq "Restricted") {
-        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+    if (Test-Command "winget") {
+        return "winget"
     }
-
-    # Install Scoop
-    Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
-
-    Write-Success "Scoop installed"
+    return "portable"
 }
 
-# Install Git via Scoop
-function Install-Git {
-    if (Test-Command "git") {
-        Write-Success "Git already installed"
-        return
-    }
-
-    Write-Info "Installing Git..."
-    scoop install git
-    Write-Success "Git installed"
-}
-
-# Install chezmoi
+# Install chezmoi via the best available method
 function Install-Chezmoi {
     if (Test-Command "chezmoi") {
         Write-Success "chezmoi already installed"
         return
     }
 
-    Write-Info "Installing chezmoi..."
-    scoop install chezmoi
-    Write-Success "chezmoi installed"
-}
+    $mode = Get-InstallMode
 
-# Install common tools via Scoop
-function Install-CommonTools {
-    Write-Info "Installing common tools..."
+    switch ($mode) {
+        "scoop" {
+            Write-Info "Installing chezmoi via Scoop..."
+            scoop install chezmoi
+            Write-Success "chezmoi installed via Scoop"
+        }
+        "winget" {
+            Write-Info "Installing chezmoi via winget..."
+            winget install twpayne.chezmoi --accept-source-agreements --accept-package-agreements
+            # Refresh PATH
+            $env:PATH = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+            Write-Success "chezmoi installed via winget"
+        }
+        "portable" {
+            Write-Info "Installing chezmoi (portable binary)..."
+            $chezmoiBin = Join-Path $env:USERPROFILE ".local\bin\chezmoi.exe"
+            $chezmoiDir = Split-Path $chezmoiBin -Parent
 
-    # Add extras bucket for more applications
-    scoop bucket add extras 2>$null
+            # Create directory
+            if (-not (Test-Path $chezmoiDir)) {
+                New-Item -ItemType Directory -Path $chezmoiDir -Force | Out-Null
+            }
 
-    $tools = @(
-        "neovim",
-        "starship",
-        "fzf",
-        "ripgrep",
-        "fd",
-        "bat",
-        "jq",
-        "curl"
-    )
+            # Download latest chezmoi
+            $downloadUrl = "https://github.com/twpayne/chezmoi/releases/latest/download/chezmoi-windows-amd64.exe"
+            try {
+                Invoke-WebRequest -Uri $downloadUrl -OutFile $chezmoiBin -UseBasicParsing
+                Write-Success "chezmoi installed to $chezmoiBin"
+            } catch {
+                Write-Err "Failed to download chezmoi: $_"
+                exit 1
+            }
 
-    foreach ($tool in $tools) {
-        if (-not (Test-Command $tool)) {
-            Write-Info "Installing $tool..."
-            scoop install $tool 2>$null
-        } else {
-            Write-Debug "$tool already installed"
+            # Add to PATH for this session
+            $env:PATH = "$chezmoiDir;$env:PATH"
         }
     }
+}
 
-    Write-Success "Common tools installed"
+# Install Git if needed (required for chezmoi init)
+function Install-Git {
+    if (Test-Command "git") {
+        Write-Success "Git already installed"
+        return
+    }
+
+    $mode = Get-InstallMode
+
+    switch ($mode) {
+        "scoop" {
+            Write-Info "Installing Git via Scoop..."
+            scoop install git
+            Write-Success "Git installed via Scoop"
+        }
+        "winget" {
+            Write-Info "Installing Git via winget..."
+            winget install Git.Git --accept-source-agreements --accept-package-agreements
+            # Refresh PATH
+            $env:PATH = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+            Write-Success "Git installed via winget"
+        }
+        "portable" {
+            Write-Warn "Git not found and no package manager available."
+            Write-Warn "Please install Git manually from: https://git-scm.com/download/win"
+            Write-Warn "Or install winget/Scoop first."
+            exit 1
+        }
+    }
 }
 
 # Initialize dotfiles
@@ -160,22 +173,27 @@ function Set-PowerShellProfile {
 
 # Print next steps
 function Show-NextSteps {
+    $mode = Get-InstallMode
+
     Write-Host ""
     Write-Host "==============================================" -ForegroundColor Cyan
     Write-Host "Dotfiles installation complete!" -ForegroundColor Green
     Write-Host "==============================================" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "Installation mode: $mode" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Next steps:"
     Write-Host "  1. Restart your terminal (PowerShell)"
     Write-Host ""
     Write-Host "  2. If errors occurred, run: chezmoi apply --keep-going"
     Write-Host ""
-    Write-Host "  3. For 1Password integration:"
-    Write-Host "     - Install 1Password from: https://1password.com/downloads"
-    Write-Host "     - Enable CLI in 1Password > Settings > Developer"
-    Write-Host "     - Sign in: op signin"
-    Write-Host "     - Re-run: chezmoi apply"
-    Write-Host ""
+
+    if ($mode -eq "portable" -or $mode -eq "winget") {
+        Write-Host "  3. Tools were installed as portable binaries to ~/.local/bin"
+        Write-Host "     They will be available after restarting your terminal."
+        Write-Host ""
+    }
+
     Write-Host "Useful commands:"
     Write-Host "  chezmoi diff      - Preview changes"
     Write-Host "  chezmoi apply     - Apply changes"
@@ -183,9 +201,16 @@ function Show-NextSteps {
     Write-Host "  chezmoi edit FILE - Edit a dotfile"
     Write-Host "  chezmoi update    - Pull and apply latest changes"
     Write-Host ""
-    Write-Host "Windows-specific:"
-    Write-Host "  scoop update *    - Update all Scoop packages"
-    Write-Host "  scoop list        - List installed packages"
+
+    if ($mode -eq "scoop") {
+        Write-Host "Package management (Scoop):"
+        Write-Host "  scoop update *    - Update all packages"
+        Write-Host "  scoop list        - List installed packages"
+        Write-Host ""
+    }
+
+    Write-Host "To uninstall (when leaving this machine):"
+    Write-Host "  ~/.local/share/chezmoi/scripts/uninstall.ps1"
     Write-Host ""
 }
 
@@ -199,32 +224,27 @@ function Main {
     Write-Host ""
 
     $arch = if ([Environment]::Is64BitOperatingSystem) { "amd64" } else { "x86" }
-    Write-Info "Detected OS: Windows, Architecture: $arch"
+    $mode = Get-InstallMode
 
-    # Check for admin rights (optional, warn only)
-    if (-not (Test-Admin)) {
-        Write-Warn "Running without administrator privileges. Some operations may require elevation."
-    }
+    Write-Info "Detected: Windows $arch, Install mode: $mode"
 
-    # Step 1: Install Scoop
-    Install-Scoop
-
-    # Step 2: Install Git
+    # Step 1: Install Git (required for chezmoi init)
     Install-Git
 
-    # Step 3: Install chezmoi
+    # Step 2: Install chezmoi
     Install-Chezmoi
 
-    # Step 4: Install common tools
-    Install-CommonTools
-
-    # Step 5: Initialize dotfiles
+    # Step 3: Initialize dotfiles
+    # This will:
+    # - Prompt for personal/work/ephemeral settings
+    # - If Scoop available: run Scoop install scripts
+    # - If portable mode: pull binaries via .chezmoiexternal
     Initialize-Dotfiles
 
-    # Step 6: Configure PowerShell
+    # Step 4: Configure PowerShell profile
     Set-PowerShellProfile
 
-    # Step 7: Show next steps
+    # Step 5: Show next steps
     Show-NextSteps
 }
 
