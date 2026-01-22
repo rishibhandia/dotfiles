@@ -1,0 +1,94 @@
+{{- if and (eq .chezmoi.os "windows") .portable -}}
+# Portable Windows binaries - only when Scoop unavailable
+# When Scoop IS available, packages come from dot_Scoopfile instead
+# These go to ~/.local/bin
+
+[".local/bin/rg.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "BurntSushi/ripgrep" "ripgrep-*-x86_64-pc-windows-msvc.zip" | quote }}
+    executable = true
+    path = "*/rg.exe"
+
+[".local/bin/fd.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "sharkdp/fd" "fd-*-x86_64-pc-windows-msvc.zip" | quote }}
+    executable = true
+    path = "*/fd.exe"
+
+[".local/bin/bat.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "sharkdp/bat" "bat-*-x86_64-pc-windows-msvc.zip" | quote }}
+    executable = true
+    path = "*/bat.exe"
+
+[".local/bin/fzf.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "junegunn/fzf" "fzf-*-windows_amd64.zip" | quote }}
+    executable = true
+    path = "fzf.exe"
+
+[".local/bin/zoxide.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "ajeetdsouza/zoxide" "zoxide-*-x86_64-pc-windows-msvc.zip" | quote }}
+    executable = true
+    path = "zoxide.exe"
+
+[".local/bin/starship.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "starship/starship" "starship-x86_64-pc-windows-msvc.zip" | quote }}
+    executable = true
+    path = "starship.exe"
+
+[".local/bin/lsd.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "lsd-rs/lsd" "lsd-*-x86_64-pc-windows-msvc.zip" | quote }}
+    executable = true
+    path = "lsd.exe"
+
+[".local/bin/jq.exe"]
+    type = "file"
+    url = {{ gitHubLatestReleaseAssetURL "jqlang/jq" "jq-windows-amd64.exe" | quote }}
+    executable = true
+
+[".local/bin/yq.exe"]
+    type = "file"
+    url = {{ gitHubLatestReleaseAssetURL "mikefarah/yq" "yq_windows_amd64.exe" | quote }}
+    executable = true
+
+[".local/bin/gh.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "cli/cli" "gh_*_windows_amd64.zip" | quote }}
+    executable = true
+    path = "*/bin/gh.exe"
+
+[".local/bin/duf.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "muesli/duf" "duf_*_windows_x86_64.zip" | quote }}
+    executable = true
+    path = "duf.exe"
+
+[".local/bin/fastfetch.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "fastfetch-cli/fastfetch" "fastfetch-windows-amd64.zip" | quote }}
+    executable = true
+    path = "fastfetch.exe"
+
+[".local/bin/uv.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "astral-sh/uv" "uv-x86_64-pc-windows-msvc.zip" | quote }}
+    executable = true
+    path = "uv.exe"
+
+[".local/bin/uvx.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "astral-sh/uv" "uv-x86_64-pc-windows-msvc.zip" | quote }}
+    executable = true
+    path = "uvx.exe"
+
+[".local/bin/ruff.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "astral-sh/ruff" "ruff-x86_64-pc-windows-msvc.zip" | quote }}
+    executable = true
+    path = "ruff.exe"
+
+{{- end }}

@@ -60,6 +60,7 @@ main/rustup                       # Rust toolchain manager
 # Development - Tools
 # =============================================================================
 main/gh                           # GitHub CLI
+main/ruff                         # Fast Python linter
 main/shellcheck                   # Shell script linter
 main/shfmt                        # Shell script formatter
 

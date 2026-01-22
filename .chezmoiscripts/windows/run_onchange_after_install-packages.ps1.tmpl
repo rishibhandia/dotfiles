@@ -1,6 +1,7 @@
-{{- if eq .chezmoi.os "windows" -}}
+{{- if and (eq .chezmoi.os "windows") (not .portable) -}}
 # Install packages from Scoopfile
 # This runs whenever the Scoopfile changes
+# Skipped in portable mode (when Scoop is unavailable)
 # Scoopfile hash: {{ include "dot_Scoopfile" | sha256sum }}
 
 $ErrorActionPreference = "Continue"

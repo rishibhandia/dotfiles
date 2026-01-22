@@ -1,6 +1,7 @@
-{{- if eq .chezmoi.os "windows" -}}
+{{- if and (eq .chezmoi.os "windows") (not .portable) -}}
 # Install Scoop package manager for Windows
 # This runs once on first chezmoi apply
+# Skipped in portable mode (when Scoop is unavailable)
 
 $ErrorActionPreference = "Stop"
 

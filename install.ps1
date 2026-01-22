@@ -143,29 +143,18 @@ function Set-PowerShellProfile {
         New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
     }
 
-    # Create or update profile
-    $profileContent = @()
-
-    # Add dotfiles functions
-    $dotsScript = Join-Path $env:USERPROFILE ".config\powershell\dots.ps1"
-    if (-not (Test-Path $PROFILE) -or -not (Select-String -Path $PROFILE -Pattern "dots.ps1" -Quiet)) {
-        $profileContent += "`n# Dotfiles management functions"
-        $profileContent += "if (Test-Path `"$dotsScript`") { . `"$dotsScript`" }"
-        Write-Success "Added dots function to PowerShell profile"
-    }
-
-    # Add starship init to profile if not present
-    if (-not (Test-Path $PROFILE) -or -not (Select-String -Path $PROFILE -Pattern "starship" -Quiet)) {
-        $profileContent += "`n# Initialize Starship prompt"
-        $profileContent += 'Invoke-Expression (&starship init powershell)'
-        Write-Success "Added Starship to PowerShell profile"
-    } else {
-        Write-Debug "Starship already in PowerShell profile"
-    }
-
-    # Write to profile
-    if ($profileContent.Count -gt 0) {
+    # Add dotfiles profile (includes PATH setup, starship, zoxide, and dots functions)
+    $profileScript = Join-Path $env:USERPROFILE ".config\powershell\profile.ps1"
+    if (-not (Test-Path $PROFILE) -or -not (Select-String -Path $PROFILE -Pattern "profile.ps1" -Quiet)) {
+        $profileContent = @(
+            "",
+            "# Dotfiles profile (PATH, starship, zoxide, dots functions)",
+            "if (Test-Path `"$profileScript`") { . `"$profileScript`" }"
+        )
         Add-Content -Path $PROFILE -Value ($profileContent -join "`n")
+        Write-Success "Added dotfiles profile to PowerShell profile"
+    } else {
+        Write-Debug "Dotfiles profile already in PowerShell profile"
     }
 }
 

@@ -59,7 +59,8 @@ eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 # Local bin
 export PATH="$HOME/.local/bin:$PATH"
 
-# API Keys from 1Password
+{{- if .personal }}
+# API Keys from 1Password (personal machines only)
 {{- with (onepassword "OpenAI API Key").fields -}}
 {{- range . -}}
 {{- if eq .id "credential" }}
@@ -95,10 +96,10 @@ export LLM_GEMINI_KEY="{{ .value }}"
 {{- end -}}
 {{- end }}
 
-
-# SSH agent for 1password (commented out by default)
+# SSH agent for 1Password
 {{- if eq .chezmoi.os "darwin" }}
 export SSH_AUTH_SOCK=~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock
+{{- end }}
 {{- end }}
 
 # Cargo

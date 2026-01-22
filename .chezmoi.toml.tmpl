@@ -13,6 +13,7 @@
 {{- $work := false -}}{{/* true if this machine is a work machine */}}
 {{- $headless := false -}}{{/* true if this machine does not have a screen and keyboard */}}
 {{- $personal := false -}}{{/* true if this machine should have personal secrets */}}
+{{- $portable := false -}}{{/* true if no package manager available (use portable binaries) */}}
 {{- "" -}}
 {{- $osID := .chezmoi.os -}}
 {{- if (and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id")) -}}
@@ -37,6 +38,9 @@
 {{- end -}}
 {{- if eq .chezmoi.os "windows" -}}
 {{-   $work = true -}}
+{{-   if not (lookPath "scoop") -}}
+{{-     $portable = true -}}
+{{-   end -}}
 {{- end -}}
 {{- if not $ephemeral -}}
 {{-   if eq $hostname "rishi-macmini-2020" -}}
@@ -68,6 +72,7 @@
     headless = {{ $headless }}
     hostname = {{ $hostname | quote }}
     personal = {{ $personal }}
+    portable = {{ $portable }}
     osid = {{ $osID | quote }}
 
 [github]
