@@ -1,6 +1,6 @@
 # Dotfiles
 
-Cross-platform dotfiles managed with [chezmoi](https://chezmoi.io/). Supports macOS, Linux, and Windows.
+Cross-platform dotfiles managed with [chezmoi](https://chezmoi.io/). Supports macOS, Linux, and Windows (including work machines without admin rights).
 
 ## Quick Start
 
@@ -16,38 +16,68 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/rishibhandia/dotfiles/main
 iwr -useb https://raw.githubusercontent.com/rishibhandia/dotfiles/main/install.ps1 | iex
 ```
 
-The install script will:
-1. Install Xcode CLI tools (macOS) or build dependencies (Linux)
-2. Install Homebrew
-3. Install chezmoi
-4. Clone and apply dotfiles
-5. Install all packages from Brewfile
-6. Set zsh as default shell
+The install script automatically detects the best installation method:
+- **Scoop available** → Uses Scoop for all packages
+- **winget available** → Uses winget for Git/chezmoi, portable binaries for tools
+- **Neither** → Downloads portable binaries directly (no admin required)
+
+During setup, you'll be prompted:
+- "Is this a personal machine?" (enables 1Password secrets)
+- "Is this a headless machine?"
+- "Is this an ephemeral machine?"
+
+### Uninstall (Windows)
+
+When leaving a work machine:
+
+```powershell
+~/.local/share/chezmoi/scripts/uninstall.ps1
+```
+
+## What Gets Installed
+
+### macOS / Linux
+1. Xcode CLI tools (macOS) or build dependencies (Linux)
+2. Homebrew
+3. All packages from Brewfile
+4. zsh as default shell
+
+### Windows (with Scoop)
+- All packages from Scoopfile via Scoop
+
+### Windows (Portable Mode)
+Portable binaries downloaded directly from GitHub releases:
+- ripgrep, fd, bat, fzf, zoxide, starship, lsd
+- jq, yq, gh, duf, fastfetch
+- uv, uvx, ruff
 
 ## Repository Structure
 
 ```
 .
 ├── .chezmoi.toml.tmpl          # Machine detection & feature flags
+├── .chezmoiexternal.toml.tmpl  # Portable Windows binaries
 ├── .chezmoiscripts/            # Auto-run scripts during apply
 │   ├── run_once_before_install-homebrew.sh.tmpl
 │   ├── run_onchange_after_install-packages.sh.tmpl
-│   └── darwin/run_once_after_configure-macos.sh
-├── .chezmoitemplates/          # Reusable template snippets
+│   ├── darwin/                 # macOS-specific scripts
+│   └── windows/                # Windows-specific scripts
 ├── dot_Brewfile                # Homebrew packages → ~/.Brewfile
+├── dot_Scoopfile               # Scoop packages → ~/.Scoopfile
 ├── dot_zshenv.tmpl             # Environment variables → ~/.zshenv
 ├── dot_config/
 │   ├── ghostty/                # Terminal emulator config
 │   ├── git/                    # Git config & ignore
 │   ├── nvim/                   # Neovim configuration
+│   ├── powershell/             # PowerShell profile & functions
 │   ├── starship/               # Cross-shell prompt
 │   ├── tmux/                   # Terminal multiplexer
 │   └── zsh/                    # Shell config, aliases, functions
-├── dot_local/share/navi/       # Interactive cheatsheets
-├── dot_claude/                 # Claude Code settings
 ├── install.sh                  # Bootstrap script (macOS/Linux)
 ├── install.ps1                 # Bootstrap script (Windows)
-└── scripts/test.sh             # Setup verification tests
+└── scripts/
+    ├── test.sh                 # Setup verification tests
+    └── uninstall.ps1           # Windows cleanup script
 ```
 
 ### Chezmoi Naming Conventions
@@ -60,6 +90,50 @@ The install script will:
 | `.tmpl` | Processed as Go template |
 | `run_once_` | Script runs once per machine |
 | `run_onchange_` | Script runs when content changes |
+
+## Common Commands
+
+The `dots` command provides shortcuts for common operations:
+
+```bash
+# Dotfiles management
+dots apply      # Apply dotfiles to home directory
+dots apply -v   # Apply with verbose output
+dots diff       # Preview changes before applying
+dots status     # Show status of managed files
+dots update     # Pull latest changes and apply
+dots edit FILE  # Edit a dotfile source
+dots add FILE   # Add a new file to chezmoi
+dots cd         # Go to dotfiles source directory
+dots git ...    # Run git commands in dotfiles repo
+dots test       # Run setup verification tests
+dots doctor     # Check chezmoi health
+
+# Brewfile management (macOS/Linux)
+dots brew add <package>       # Add package (auto-detects brew/cask)
+dots brew add <pkg> --cask    # Force cask type
+dots brew remove <package>    # Remove package from Brewfile
+dots brew list                # List all packages
+dots brew list --brew         # List only formulas
+dots brew list --cask         # List only casks
+```
+
+## Machine Configuration
+
+The `.chezmoi.toml.tmpl` template sets feature flags based on machine type:
+
+| Flag | Purpose |
+|------|---------|
+| `personal` | Personal machines (enables 1Password secrets) |
+| `work` | Work machines (no personal secrets) |
+| `portable` | Windows without Scoop (uses portable binaries) |
+| `ephemeral` | Temporary/cloud environments |
+| `headless` | Machines without display |
+
+**Detection logic:**
+- Known hostnames → automatically configured
+- Unknown machines → prompted during `chezmoi init`
+- Non-interactive → defaults to ephemeral work machine
 
 ## Tools Installed
 
@@ -83,7 +157,6 @@ The install script will:
 | [btop](https://github.com/aristocratos/btop) | top/htop | Resource monitor |
 | [zoxide](https://github.com/ajeetdsouza/zoxide) | cd | Smart directory jumping |
 | [duf](https://github.com/muesli/duf) | df | Disk usage |
-| [tldr](https://tldr.sh/) | man | Simplified help |
 
 ### Utilities
 | Tool | Description |
@@ -127,24 +200,6 @@ The install script will:
 - Hack Nerd Font
 - Meslo LG Nerd Font
 
-## Common Commands
-
-The `dots` command provides shortcuts for common operations:
-
-```bash
-dots apply      # Apply dotfiles to home directory
-dots apply -v   # Apply with verbose output
-dots diff       # Preview changes before applying
-dots status     # Show status of managed files
-dots update     # Pull latest changes and apply
-dots edit FILE  # Edit a dotfile source
-dots add FILE   # Add a new file to chezmoi
-dots cd         # Go to dotfiles source directory
-dots git ...    # Run git commands in dotfiles repo
-dots test       # Run setup verification tests
-dots doctor     # Check chezmoi health
-```
-
 ## Custom Shell Functions
 
 Defined in `dot_config/zsh/scripts.zsh`:
@@ -156,17 +211,6 @@ Defined in `dot_config/zsh/scripts.zsh`:
 | `q` / `qv` | Ask questions about web pages or YouTube videos |
 | `sheet2csv` | Extract spreadsheet data from images using AI |
 | `pdf2text` | Extract text from PDFs using AI |
-
-## Machine Configuration
-
-The `.chezmoi.toml.tmpl` template detects machines by hostname and sets feature flags:
-
-| Flag | Purpose |
-|------|---------|
-| `personal` | Personal machines (enables secrets via 1Password) |
-| `work` | Work machines |
-| `ephemeral` | Temporary/cloud environments |
-| `headless` | Machines without display |
 
 ## Testing
 
