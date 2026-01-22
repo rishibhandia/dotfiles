@@ -12,12 +12,12 @@ if (Test-Path $LocalBin) {
 
 # Initialize starship prompt (if available)
 if (Get-Command starship -ErrorAction SilentlyContinue) {
-    Invoke-Expression (&starship init powershell)
+    Invoke-Expression (&starship init powershell | Out-String)
 }
 
 # Initialize zoxide (if available)
 if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    Invoke-Expression (& zoxide init powershell)
+    Invoke-Expression (& zoxide init powershell | Out-String)
 }
 
 # Source dots.ps1 if it exists (dotfiles management functions)
