@@ -1,10 +1,15 @@
-#!/usr/bin/env -S uv run --script
+#!/usr/bin/env python3
 # /// script
 # dependencies = ["pypdf", "pdfplumber"]
 # ///
 """
 Get PDF statistics without loading full content into memory.
 Returns: page count, file size, text extractability, estimated word count.
+
+Cross-platform usage:
+  - With uv (auto-installs deps): uv run pdf_stats.py document.pdf
+  - With Python (requires deps):  python3 pdf_stats.py document.pdf
+  - Windows:                      python pdf_stats.py document.pdf
 """
 
 import sys

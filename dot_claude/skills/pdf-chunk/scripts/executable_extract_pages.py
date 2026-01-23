@@ -1,10 +1,15 @@
-#!/usr/bin/env -S uv run --script
+#!/usr/bin/env python3
 # /// script
 # dependencies = ["pypdf", "pdfplumber"]
 # ///
 """
 Extract text from specific page range of a PDF.
 Outputs to stdout or file, avoiding loading entire PDF into context.
+
+Cross-platform usage:
+  - With uv (auto-installs deps): uv run extract_pages.py document.pdf 1 10
+  - With Python (requires deps):  python3 extract_pages.py document.pdf 1 10
+  - Windows:                      python extract_pages.py document.pdf 1 10
 """
 
 import sys

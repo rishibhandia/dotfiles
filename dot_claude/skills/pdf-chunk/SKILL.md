@@ -73,18 +73,37 @@ Claude: Found it. Let me extract just the installation section.
 
 ## Implementation
 
-Run the Python scripts in the `scripts/` directory. Scripts use inline uv dependencies, so no manual install needed.
+Run the Python scripts in the `scripts/` directory.
 
 ### Stats Command
 
+**macOS/Linux (with uv):**
 ```bash
-~/.claude/skills/pdf-chunk/scripts/pdf_stats.py document.pdf
+uv run ~/.claude/skills/pdf-chunk/scripts/pdf_stats.py document.pdf
+```
+
+**macOS/Linux (without uv):**
+```bash
+python3 ~/.claude/skills/pdf-chunk/scripts/pdf_stats.py document.pdf
+```
+
+**Windows:**
+```powershell
+uv run $env:USERPROFILE\.claude\skills\pdf-chunk\scripts\pdf_stats.py document.pdf
+# or without uv:
+python $env:USERPROFILE\.claude\skills\pdf-chunk\scripts\pdf_stats.py document.pdf
 ```
 
 ### Extract Pages Command
 
+**macOS/Linux:**
 ```bash
-~/.claude/skills/pdf-chunk/scripts/extract_pages.py document.pdf 1 10
+uv run ~/.claude/skills/pdf-chunk/scripts/extract_pages.py document.pdf 1 10
+```
+
+**Windows:**
+```powershell
+uv run $env:USERPROFILE\.claude\skills\pdf-chunk\scripts\extract_pages.py document.pdf 1 10
 ```
 
 Arguments: `<pdf_file> <start_page> <end_page> [output_file]`
@@ -94,11 +113,28 @@ Arguments: `<pdf_file> <start_page> <end_page> [output_file]`
 
 ## Dependencies
 
-Scripts use `uv` inline dependencies - packages are auto-installed on first run:
+Required Python packages:
 - `pypdf` - for page count and metadata
 - `pdfplumber` - for text extraction
 
-No manual installation required if `uv` is available.
+**With uv (recommended):** Dependencies auto-install on first run via inline script metadata.
+
+**Without uv / Work environments:** Pre-install dependencies:
+```bash
+pip install pypdf pdfplumber   # or: uv pip install pypdf pdfplumber
+```
+
+## Work/Restricted Environments
+
+If you're in an environment where:
+- `uv` is not available
+- Network access to pypi.org is blocked
+- You cannot install packages
+
+**Options:**
+1. Ask IT to pre-install `pypdf` and `pdfplumber` system-wide
+2. Use CLI tools instead: `pdftotext -f 1 -l 10 document.pdf` (from poppler-utils)
+3. Use the built-in `/pdf` skill which may have different dependencies
 
 ## Tips
 
