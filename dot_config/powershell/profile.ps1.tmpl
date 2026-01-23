@@ -12,6 +12,7 @@ if (Test-Path $LocalBin) {
 
 # Initialize starship prompt (if available)
 if (Get-Command starship -ErrorAction SilentlyContinue) {
+    $env:STARSHIP_CONFIG = Join-Path $env:USERPROFILE ".config\starship\config.toml"
     Invoke-Expression (&starship init powershell | Out-String)
 }
 
