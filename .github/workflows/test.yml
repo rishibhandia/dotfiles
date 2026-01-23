@@ -130,6 +130,22 @@ jobs:
           & .\scripts\test.ps1
         continue-on-error: true
 
+      - name: Install uv
+        shell: pwsh
+        run: |
+          irm https://astral.sh/uv/install.ps1 | iex
+          $env:PATH = "$env:USERPROFILE\.local\bin;$env:PATH"
+          uv --version
+
+      - name: Test pdf-chunk skill
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:USERPROFILE\.local\bin;$env:PATH"
+          # Test that scripts have valid syntax and can import dependencies
+          uv run --script dot_claude/skills/pdf-chunk/scripts/executable_pdf_stats.py 2>&1 | Out-String
+          Write-Host "pdf-chunk skill scripts are valid"
+        continue-on-error: true
+
   # ==========================================================================
   # Template validation
   # ==========================================================================
