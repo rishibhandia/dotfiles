@@ -91,3 +91,100 @@ $DotsScript = Join-Path $env:USERPROFILE ".config\powershell\dots.ps1"
 if (Test-Path $DotsScript) {
     . $DotsScript
 }
+
+# =============================================================================
+# Cross-shell portable functions (no external dependencies)
+# =============================================================================
+
+# Create missing $IsWindows if running PowerShell 5 or below
+if (!(Test-Path variable:global:IsWindows)) {
+    Set-Variable "IsWindows" -Scope "Global" -Value ([System.Environment]::OSVersion.Platform -eq "Win32NT")
+}
+
+# Navigation: Go up directories
+function .. { Set-Location .. }
+function ... { Set-Location ../.. }
+function .... { Set-Location ../../.. }
+function ..... { Set-Location ../../../.. }
+
+# Navigation: Go to last directory
+function cd- { Set-Location - }
+
+# Directory listing
+function l { Get-ChildItem -Force @args }
+function ll { Get-ChildItem -Force @args }
+function lsd { Get-ChildItem -Directory @args }
+function lsh { Get-ChildItem -Hidden @args }
+
+# File management
+function mkcd {
+    param([string]$Path)
+    if (!(Test-Path $Path)) { New-Item -ItemType Directory -Path $Path | Out-Null }
+    Set-Location $Path
+}
+Set-Alias -Name "take" -Value mkcd
+
+function touch {
+    param([string]$File)
+    if (Test-Path $File) { (Get-Item $File).LastWriteTime = Get-Date }
+    else { New-Item -ItemType File $File | Out-Null }
+}
+
+function ff { Get-ChildItem -Path . -File -Recurse -Name -Include @args }
+function fd { Get-ChildItem -Path . -Directory -Recurse -Name -Include @args }
+
+# General
+function c { Clear-Host }
+function reload { & $SHELL }
+function path { $env:PATH -split ';' }
+function which { param([string]$cmd) Get-Command $cmd -ErrorAction SilentlyContinue }
+
+# Time (ISO-8601)
+function now { Get-Date -Format "yyyy-MM-ddTHH:mm:ss" }
+function unow { (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss") }
+function nowdate { Get-Date -Format "yyyy-MM-dd" }
+function nowtime { Get-Date -Format "HH:mm:ss" }
+function timestamp { [int][double]::Parse((Get-Date -UFormat %s)) }
+function week { (Get-Date -UFormat %Y-W) + (Get-Date -UFormat %W).PadLeft(2,'0') }
+function weekday { Get-Date -UFormat %u }
+
+# Networking
+function localip {
+    if ($IsWindows) {
+        (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.PrefixOrigin -eq "Dhcp" -or $_.PrefixOrigin -eq "Manual" } | Select-Object -First 1).IPAddress
+    } else { ipconfig getifaddr en0 }
+}
+function publicip { (Invoke-RestMethod http://ipinfo.io/json).ip }
+function flushdns {
+    if ($IsWindows) { ipconfig /flushdns }
+    elseif ($IsMacOS) { dscacheutil -flushcache; sudo killall -HUP mDNSResponder }
+    Write-Host "DNS cache flushed"
+}
+
+# Hash functions
+function md5sum { param([string]$Path) Get-FileHash $Path -Algorithm MD5 }
+function sha1sum { param([string]$Path) Get-FileHash $Path -Algorithm SHA1 }
+function sha256sum { param([string]$Path) Get-FileHash $Path -Algorithm SHA256 }
+
+# Weather
+function weather { (Invoke-WebRequest -Uri "https://wttr.in/?format=%l:+(%C)+%c++%t+[%h,+%w]" -UserAgent "curl" -UseBasicParsing -TimeoutSec 10).Content }
+function forecast { (Invoke-WebRequest -Uri "https://wttr.in?F" -UserAgent "curl" -UseBasicParsing -TimeoutSec 10).Content }
+
+# Common paths
+function dls { Set-Location (Join-Path $HOME "Downloads") }
+function docs { Set-Location (Join-Path $HOME "Documents") }
+function dt { Set-Location (Join-Path $HOME "Desktop") }
+function repos { Set-Location (Join-Path $HOME "Code") }
+
+# Clipboard
+function cbpaste { Get-Clipboard }
+
+# Development
+function g { git @args }
+function dk { docker @args }
+function dco { docker-compose @args }
+function va {
+    $paths = @("./.venv/Scripts/Activate.ps1", "./venv/Scripts/Activate.ps1", "./.venv/bin/Activate.ps1", "./venv/bin/Activate.ps1")
+    foreach ($p in $paths) { if (Test-Path $p) { . $p; break } }
+}
+function ve { python -m venv .venv }

@@ -1198,3 +1198,31 @@ function chromekill() {
     pgrep -f '[C]hrome Helper --type=renderer' | xargs kill -9
     echo "Chrome renderer processes killed."
 }
+
+# =============================================================================
+# Cross-shell portable functions (match PowerShell equivalents)
+# =============================================================================
+
+# Make directory and cd into it
+function mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+alias take='mkcd'
+
+# Create empty file or update timestamp (touch equivalent)
+function touchfile() {
+    if [[ -e "$1" ]]; then
+        touch "$1"
+    else
+        > "$1"
+    fi
+}
+
+# Repeat a command n times
+function repeat_cmd() {
+    local count=$1
+    shift
+    for ((i=1; i<=count; i++)); do
+        "$@"
+    done
+}
