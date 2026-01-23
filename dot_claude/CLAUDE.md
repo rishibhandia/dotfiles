@@ -86,6 +86,33 @@ const schema = z.object({
 const validated = schema.parse(input)
 ```
 
+### Python Package Management
+
+**ALWAYS use `uv` instead of `pip`** for Python package operations:
+
+```bash
+# NEVER: pip install
+pip install package-name
+
+# ALWAYS: uv
+uv pip install package-name          # If in a venv
+uv pip install --system package-name # System-wide (if needed)
+uvx package-name                     # Run tools without installing
+```
+
+**For scripts with dependencies**, use inline script metadata:
+```python
+#!/usr/bin/env -S uv run --script
+# /// script
+# dependencies = ["requests", "rich"]
+# ///
+
+import requests
+from rich import print
+```
+
+This allows scripts to auto-install dependencies on first run without manual setup.
+
 ### Testing Requirements
 
 **Minimum Test Coverage: 80%**

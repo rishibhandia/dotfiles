@@ -114,6 +114,7 @@ Scripts that run automatically during `chezmoi apply`:
 ### Claude Code Skills
 Skills are synced via chezmoi to `~/.claude/skills/`. Included skills:
 - **pdf** - PDF manipulation and form extraction
+- **pdf-chunk** - Handle large PDFs without filling context (selective page extraction)
 - **xlsx** - Excel spreadsheet creation
 - **pptx** - PowerPoint presentations
 - **docx** - Word document creation
