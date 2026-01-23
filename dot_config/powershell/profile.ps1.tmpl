@@ -2,6 +2,71 @@
 # Source this file in your PowerShell profile:
 #   . "$env:USERPROFILE\.config\powershell\profile.ps1"
 
+# =============================================================================
+# PSReadLine Configuration (Catppuccin Macchiato theme)
+# =============================================================================
+if (Get-Module -ListAvailable -Name PSReadLine) {
+    # Catppuccin Macchiato palette
+    $Macchiato = @{
+        Rosewater = '#F4DBD6'
+        Flamingo  = '#F0C6C6'
+        Pink      = '#F5BDE6'
+        Mauve     = '#C6A0F6'
+        Red       = '#ED8796'
+        Maroon    = '#EE99A0'
+        Peach     = '#F5A97F'
+        Yellow    = '#EED49F'
+        Green     = '#A6DA95'
+        Teal      = '#8BD5CA'
+        Sky       = '#91D7E3'
+        Sapphire  = '#7DC4E4'
+        Blue      = '#8AADF4'
+        Lavender  = '#B7BDF8'
+        Text      = '#CAD3F5'
+        Subtext1  = '#B8C0E0'
+        Subtext0  = '#A5ADCB'
+        Overlay2  = '#939AB7'
+        Overlay1  = '#8087A2'
+        Overlay0  = '#6E738D'
+        Surface2  = '#5B6078'
+        Surface1  = '#494D64'
+        Surface0  = '#363A4F'
+        Base      = '#24273A'
+        Mantle    = '#1E2030'
+        Crust     = '#181926'
+    }
+
+    Set-PSReadLineOption -Colors @{
+        Command            = $Macchiato.Blue
+        Comment            = $Macchiato.Overlay0
+        ContinuationPrompt = $Macchiato.Teal
+        Default            = $Macchiato.Text
+        Emphasis           = $Macchiato.Red
+        Error              = $Macchiato.Red
+        InlinePrediction   = $Macchiato.Overlay0
+        Keyword            = $Macchiato.Mauve
+        ListPrediction     = $Macchiato.Mauve
+        Member             = $Macchiato.Rosewater
+        Number             = $Macchiato.Peach
+        Operator           = $Macchiato.Sky
+        Parameter          = $Macchiato.Pink
+        Selection          = $Macchiato.Surface2
+        String             = $Macchiato.Green
+        Type               = $Macchiato.Yellow
+        Variable           = $Macchiato.Lavender
+    }
+
+    # Better editing experience
+    Set-PSReadLineOption -EditMode Emacs
+    Set-PSReadLineOption -BellStyle None
+    Set-PSReadLineOption -PredictionSource History
+    Set-PSReadLineOption -PredictionViewStyle ListView
+}
+
+# =============================================================================
+# PATH Configuration
+# =============================================================================
+
 # Add portable binaries to PATH (for portable mode without Scoop)
 $LocalBin = Join-Path $env:USERPROFILE ".local\bin"
 if (Test-Path $LocalBin) {
