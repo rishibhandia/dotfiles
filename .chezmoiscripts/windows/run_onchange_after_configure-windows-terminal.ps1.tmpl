@@ -43,22 +43,19 @@ $catppuccinScheme = @{
     brightWhite     = "#B8C0E0"
 }
 
-# Ensure schemes array exists
-if (-not $settings.schemes) {
+# Ensure schemes array exists (use PSObject.Properties to check if property exists)
+if (-not $settings.PSObject.Properties['schemes']) {
     $settings | Add-Member -NotePropertyName "schemes" -NotePropertyValue @()
 }
 
-# Remove existing Catppuccin Macchiato scheme if present
-$settings.schemes = @($settings.schemes | Where-Object { $_.name -ne "Catppuccin Macchiato" })
-
-# Add our scheme
-$settings.schemes += $catppuccinScheme
+# Remove existing Catppuccin Macchiato scheme if present, then add ours
+$settings.schemes = @($settings.schemes | Where-Object { $_.name -ne "Catppuccin Macchiato" }) + $catppuccinScheme
 
 # Ensure profiles.defaults exists
-if (-not $settings.profiles) {
+if (-not $settings.PSObject.Properties['profiles']) {
     $settings | Add-Member -NotePropertyName "profiles" -NotePropertyValue @{}
 }
-if (-not $settings.profiles.defaults) {
+if (-not $settings.profiles.PSObject.Properties['defaults']) {
     $settings.profiles | Add-Member -NotePropertyName "defaults" -NotePropertyValue @{}
 }
 
