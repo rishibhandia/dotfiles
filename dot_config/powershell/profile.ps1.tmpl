@@ -187,4 +187,7 @@ function va {
     $paths = @("./.venv/Scripts/Activate.ps1", "./venv/Scripts/Activate.ps1", "./.venv/bin/Activate.ps1", "./venv/bin/Activate.ps1")
     foreach ($p in $paths) { if (Test-Path $p) { . $p; break } }
 }
-function ve { python -m venv .venv }
+function ve {
+    if (Get-Command uv -ErrorAction SilentlyContinue) { uv venv }
+    else { python -m venv .venv }
+}

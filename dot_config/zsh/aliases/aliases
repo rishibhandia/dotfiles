@@ -409,8 +409,8 @@ alias g='git'
 # Activates Python virtual environment `venv`.
 alias va='if [ -d ./.venv ]; then \. ./.venv/bin/activate; elif [ -d ./venv ]; then \. ./venv/bin/activate; fi'
 
-# Creates Python virtual environment `venv`.
-alias ve='python3 -m venv ./.venv'
+# Creates Python virtual environment using uv (fast) or falls back to python3.
+alias ve='if command -v uv &> /dev/null; then uv venv; else python3 -m venv ./.venv; fi'
 
 #+-------+
 #| macOS |
