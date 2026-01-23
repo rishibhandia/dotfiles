@@ -29,3 +29,9 @@
 dot_claude/skills/things
 dot_claude/skills/fantastical
 {{ end }}
+
+# =============================================================================
+# Project-specific CLAUDE.md stays in repo only, not applied to ~/
+# (Global rules are in ~/.claude/CLAUDE.md, managed via dot_claude/CLAUDE.md)
+# =============================================================================
+CLAUDE.md

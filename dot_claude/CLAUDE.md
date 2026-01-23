@@ -236,3 +236,20 @@ interface Repository<T> {
 | `/test-coverage` | Coverage analysis |
 | `/update-codemaps` | Codebase mapping |
 | `/update-docs` | Documentation sync |
+
+### Dotfiles Management
+
+Use `dots` command (chezmoi wrapper) to manage dotfiles from any directory:
+
+| Command | Purpose |
+|---------|---------|
+| `dots apply` | Apply dotfiles to home directory |
+| `dots diff` | Preview changes before applying |
+| `dots status` | Show status of managed files |
+| `dots update` | Pull latest changes and apply |
+| `dots edit FILE` | Edit a dotfile source |
+| `dots add FILE` | Add a new file to chezmoi |
+| `dots cd` | Go to dotfiles source directory |
+| `dots git ...` | Run git commands in dotfiles repo |
+
+Source directory: `~/.local/share/chezmoi`
