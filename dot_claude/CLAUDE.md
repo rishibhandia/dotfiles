@@ -113,6 +113,24 @@ from rich import print
 
 This allows scripts to auto-install dependencies on first run without manual setup.
 
+### Python Project Creation
+
+**Use Copier with cookiecutter-uv template** for new Python projects:
+
+```bash
+# Create new project
+uvx copier copy gh:fpgmaas/cookiecutter-uv my-project
+
+# Update existing project when template improves
+cd my-project
+uvx copier update
+```
+
+**Why Copier over Cookiecutter:**
+- `copier update` pulls template improvements into existing projects
+- Saves answers in `.copier-answers.yml` for reproducibility
+- Supports version-aware migrations between template versions
+
 ### Testing Requirements
 
 **Minimum Test Coverage: 80%**
