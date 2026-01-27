@@ -61,6 +61,15 @@
       "Bash(find:*)"
     ],
     "deny": [
+{{- if eq .chezmoi.os "windows" }}
+      "Bash(Stop-Computer*)",
+      "Bash(Restart-Computer*)",
+      "Bash(shutdown*)",
+      "Bash(Format-Volume*)",
+      "Bash(Clear-Disk*)",
+      "Bash(diskpart*)",
+      "Bash(bcdedit*)"
+{{- else }}
       "Bash(shutdown)",
       "Bash(reboot)",
       "Bash(halt)",
@@ -72,14 +81,28 @@
       "Bash(sudo)",
       "Bash(doas)",
       "Bash(su)"
+{{- end }}
     ],
     "ask": [
+{{- if eq .chezmoi.os "windows" }}
+      "Bash(Remove-Item*)",
+      "Bash(del *)",
+      "Bash(rd *)",
+      "Bash(rmdir*)",
+      "Bash(icacls*)",
+      "Bash(Set-Acl*)",
+      "Bash(Stop-Process*)",
+      "Bash(taskkill*)",
+      "Bash(git reset --hard)",
+      "Bash(git push --force)"
+{{- else }}
       "Bash(rm)",
       "Bash(chmod)",
       "Bash(chown)",
       "Bash(kill)",
       "Bash(git reset --hard)",
       "Bash(git push --force)"
+{{- end }}
     ]
   },
   "statusLine": {
