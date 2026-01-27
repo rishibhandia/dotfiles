@@ -8,6 +8,35 @@ Project-specific CLAUDE.md files in individual repositories will be loaded in ad
 
 These rules are enforced by the agents and skills configured in this dotfiles setup.
 
+### Development Workflow
+
+**ALWAYS break plans into atomic commits.** When planning any change, first identify the atomic commits that will be created, then execute each commit using this workflow:
+
+**Per-Commit Workflow:**
+1. **Orchestrate** - Use `/orchestrate` to coordinate the work for this commit
+2. **Review** - Use `/architect` to review the source module(s) being changed
+3. **Write Tests** - Write tests first (TDD - tests should initially fail)
+4. **Verify Failure** - Run tests to confirm they fail appropriately
+5. **Implement** - Write minimal code to make tests pass
+6. **Fix Issues** - Resolve any problems found
+7. **Commit** - Use `/git-commit` to create the atomic commit
+8. **Debug** - Use `/debugger` if tests fail unexpectedly
+
+**Planning Example:**
+```
+Task: "Add user authentication"
+
+Atomic Commits:
+1. Add User model and migration
+2. Add password hashing utility
+3. Add login endpoint with tests
+4. Add logout endpoint with tests
+5. Add auth middleware
+6. Integrate middleware with protected routes
+
+For each commit → follow Per-Commit Workflow above
+```
+
 ### Security
 
 Before ANY commit:
@@ -152,21 +181,75 @@ Test Types (ALL required):
 - **tdd-guide** - Use PROACTIVELY for new features
 - **e2e-runner** - Playwright E2E testing specialist
 
+### Debugging
+
+**When implementation fails or tests don't pass**, use systematic debugging:
+
+1. **Don't shotgun debug** - Avoid random fix attempts
+2. **Gather evidence** - Read error messages, logs, and relevant code
+3. **Form hypotheses** - Rank possible causes by likelihood
+4. **Create fix plan** - Document root cause and solution before coding
+5. **Verify fix** - Ensure the fix addresses root cause, not symptoms
+
+**Agent Support:**
+- **debugger** - Use PROACTIVELY after first implementation attempt fails
+
 ### Git Workflow
+
+**Atomic Commits (CRITICAL)** - Each commit should be ONE logical unit of change:
+
+The "AND" Test: If your commit message needs "and", split it into multiple commits.
+
+```bash
+# BAD: Monolithic commit
+git commit -m "fix: login bug and add logout button and update styles"
+
+# GOOD: Atomic commits
+git commit -m "fix: prevent null pointer in login validation"
+git commit -m "feat: add logout button to navbar"
+git commit -m "style: update button hover states"
+```
+
+**What to Split Into Separate Commits:**
+| Don't Combine | Split Into |
+|---------------|------------|
+| Fix bug A + Fix bug B | 2 commits (one per bug) |
+| Remove dead code + Add feature | 2 commits (cleanup, then feature) |
+| Refactor + New functionality | 2 commits (refactor first, then feature) |
+| Formatting + Logic changes | 2 commits (format first, then logic) |
+| Multiple unrelated file changes | Separate by concern |
+
+**Valid Atomic Commits:**
+- Fix a specific bug
+- Add one user-facing feature
+- Update a single dependency
+- Refactor one module (no behavior change)
+- Add/update tests for one feature
+
+**Atomic Commit Checklist:**
+- [ ] Commit does exactly ONE thing
+- [ ] Tests pass after this commit
+- [ ] Could revert this commit without side effects
+- [ ] Message doesn't need "and" to describe changes
+- [ ] Doesn't mix refactoring with new features
 
 **Commit Message Format:**
 ```
 <type>: <description>
 
-<optional body>
+<optional body explaining WHY, not WHAT>
 ```
-Types: feat, fix, refactor, docs, test, chore, perf, ci
+Types: feat, fix, refactor, docs, test, chore, perf, ci, style
 
 **Feature Implementation Workflow:**
-1. **Plan First** - Use `/plan` to create implementation plan
-2. **TDD Approach** - Use `/tdd` for test-driven development
-3. **Code Review** - Use `/code-review` immediately after writing code
-4. **Commit & Push** - Detailed messages, conventional commits format
+1. **Plan First** - Break feature into atomic sub-tasks
+2. **TDD Approach** - Write test, commit; implement, commit
+3. **One Concern Per Commit** - Resist bundling changes
+4. **Code Review** - Use `/code-review` before final push
+5. **Interactive Staging** - Use `git add -p` to separate mixed changes
+
+**Agent Support:**
+- **git-commit** - Use PROACTIVELY before committing to ensure atomic commits
 
 ### Performance (Model Selection)
 
@@ -235,9 +318,12 @@ interface Repository<T> {
 | `e2e-runner` | Playwright testing | Testing critical user flows |
 | `refactor-cleaner` | Dead code removal | Cleaning up unused code |
 | `doc-updater` | Documentation sync | Updating codemaps and docs |
+| `git-commit` | Atomic commit enforcement | Before committing to ensure atomic commits |
+| `debugger` | Systematic debugging | When initial implementation fails or bugs occur |
 
 ### Available Skills (Commands)
 
+**Development Workflow:**
 | Command | Purpose |
 |---------|---------|
 | `/plan` | Create implementation plan before coding |
@@ -255,6 +341,24 @@ interface Repository<T> {
 | `/update-codemaps` | Codebase mapping |
 | `/update-docs` | Documentation sync |
 
+**Document & File Creation:**
+| Command | Purpose |
+|---------|---------|
+| `/pdf` | PDF manipulation and form extraction |
+| `/pdf-chunk` | Handle large PDFs without filling context |
+| `/xlsx` | Excel spreadsheet creation and editing |
+| `/pptx` | PowerPoint presentation creation |
+| `/docx` | Word document creation |
+| `/doc-coauthoring` | Structured documentation collaboration |
+| `/theme-factory` | Generate color themes for artifacts |
+| `/skill-creator` | Create custom Claude Code skills |
+
+**macOS App Integrations:**
+| Command | Purpose |
+|---------|---------|
+| `/things` | Things 3 task management |
+| `/fantastical` | Fantastical calendar integration |
+
 ### Dotfiles Management
 
 Use `dots` command (chezmoi wrapper) to manage dotfiles from any directory:
@@ -271,3 +375,36 @@ Use `dots` command (chezmoi wrapper) to manage dotfiles from any directory:
 | `dots git ...` | Run git commands in dotfiles repo |
 
 Source directory: `~/.local/share/chezmoi`
+
+### Claude Code Settings
+
+Configuration managed via `~/.claude/settings.json` (templated from `settings.json.tmpl`).
+
+**Default Mode:** `plan` - Claude enters plan mode by default for new tasks.
+
+**Hooks:**
+| Hook | Trigger | Behavior |
+|------|---------|----------|
+| Git push confirmation | `Bash(git push*)` | Prompts for confirmation before pushing |
+| Block arbitrary docs | `Write(*.md)` | Blocks creating random .md files (allows README, CLAUDE, SKILL, etc.) |
+| Console.log warning | `Edit(*.ts\|*.tsx\|*.js\|*.jsx)` | Warns if console.log found after edit |
+
+**Permissions (OS-specific):**
+
+*Common (all platforms):*
+| Type | Commands |
+|------|----------|
+| **Allow** | `Read`, `Edit`, `Write`, `Glob`, `Grep`, `Bash(git:*)`, `Bash(tree:*)`, `Bash(find:*)` |
+| **Ask** | `git reset --hard`, `git push --force` |
+
+*macOS/Linux:*
+| Type | Commands |
+|------|----------|
+| **Deny** | `shutdown`, `reboot`, `halt`, `poweroff`, `mkfs`, `dd`, `fdisk`, `parted`, `sudo`, `doas`, `su` |
+| **Ask** | `rm`, `chmod`, `chown`, `kill` |
+
+*Windows:*
+| Type | Commands |
+|------|----------|
+| **Deny** | `Stop-Computer`, `Restart-Computer`, `shutdown`, `Format-Volume`, `Clear-Disk`, `diskpart`, `bcdedit` |
+| **Ask** | `Remove-Item`, `del`, `rd`, `rmdir`, `icacls`, `Set-Acl`, `Stop-Process`, `taskkill` |
