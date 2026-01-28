@@ -15,9 +15,9 @@ These rules are enforced by the agents and skills configured in this dotfiles se
 **Per-Commit Workflow:**
 1. **Orchestrate** - Use `/orchestrate` to coordinate the work for this commit
 2. **Review** - Use `/architect` to review the source module(s) being changed
-3. **Write Tests** - Write tests first (TDD - tests should initially fail)
+3. **Write Tests** - Use **tdd-guide** agent to write tests first (RED phase)
 4. **Verify Failure** - Run tests to confirm they fail appropriately
-5. **Implement** - Write minimal code to make tests pass
+5. **Implement** - Write minimal code to make tests pass (GREEN phase)
 6. **Fix Issues** - Resolve any problems found
 7. **Commit** - Use `/git-commit` to create the atomic commit
 8. **Debug** - Use `/debugger` if tests fail unexpectedly
