@@ -117,6 +117,8 @@ Scripts that run automatically during `chezmoi apply`:
 - `dot_Scoopfile` → `~/.Scoopfile` - Scoop packages for Windows
 - Packages auto-install when package files change via `run_onchange` scripts
 
+**Windows package manager policy:** Use Scoop exclusively. Do not use npm, cargo, winget, or other package managers as alternatives for CLI tools.
+
 ### Claude Code Skills
 Skills are synced via chezmoi to `~/.claude/skills/`. Included skills:
 - **pdf** - PDF manipulation and form extraction
