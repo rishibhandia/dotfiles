@@ -16,17 +16,19 @@ A user may ask you to create, edit, or analyze the contents of a .pptx file. A .
 If you just need to read the text contents of a presentation, you should convert the document to markdown:
 
 ```bash
-# Convert document to markdown
-python -m markitdown path-to-file.pptx
+# Convert document to markdown (using uvx with required dependency)
+uvx --with python-pptx markitdown path-to-file.pptx
 ```
 
 ### Raw XML access
 You need raw XML access for: comments, speaker notes, slide layouts, animations, design elements, and complex formatting. For any of these features, you'll need to unpack a presentation and read its raw XML contents.
 
 #### Unpacking a file
-`python ooxml/scripts/unpack.py <office_file> <output_dir>`
+```bash
+uv run --with defusedxml python3 ~/.claude/skills/pptx/ooxml/scripts/unpack.py <office_file> <output_dir>
+```
 
-**Note**: The unpack.py script is located at `skills/pptx/ooxml/scripts/unpack.py` relative to the project root. If the script doesn't exist at this path, use `find . -name "unpack.py"` to locate it.
+**Note**: The unpack.py script is located at `~/.claude/skills/pptx/ooxml/scripts/unpack.py`. Use `uv run --with defusedxml` to ensure the required dependency is available.
 
 #### Key file structures
 * `ppt/presentation.xml` - Main presentation metadata and slide references
@@ -174,10 +176,19 @@ When edit slides in an existing PowerPoint presentation, you need to work with t
 
 ### Workflow
 1. **MANDATORY - READ ENTIRE FILE**: Read [`ooxml.md`](ooxml.md) (~500 lines) completely from start to finish.  **NEVER set any range limits when reading this file.**  Read the full file content for detailed guidance on OOXML structure and editing workflows before any presentation editing.
-2. Unpack the presentation: `python ooxml/scripts/unpack.py <office_file> <output_dir>`
+2. Unpack the presentation:
+   ```bash
+   uv run --with defusedxml python3 ~/.claude/skills/pptx/ooxml/scripts/unpack.py <office_file> <output_dir>
+   ```
 3. Edit the XML files (primarily `ppt/slides/slide{N}.xml` and related files)
-4. **CRITICAL**: Validate immediately after each edit and fix any validation errors before proceeding: `python ooxml/scripts/validate.py <dir> --original <file>`
-5. Pack the final presentation: `python ooxml/scripts/pack.py <input_directory> <office_file>`
+4. **CRITICAL**: Validate immediately after each edit and fix any validation errors before proceeding:
+   ```bash
+   uv run --with defusedxml,lxml python3 ~/.claude/skills/pptx/ooxml/scripts/validate.py <dir> --original <file>
+   ```
+5. Pack the final presentation:
+   ```bash
+   uv run --with defusedxml python3 ~/.claude/skills/pptx/ooxml/scripts/pack.py <input_directory> <office_file>
+   ```
 
 ## Creating a new PowerPoint presentation **using a template**
 
@@ -185,9 +196,9 @@ When you need to create a presentation that follows an existing template's desig
 
 ### Workflow
 1. **Extract template text AND create visual thumbnail grid**:
-   * Extract text: `python -m markitdown template.pptx > template-content.md`
+   * Extract text: `uvx --with python-pptx markitdown template.pptx > template-content.md`
    * Read `template-content.md`: Read the entire file to understand the contents of the template presentation. **NEVER set any range limits when reading this file.**
-   * Create thumbnail grids: `python scripts/thumbnail.py template.pptx`
+   * Create thumbnail grids: `uv run --with python-pptx,Pillow python3 ~/.claude/skills/pptx/scripts/thumbnail.py template.pptx`
    * See [Creating Thumbnail Grids](#creating-thumbnail-grids) section for more details
 
 2. **Analyze template and save inventory to a file**:
@@ -245,7 +256,7 @@ When you need to create a presentation that follows an existing template's desig
 4. **Duplicate, reorder, and delete slides using `rearrange.py`**:
    * Use the `scripts/rearrange.py` script to create a new presentation with slides in the desired order:
      ```bash
-     python scripts/rearrange.py template.pptx working.pptx 0,34,34,50,52
+     uv run --with python-pptx python3 ~/.claude/skills/pptx/scripts/rearrange.py template.pptx working.pptx 0,34,34,50,52
      ```
    * The script handles duplicating repeated slides, deleting unused slides, and reordering automatically
    * Slide indices are 0-based (first slide is 0, second is 1, etc.)
@@ -254,7 +265,7 @@ When you need to create a presentation that follows an existing template's desig
 5. **Extract ALL text using the `inventory.py` script**:
    * **Run inventory extraction**:
      ```bash
-     python scripts/inventory.py working.pptx text-inventory.json
+     uv run --with python-pptx python3 ~/.claude/skills/pptx/scripts/inventory.py working.pptx text-inventory.json
      ```
    * **Read text-inventory.json**: Read the entire text-inventory.json file to understand all shapes and their properties. **NEVER set any range limits when reading this file.**
 
@@ -381,7 +392,7 @@ When you need to create a presentation that follows an existing template's desig
 
 7. **Apply replacements using the `replace.py` script**
    ```bash
-   python scripts/replace.py working.pptx replacement-text.json output.pptx
+   uv run --with python-pptx python3 ~/.claude/skills/pptx/scripts/replace.py working.pptx replacement-text.json output.pptx
    ```
 
    The script will:
@@ -410,13 +421,13 @@ When you need to create a presentation that follows an existing template's desig
 To create visual thumbnail grids of PowerPoint slides for quick analysis and reference:
 
 ```bash
-python scripts/thumbnail.py template.pptx [output_prefix]
+uv run --with python-pptx,Pillow python3 ~/.claude/skills/pptx/scripts/thumbnail.py template.pptx [output_prefix]
 ```
 
 **Features**:
 - Creates: `thumbnails.jpg` (or `thumbnails-1.jpg`, `thumbnails-2.jpg`, etc. for large decks)
 - Default: 5 columns, max 30 slides per grid (5×6)
-- Custom prefix: `python scripts/thumbnail.py template.pptx my-grid`
+- Custom prefix: Add output prefix after the pptx file (e.g., `my-grid`)
   - Note: The output prefix should include the path if you want output in a specific directory (e.g., `workspace/my-grid`)
 - Adjust columns: `--cols 4` (range: 3-6, affects slides per grid)
 - Grid limits: 3 cols = 12 slides/grid, 4 cols = 20, 5 cols = 30, 6 cols = 42
@@ -431,10 +442,10 @@ python scripts/thumbnail.py template.pptx [output_prefix]
 **Examples**:
 ```bash
 # Basic usage
-python scripts/thumbnail.py presentation.pptx
+uv run --with python-pptx,Pillow python3 ~/.claude/skills/pptx/scripts/thumbnail.py presentation.pptx
 
 # Combine options: custom name, columns
-python scripts/thumbnail.py template.pptx analysis --cols 4
+uv run --with python-pptx,Pillow python3 ~/.claude/skills/pptx/scripts/thumbnail.py template.pptx analysis --cols 4
 ```
 
 ## Converting Slides to Images
@@ -472,13 +483,44 @@ pdftoppm -jpeg -r 150 -f 2 -l 5 template.pdf slide  # Converts only pages 2-5
 
 ## Dependencies
 
-Required dependencies (should already be installed):
+### Using uv and uvx for Python packages
 
-- **markitdown**: `pip install "markitdown[pptx]"` (for text extraction from presentations)
+This skill uses `uv` and `uvx` for Python package management instead of pip. This provides isolated environments and avoids conflicts with system Python.
+
+**Key patterns:**
+
+```bash
+# Run a tool with dependencies (uvx)
+uvx --with python-pptx markitdown file.pptx
+
+# Run a script with dependencies (uv run)
+uv run --with defusedxml python3 script.py
+
+# Multiple dependencies
+uv run --with defusedxml,lxml,python-pptx python3 script.py
+```
+
+**Common dependency combinations for this skill:**
+- Text extraction: `uvx --with python-pptx markitdown`
+- OOXML scripts (unpack/pack): `uv run --with defusedxml python3`
+- OOXML validation: `uv run --with defusedxml,lxml python3`
+- Template scripts (thumbnail, inventory, replace, rearrange): `uv run --with python-pptx,Pillow python3`
+
+### Required dependencies
+
+**Python packages** (managed via uv/uvx - no manual installation needed):
+- **markitdown** with python-pptx: For text extraction from presentations
+- **defusedxml**: For secure XML parsing in OOXML scripts
+- **lxml**: For XML validation (optional, for validate.py)
+- **python-pptx**: For template manipulation scripts
+- **Pillow**: For thumbnail generation
+
+**Node.js packages** (install globally):
 - **pptxgenjs**: `npm install -g pptxgenjs` (for creating presentations via html2pptx)
 - **playwright**: `npm install -g playwright` (for HTML rendering in html2pptx)
 - **react-icons**: `npm install -g react-icons react react-dom` (for icons)
 - **sharp**: `npm install -g sharp` (for SVG rasterization and image processing)
-- **LibreOffice**: `sudo apt-get install libreoffice` (for PDF conversion)
-- **Poppler**: `sudo apt-get install poppler-utils` (for pdftoppm to convert PDF to images)
-- **defusedxml**: `pip install defusedxml` (for secure XML parsing)
+
+**System packages**:
+- **LibreOffice**: `brew install libreoffice` or `sudo apt-get install libreoffice` (for PDF conversion)
+- **Poppler**: `brew install poppler` or `sudo apt-get install poppler-utils` (for pdftoppm to convert PDF to images)
