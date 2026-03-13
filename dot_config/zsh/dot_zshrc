@@ -102,9 +102,9 @@ source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zs
 # | TIRITH |
 # +--------+
 
-# AI-powered shell assistant
+# Terminal security (URL/ANSI injection guard)
 if command -v tirith &>/dev/null; then
-  eval "$(tirith init)"
+  eval "$(tirith init --shell zsh)"
 fi
 
 

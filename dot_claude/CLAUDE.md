@@ -408,3 +408,8 @@ Configuration managed via `~/.claude/settings.json` (templated from `settings.js
 |------|----------|
 | **Deny** | `Stop-Computer`, `Restart-Computer`, `shutdown`, `Format-Volume`, `Clear-Disk`, `diskpart`, `bcdedit` |
 | **Ask** | `Remove-Item`, `del`, `rd`, `rmdir`, `icacls`, `Set-Acl`, `Stop-Process`, `taskkill` |
+
+**MCP Servers (personal machines):**
+| Server | Tools | Notes |
+|--------|-------|-------|
+| `tirith` | `tirith_check_command`, `tirith_check_url`, `tirith_check_paste`, `tirith_scan_file`, `tirith_scan_directory`, `tirith_verify_mcp_config`, `tirith_fetch_cloaking` | Terminal security analysis. Installed via Homebrew on personal machines only. |
