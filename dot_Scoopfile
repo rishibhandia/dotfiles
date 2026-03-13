@@ -68,6 +68,7 @@ main/shfmt                        # Shell script formatter
 # AI/LLM Tools
 # =============================================================================
 main/ollama                       # Local LLM runtime
+tirith/tirith                     # Terminal security (requires: scoop bucket add tirith https://github.com/sheeki03/scoop-tirith)
 
 # =============================================================================
 # GUI Applications (extras bucket)

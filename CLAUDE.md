@@ -89,6 +89,12 @@ This repo follows XDG Base Directory spec:
 - `sheet2csv()` - Extract spreadsheet data from images using Gemini AI
 - `pdf2text()` - Extract text from PDFs using Gemini AI
 
+### Security Tools
+- **tirith** - Terminal security tool that guards against URL/ANSI injection attacks
+  - macOS: Installed via Homebrew (`brew install sheeki03/tap/tirith`)
+  - Windows: Installed via Scoop (`scoop bucket add tirith https://github.com/sheeki03/scoop-tirith && scoop install tirith`)
+  - Initialized in shell via `eval "$(tirith init)"` (zsh) or `Invoke-Expression (& tirith init powershell)` (PowerShell)
+
 ### Template Variables
 When editing `.tmpl` files, these variables are available:
 - `.chezmoi.hostname` - Machine hostname

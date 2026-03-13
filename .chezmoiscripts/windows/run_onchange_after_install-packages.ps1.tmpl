@@ -28,6 +28,25 @@ if (-not (Test-Path $ScoopfilePath)) {
 
 Write-Info "Installing packages from Scoopfile..."
 
+# Ensure required buckets are added
+$requiredBuckets = @{
+    "extras" = $null  # Official extras bucket
+    "nerd-fonts" = $null  # Nerd fonts bucket
+    "tirith" = "https://github.com/sheeki03/scoop-tirith"  # Tirith security tool
+}
+
+foreach ($bucket in $requiredBuckets.Keys) {
+    $existingBuckets = scoop bucket list 2>$null
+    if ($existingBuckets -notcontains $bucket) {
+        Write-Info "Adding Scoop bucket: $bucket"
+        if ($requiredBuckets[$bucket]) {
+            scoop bucket add $bucket $requiredBuckets[$bucket] 2>&1 | Out-Null
+        } else {
+            scoop bucket add $bucket 2>&1 | Out-Null
+        }
+    }
+}
+
 # Parse Scoopfile and install packages
 $packages = Get-Content $ScoopfilePath | ForEach-Object {
     # Remove comments and trim whitespace

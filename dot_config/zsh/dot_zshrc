@@ -98,4 +98,13 @@ eval "$(starship init zsh)"
 #zsh-syntax-highlighting
 source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
+# +--------+
+# | TIRITH |
+# +--------+
+
+# AI-powered shell assistant
+if command -v tirith &>/dev/null; then
+  eval "$(tirith init)"
+fi
+
 

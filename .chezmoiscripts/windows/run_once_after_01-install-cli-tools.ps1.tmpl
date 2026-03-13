@@ -70,4 +70,33 @@ if (Get-Command claude -ErrorAction SilentlyContinue) {
     }
 }
 
+# -----------------------------------------------------------------------------
+# Tirith (Terminal security - guards against URL/ANSI injection attacks)
+# https://github.com/sheeki03/tirith
+# Requires Scoop
+# -----------------------------------------------------------------------------
+if (Get-Command tirith -ErrorAction SilentlyContinue) {
+    Write-Success "Tirith already installed"
+} elseif (Get-Command scoop -ErrorAction SilentlyContinue) {
+    Write-Info "Installing Tirith via Scoop..."
+    try {
+        # Add tirith bucket if not present
+        $buckets = scoop bucket list 2>$null
+        if ($buckets -notcontains "tirith") {
+            scoop bucket add tirith https://github.com/sheeki03/scoop-tirith 2>&1 | Out-Null
+        }
+        scoop install tirith 2>&1 | Out-Null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Success "Tirith installed via Scoop"
+        } else {
+            Write-Warn "Tirith installation failed"
+        }
+    } catch {
+        Write-Warn "Tirith installation failed: $_"
+    }
+} else {
+    Write-Warn "Scoop not available. Install Tirith manually:"
+    Write-Warn "  scoop bucket add tirith https://github.com/sheeki03/scoop-tirith && scoop install tirith"
+}
+
 {{ end -}}
