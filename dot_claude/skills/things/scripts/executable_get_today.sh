@@ -1,16 +1,13 @@
 #!/bin/bash
-# Get today's tasks from Things 3
+# Get today's tasks from Things 3 via AppleScript
 # Usage: get_today.sh [--limit N]
 
-THINGS3_CLI="$HOME/.cargo/bin/things3"
-
-if [[ ! -x "$THINGS3_CLI" ]]; then
-    echo "Error: things3 CLI not found at $THINGS3_CLI"
-    echo "Install with: cargo install things3"
+if [[ "$(uname)" != "Darwin" ]]; then
+    echo "Error: Things 3 is macOS only"
     exit 1
 fi
 
-limit=""
+limit=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -25,8 +22,41 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [[ -n "$limit" ]]; then
-    "$THINGS3_CLI" today --limit "$limit"
-else
-    "$THINGS3_CLI" today
-fi
+osascript << APPLESCRIPT
+tell application "Things3"
+    set todayTodos to to dos of list "Today"
+    set output to ""
+    set taskCount to 0
+    set lim to $limit
+
+    repeat with t in todayTodos
+        if lim > 0 and taskCount >= lim then exit repeat
+
+        set taskName to name of t
+        set taskLine to "- [ ] " & taskName
+
+        try
+            set projName to name of project of t
+            set taskLine to taskLine & "  |  Project: " & projName
+        end try
+
+        set dueDate to due date of t
+        if dueDate is not missing value then
+            set taskLine to taskLine & "  |  Due: " & (short date string of dueDate)
+        end if
+
+        set taskTags to tag names of t
+        if taskTags is not {} and taskTags is not "" then
+            set taskLine to taskLine & "  |  Tags: " & taskTags
+        end if
+
+        set output to output & taskLine & linefeed
+        set taskCount to taskCount + 1
+    end repeat
+
+    if output is "" then
+        return "No tasks for today."
+    end if
+    return output
+end tell
+APPLESCRIPT

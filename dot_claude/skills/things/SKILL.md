@@ -7,9 +7,12 @@ description: Task management with Things 3 on macOS. Use when Claude needs to ad
 
 macOS-only skill for task management via Things 3.
 
-## Reading Tasks (CLI)
+## Reading Tasks (AppleScript)
 
-Uses `~/.cargo/bin/things3` CLI for read-only database access.
+Uses `osascript` to talk directly to Things 3 — no external dependencies required.
+
+Output format: `- [ ] Task Name  |  Project: X  |  Due: MM/DD/YYYY  |  Tags: tag1, tag2`
+Fields are omitted when not set.
 
 ### Get Today's Tasks
 
@@ -31,6 +34,8 @@ scripts/get_inbox.sh --limit 10
 scripts/get_projects.sh
 ```
 
+Lists all open projects with their area (if assigned).
+
 ### List Areas
 
 ```bash
@@ -42,7 +47,15 @@ scripts/get_areas.sh
 ```bash
 scripts/search.sh "meeting"
 scripts/search.sh "deadline" --limit 5
+scripts/search.sh "old task" --all          # include completed & cancelled
+scripts/search.sh "report" --all --limit 10
 ```
+
+Parameters:
+- `--limit N` - Return at most N results
+- `--all` - Include completed and cancelled tasks (default: open only)
+
+Completed/cancelled tasks are marked with `[completed]` or `[cancelled]` prefix.
 
 ## Writing Tasks (URL Scheme)
 
@@ -92,5 +105,5 @@ scripts/show.sh logbook
 ## Limitations
 
 - macOS only (requires Things 3 app)
-- Reading requires `things3` CLI installed (`cargo install things3`)
-- Writing doesn't wait for Things to process - tasks appear shortly after
+- Things 3 will auto-launch if not running when read scripts are called
+- Writing via URL scheme doesn't wait for Things to process — tasks appear shortly after
