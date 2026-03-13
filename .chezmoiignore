@@ -31,6 +31,15 @@ dot_claude/skills/fantastical
 {{ end }}
 
 # =============================================================================
+# Windows-only shell configs — skip on macOS/Linux to avoid clobbering
+# existing .bashrc/.bash_profile on those platforms
+# =============================================================================
+{{ if ne .chezmoi.os "windows" }}
+dot_bashrc
+dot_bash_profile
+{{ end }}
+
+# =============================================================================
 # Project-specific CLAUDE.md stays in repo only, not applied to ~/
 # (Global rules are in ~/.claude/CLAUDE.md, managed via dot_claude/CLAUDE.md)
 # =============================================================================

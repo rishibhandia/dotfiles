@@ -1,0 +1,86 @@
+{{- if eq .chezmoi.os "windows" -}}
+# -*-mode:bash-*- vim:ft=bash
+#
+# ~/.bashrc - Git Bash configuration (Windows)
+# Managed by chezmoi
+
+# +------------------+
+# | XDG Base Dirs    |
+# +------------------+
+
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$HOME/.cache"
+
+# +------------------+
+# | PATH             |
+# +------------------+
+
+# Portable binaries (chezmoi-managed, always present)
+export PATH="$HOME/.local/bin:$PATH"
+
+# Scoop shims (present when Scoop is installed)
+export PATH="$HOME/scoop/shims:$PATH"
+
+# +------------------+
+# | ALIASES          |
+# +------------------+
+
+if [ -f "$XDG_CONFIG_HOME/zsh/aliases/aliases" ]; then
+  source "$XDG_CONFIG_HOME/zsh/aliases/aliases"
+fi
+
+# +------------------+
+# | SHELL TOOLS      |
+# +------------------+
+
+# Starship prompt
+if command -v starship &>/dev/null; then
+  export STARSHIP_CONFIG="$XDG_CONFIG_HOME/starship/config.toml"
+  eval "$(starship init bash)"
+fi
+
+# Zoxide (better cd)
+if command -v zoxide &>/dev/null; then
+  eval "$(zoxide init bash)"
+fi
+
+# FZF fuzzy finder
+if command -v fzf &>/dev/null; then
+  eval "$(fzf --bash 2>/dev/null)" || true
+fi
+
+# +------------------+
+# | SECURITY         |
+# +------------------+
+
+# Tirith (terminal security - URL/ANSI injection guard)
+if command -v tirith &>/dev/null; then
+  eval "$(tirith init --shell bash)" 2>/dev/null || true
+fi
+
+# +------------------+
+# | DOTS COMMAND     |
+# +------------------+
+
+# Chezmoi wrapper (mirrors the zsh dots() function in scripts.zsh)
+dots() {
+  local cmd="${1:-help}"
+  shift 2>/dev/null || true
+  local src="$HOME/.local/share/chezmoi"
+
+  case "$cmd" in
+    apply)   chezmoi apply "$@" ;;
+    diff)    chezmoi diff "$@" ;;
+    status)  chezmoi status "$@" ;;
+    update)  chezmoi update "$@" ;;
+    edit)    chezmoi edit "$@" ;;
+    add)     chezmoi add "$@" ;;
+    cd)      cd "$src" ;;
+    git)     git -C "$src" "$@" ;;
+    test)    bash "$src/scripts/test.sh" ;;
+    doctor)  chezmoi doctor ;;
+    *)       echo "Usage: dots <apply|diff|status|update|edit|add|cd|git|test|doctor>" ;;
+  esac
+}
+{{- end }}

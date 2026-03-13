@@ -223,10 +223,6 @@ bash scripts/test.sh   # Direct execution
 
 CI runs on GitHub Actions for macOS, Ubuntu, and Windows.
 
-## TODO
-
-- [ ] **Windows PC deployment**: Add `dot_bashrc` and `dot_bash_profile` templates so Git Bash on Windows gets a proper shell environment (aliases, PATH, `dots` function, etc.) — currently Claude Code and other Git Bash sessions start with no config sourced and `dots` is unavailable.
-
 ## License
 
 MIT

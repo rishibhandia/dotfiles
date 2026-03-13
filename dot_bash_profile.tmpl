@@ -1,0 +1,12 @@
+{{- if eq .chezmoi.os "windows" -}}
+# ~/.bash_profile - Git Bash login shell (Windows)
+# Managed by chezmoi
+#
+# Git Bash sources .bash_profile for login shells (new terminal windows).
+# Source .bashrc for a consistent environment in both login and
+# non-login shells.
+
+if [ -f "$HOME/.bashrc" ]; then
+  source "$HOME/.bashrc"
+fi
+{{- end }}
