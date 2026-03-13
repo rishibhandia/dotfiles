@@ -2,7 +2,7 @@
 # Install packages from Scoopfile
 # This runs whenever the Scoopfile changes
 # Skipped in portable mode (when Scoop is unavailable)
-# Scoopfile hash: {{ include "dot_Scoopfile" | sha256sum }}
+# Scoopfile hash: {{ include "dot_Scoopfile.tmpl" | sha256sum }}-work={{ .work }}
 
 $ErrorActionPreference = "Continue"
 
@@ -19,7 +19,7 @@ if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
     exit 0
 }
 
-$ScoopfilePath = "{{ .chezmoi.sourceDir }}\dot_Scoopfile"
+$ScoopfilePath = "$env:USERPROFILE\.Scoopfile"
 
 if (-not (Test-Path $ScoopfilePath)) {
     Write-Warn "Scoopfile not found at $ScoopfilePath"

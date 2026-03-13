@@ -65,22 +65,29 @@ main/shellcheck                   # Shell script linter
 main/shfmt                        # Shell script formatter
 
 # =============================================================================
-# AI/LLM Tools
+# Security Tools
 # =============================================================================
-main/ollama                       # Local LLM runtime
-tirith/tirith                     # Terminal security (requires: scoop bucket add tirith https://github.com/sheeki03/scoop-tirith)
+tirith/tirith                     # Terminal security (URL/ANSI injection guard)
 
 # =============================================================================
-# GUI Applications (extras bucket)
+# GUI Applications - Productivity (all machines)
 # =============================================================================
+extras/sumatrapdf                 # PDF reader
+
+# =============================================================================
+# GUI Applications - Personal only
+# Not installed on work machines (personal apps, network security concerns)
+# =============================================================================
+{{- if not .work }}
+main/ollama                       # Local LLM runtime
 extras/1password                  # Password manager
 extras/1password-cli              # 1Password CLI
 extras/github                     # GitHub Desktop
 extras/logseq                     # Note taking / PKM
 extras/mpv                        # Video player
-extras/sumatrapdf                 # PDF reader (skim alternative)
-extras/tailscale                  # VPN/mesh network
+extras/tailscale                  # VPN/mesh network (security risk on corp networks)
 extras/signal                     # Secure messaging
+{{- end }}
 
 # =============================================================================
 # Fonts (nerd-fonts bucket)
