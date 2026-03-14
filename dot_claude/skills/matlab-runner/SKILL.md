@@ -5,13 +5,24 @@ description: Run MATLAB scripts headlessly, capture stdout/stderr, and read expo
 
 # MATLAB Runner
 
-Run MATLAB scripts headlessly via `matlab -batch`, capture all output, and read any exported figures to inspect results.
+Run MATLAB scripts headlessly via `matlab -batch`, capture all output, and read any exported figures to inspect results. Works on macOS, Linux, and Windows (Git Bash).
 
 ## MATLAB Executable
 
-```
-/c/Program Files/MATLAB/R2025a/bin/matlab.exe
-```
+The runner script auto-detects MATLAB in this order:
+
+1. `matlab` in PATH (works on all platforms if configured)
+2. **macOS**: `/Applications/MATLAB_R20XXx.app/bin/matlab`
+3. **Linux**: `/usr/local/MATLAB/R20XXx/bin/matlab` or `/opt/MATLAB/R20XXx/bin/matlab`
+4. **Windows (Git Bash)**: `/c/Program Files/MATLAB/R20XXx/bin/matlab.exe`
+
+Common installed paths by platform:
+
+| Platform | Default location |
+|----------|-----------------|
+| macOS | `/Applications/MATLAB_R2025a.app/bin/matlab` |
+| Linux | `/usr/local/MATLAB/R2025a/bin/matlab` |
+| Windows | `C:\Program Files\MATLAB\R2025a\bin\matlab.exe` |
 
 ## Running a Script
 
@@ -24,6 +35,10 @@ bash ~/.claude/skills/matlab-runner/scripts/run_matlab.sh <script_path> [working
 Or invoke MATLAB directly (preferred for full control):
 
 ```bash
+# macOS / Linux
+/Applications/MATLAB_R2025a.app/bin/matlab -batch "cd('/path/to/dir'); scriptName"
+
+# Windows (Git Bash)
 "/c/Program Files/MATLAB/R2025a/bin/matlab.exe" -batch "cd('C:\path\to\dir'); scriptName"
 ```
 
@@ -60,9 +75,10 @@ Then use the Read tool on each PNG path to view the figure.
 | `Unable to read file` | Wrong `pwd` | Always `cd()` to script directory in the `-batch` command |
 | Exit code 1, no message | Script called `error()` | Check stderr for the error message and line number |
 | Figure not exported | Script errored before `exportgraphics` | Fix the upstream error first |
+| `matlab: command not found` | MATLAB not in PATH | Use the full path or run via the bundled script which auto-detects |
 
 ## Notes
 
 - `-batch` mode has no display — `figure()` calls are valid but windows won't appear; only `exportgraphics`/`saveas` outputs are accessible
-- Large scans (25 angles × averaging) may take 30–120 seconds; the Bash tool timeout defaults to 120s — increase with `timeout` parameter if needed
-- The working directory for this project is typically `C:\Users\katsumilab\Documents\data\NbOI2_Exfoliated_Sample\<subfolder>`
+- Long-running scripts may exceed the Bash tool's default 120s timeout — increase with the `timeout` parameter if needed
+- On Linux, MATLAB may require a license server reachable from the machine
