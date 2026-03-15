@@ -68,6 +68,16 @@ if (!apiKey) {
 4. Rotate any exposed secrets
 5. Review entire codebase for similar issues
 
+### Data Visualization
+
+**Never introduce artificial features into plots.** Always show raw measured data as faithfully as possible:
+- **No mirroring** — do not reflect or duplicate data points (e.g. +180° copies on polar plots)
+- **No artificial symmetry** — do not symmetrize unless the user explicitly requests it
+- **No gap-filling** — only plot data that was actually measured
+- Close loop-plots using the real first/last data point, not a synthetic copy
+
+If a standard technique would add non-measured points, flag it and ask first.
+
 ### Coding Style
 
 **Immutability (CRITICAL)** - ALWAYS create new objects, NEVER mutate:
