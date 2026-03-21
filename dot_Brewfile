@@ -65,7 +65,6 @@ brew "shfmt"                  # Shell script formatter
 # =============================================================================
 # AI/LLM Tools
 # =============================================================================
-brew "llm"                    # CLI for LLMs
 tap "sheeki03/tap"
 brew "tirith"                 # Terminal security tool (URL/ANSI injection guard)
 
