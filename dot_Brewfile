@@ -117,4 +117,3 @@ cask "font-meslo-lg-nerd-font"    # Meslo font for terminal
 # =============================================================================
 brew "mas"                    # Mac App Store CLI
 # mas "Xcode", id: 497799835
-brew "pdf2svg"
