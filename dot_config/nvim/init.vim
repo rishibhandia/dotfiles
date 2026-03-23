@@ -45,14 +45,30 @@ set mouse=a
 set ignorecase
 set smartcase
 
-" list of plugins start here, ($XDG_CONFIG_HOME/nvim/plugged)
-" is the plugin directory
+" Auto-install vim-plug if missing
+let s:plug_path = expand($XDG_CONFIG_HOME) . '/nvim/autoload/plug.vim'
+if !filereadable(s:plug_path)
+  silent execute '!curl -fLo ' . s:plug_path . ' --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
 
-call plug#begin(expand($XDG_CONFIG_HOME). "/nvim/plugged")
+" Plugins ($XDG_CONFIG_HOME/nvim/plugged)
+call plug#begin(expand($XDG_CONFIG_HOME) . '/nvim/plugged')
 
 Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope.nvim'
+Plug 'sudormrfbin/cheatsheet.nvim'
 
 call plug#end()
 
-" declare your color scheme
-colorscheme catppuccin-macchiato " catppuccin-latte, catppuccin-frappe, catppuccin-macchiato, catppuccin-mocha
+" Color scheme
+colorscheme catppuccin-macchiato
+
+" Cheatsheet - <leader>? to open
+nnoremap <leader>? <cmd>Cheatsheet<CR>
+
+" Telescope
+nnoremap <leader>ff <cmd>Telescope find_files<CR>
+nnoremap <leader>fg <cmd>Telescope live_grep<CR>

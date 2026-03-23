@@ -49,4 +49,30 @@ else
     fi
 fi
 
+
+# -----------------------------------------------------------------------------
+# Neovim plugins (vim-plug + PlugInstall)
+# -----------------------------------------------------------------------------
+if command -v nvim &>/dev/null; then
+    PLUG_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/nvim/autoload/plug.vim"
+    if [ ! -f "$PLUG_PATH" ]; then
+        info "Installing vim-plug..."
+        mkdir -p "$(dirname "$PLUG_PATH")"
+        if curl -fLo "$PLUG_PATH" --create-dirs \
+            https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim; then
+            success "vim-plug installed"
+        else
+            warn "vim-plug installation failed"
+        fi
+    fi
+    info "Installing Neovim plugins..."
+    if nvim --headless +PlugInstall +qall 2>/dev/null; then
+        success "Neovim plugins installed"
+    else
+        warn "Neovim plugin installation failed (non-fatal)"
+    fi
+else
+    warn "nvim not found, skipping plugin installation"
+fi
+
 {{ end -}}
