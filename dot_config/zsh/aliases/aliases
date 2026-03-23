@@ -516,6 +516,12 @@ if ! command -v sha256sum > /dev/null; then
     fi
 fi
 
+# Prevents system sleep while Claude Code is running (AC power only).
+# caffeinate -s is a no-op on battery — no conditional needed.
+if [[ "$OSTYPE" == darwin* ]] && command -v caffeinate > /dev/null; then
+    alias claude='caffeinate -s claude'
+fi
+
 # Displays detailed weather and forecast.
 if command -v curl > /dev/null; then
     alias forecast='curl --silent --compressed --max-time 10 --url "https://wttr.in?F"'
