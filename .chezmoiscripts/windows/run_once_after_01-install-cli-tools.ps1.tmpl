@@ -99,4 +99,32 @@ if (Get-Command tirith -ErrorAction SilentlyContinue) {
     Write-Warn "  scoop bucket add tirith https://github.com/sheeki03/scoop-tirith && scoop install tirith"
 }
 
+
+# -----------------------------------------------------------------------------
+# Neovim plugins (vim-plug + PlugInstall)
+# -----------------------------------------------------------------------------
+if (Get-Command nvim -ErrorAction SilentlyContinue) {
+    $plugPath = "$env:LOCALAPPDATA\nvim\autoload\plug.vim"
+    if (-not (Test-Path $plugPath)) {
+        Write-Info "Installing vim-plug..."
+        New-Item -ItemType Directory -Force -Path (Split-Path $plugPath) | Out-Null
+        try {
+            Invoke-WebRequest -Uri "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" `
+                -OutFile $plugPath -UseBasicParsing
+            Write-Success "vim-plug installed"
+        } catch {
+            Write-Warn "vim-plug installation failed: $_"
+        }
+    }
+    Write-Info "Installing Neovim plugins..."
+    try {
+        nvim --headless +PlugInstall +qall 2>$null
+        Write-Success "Neovim plugins installed"
+    } catch {
+        Write-Warn "Neovim plugin installation failed (non-fatal)"
+    }
+} else {
+    Write-Warn "nvim not found, skipping plugin installation"
+}
+
 {{ end -}}
