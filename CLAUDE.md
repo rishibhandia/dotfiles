@@ -89,11 +89,23 @@ This repo follows XDG Base Directory spec:
 - `sheet2csv()` - Extract spreadsheet data from images using Gemini AI
 - `pdf2text()` - Extract text from PDFs using Gemini AI
 
+### Neovim Configuration (`dot_config/nvim/init.vim`)
+- **Plugin manager**: vim-plug — auto-installs on first launch if missing
+- **Plugins**: catppuccin theme, telescope.nvim (fuzzy finder), cheatsheet.nvim
+- **Key bindings**:
+  - `<leader>?` — open cheatsheet browser (via cheatsheet.nvim + telescope)
+  - `<leader>ff` — fuzzy file finder (telescope)
+  - `<leader>fg` — live grep (telescope)
+- **New machine setup**: `run_once_after_01` scripts run `nvim --headless +PlugInstall` on both macOS/Linux and Windows
+- **Windows paths**: Uses `$LOCALAPPDATA/nvim` instead of `$XDG_CONFIG_HOME/nvim`
+- Add custom cheatsheets at `~/.config/nvim/cheatsheet.txt` (format: `## Section` + `command | description`)
+
 ### Security Tools
 - **tirith** - Terminal security tool that guards against URL/ANSI injection attacks
-  - macOS: Installed via Homebrew (`brew install sheeki03/tap/tirith`)
+  - macOS: Installed via Homebrew tap (`brew install sheeki03/tap/tirith`) — use fully qualified name in Brewfile
   - Windows: Installed via Scoop (`scoop bucket add tirith https://github.com/sheeki03/scoop-tirith && scoop install tirith`)
   - Initialized in shell via `eval "$(tirith init)"` (zsh) or `Invoke-Expression (& tirith init powershell)` (PowerShell)
+  - **Claude Code MCP**: Registered as MCP server on personal machines (`settings.json.tmpl`) — provides `tirith_check_command`, `tirith_check_url`, `tirith_scan_file`, etc.
 
 ### Template Variables
 When editing `.tmpl` files, these variables are available:
@@ -109,8 +121,13 @@ When editing `.tmpl` files, these variables are available:
 ### Chezmoi Scripts (`.chezmoiscripts/`)
 Scripts that run automatically during `chezmoi apply`:
 - `run_once_before_install-homebrew.sh.tmpl` - Installs Homebrew (first run only)
-- `run_onchange_after_install-packages.sh.tmpl` - Installs Brewfile packages (when Brewfile changes)
+- `run_onchange_after_install-packages.sh.tmpl` - Installs Brewfile/Scoopfile packages (when package files change)
+- `run_once_after_01-install-cli-tools.sh.tmpl` - Installs Claude Code, Shell Sage, nvim plugins (macOS/Linux)
+- `windows/run_once_after_01-install-cli-tools.ps1.tmpl` - Installs Claude Code, Tirith, nvim plugins (Windows)
 - `darwin/run_once_after_configure-macos.sh` - Configures macOS preferences
+
+### Windows Portable Mode (`.chezmoiexternal.toml.tmpl`)
+Fallback for Windows machines where Scoop is unavailable (`.portable = true`). Downloads pre-built binaries directly from GitHub releases to `~/.local/bin`, which is added to PATH in the PowerShell profile. Covers: rg, fd, bat, fzf, zoxide, starship, lsd, jq, yq, gh, duf, fastfetch, uv, uvx, ruff. Note: nvim, navi, and tirith are NOT included in portable mode.
 
 ### Package Management
 - `dot_Brewfile` → `~/.Brewfile` - Homebrew packages for macOS/Linux
