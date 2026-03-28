@@ -84,6 +84,13 @@
     portable = {{ $portable }}
     osid = {{ $osID | quote }}
 
+{{ if eq .chezmoi.os "windows" }}
+[cd]
+    command = "pwsh"
+{{ end }}
+[interpreters.py]
+    command = "uvx"
+    args = ["python"]
 [github]
     refreshPeriod = "12h"
     
