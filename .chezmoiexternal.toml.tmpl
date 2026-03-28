@@ -96,3 +96,13 @@
     path = "ruff.exe"
 
 {{- end }}
+
+{{- if eq .chezmoi.os "windows" }}
+# Hack Nerd Font - per-user installation (no Scoop required)
+# Extracted directly to the Windows per-user fonts directory
+# Removed automatically by chezmoi purge/uninstall
+["AppData/Local/Microsoft/Windows/Fonts"]
+    type = "archive"
+    url = {{ gitHubLatestReleaseAssetURL "ryanoasis/nerd-fonts" "Hack.zip" | quote }}
+    include = ["*.ttf"]
+{{- end }}

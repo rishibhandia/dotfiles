@@ -1,0 +1,31 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Register Hack Nerd Font in per-user font registry
+# Hash: {{ include "dot_chezmoiexternal.toml.tmpl" | sha256sum }}
+
+$fontDir = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
+$regPath = "HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"
+
+if (-not (Test-Path $fontDir)) {
+    Write-Host "[INFO] Font directory not found, skipping registration"
+    exit 0
+}
+
+$fonts = Get-ChildItem "$fontDir\HackNerdFont*.ttf" -ErrorAction SilentlyContinue
+if (-not $fonts) {
+    Write-Host "[INFO] No Hack Nerd Font files found, skipping registration"
+    exit 0
+}
+
+# Ensure registry path exists
+if (-not (Test-Path $regPath)) {
+    New-Item -Path $regPath -Force | Out-Null
+}
+
+foreach ($font in $fonts) {
+    $regName = "$($font.BaseName) (TrueType)"
+    Set-ItemProperty -Path $regPath -Name $regName -Value $font.FullName
+    Write-Host "[OK] Registered $($font.Name)" -ForegroundColor Green
+}
+
+Write-Host "[OK] Hack Nerd Font registered ($($fonts.Count) files)" -ForegroundColor Green
+{{ end -}}
