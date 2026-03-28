@@ -59,6 +59,7 @@ Commands:
   data           Show template data (name, email, OS, etc.)
   re-init        Re-run chezmoi init (regenerate config)
   test           Run dotfiles setup tests
+  uninstall      Remove all managed files (deregisters fonts, then chezmoi purge)
   help           Show this help message
 
 Examples:
@@ -129,6 +130,22 @@ Examples:
                 Write-Host "No test script found at $testScript" -ForegroundColor Yellow
             }
         }
+        { $_ -in "uninstall", "purge" } {
+            # Deregister chezmoi-managed fonts before purging
+            $fontDir = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
+            $regPath = "HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"
+            if (Test-Path $regPath) {
+                $fonts = Get-ChildItem "$fontDir\HackNerdFont*.ttf" -ErrorAction SilentlyContinue
+                foreach ($font in $fonts) {
+                    $regName = "$($font.BaseName) (TrueType)"
+                    Remove-ItemProperty -Path $regPath -Name $regName -ErrorAction SilentlyContinue
+                }
+                if ($fonts) {
+                    Write-Host "[OK] Deregistered $($fonts.Count) Hack Nerd Font entries" -ForegroundColor Green
+                }
+            }
+            & chezmoi purge @Args
+        }
         { $_ -in "help", "--help", "-h" } {
             dots  # Call without args to show help
         }
@@ -155,8 +172,9 @@ Register-ArgumentCompleter -CommandName dots -ScriptBlock {
         @{ Name = 'doctor';   Description = 'Check chezmoi configuration' }
         @{ Name = 'data';     Description = 'Show template data' }
         @{ Name = 're-init';  Description = 'Re-run chezmoi init' }
-        @{ Name = 'test';     Description = 'Run setup tests' }
-        @{ Name = 'help';     Description = 'Show help message' }
+        @{ Name = 'test';      Description = 'Run setup tests' }
+        @{ Name = 'uninstall'; Description = 'Deregister fonts and chezmoi purge' }
+        @{ Name = 'help';      Description = 'Show help message' }
     )
 
     $commands | Where-Object { $_.Name -like "$wordToComplete*" } | ForEach-Object {
