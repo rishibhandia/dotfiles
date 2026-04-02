@@ -196,3 +196,19 @@ function ve {
     if (Get-Command uv -ErrorAction SilentlyContinue) { uv venv }
     else { python -m venv .venv }
 }
+
+# =============================================================================
+# psmux auto-launch (terminal multiplexer)
+# =============================================================================
+# Attach to existing session or create a new one on terminal open.
+# Skip if: already inside psmux/tmux, non-interactive, or running in VS Code terminal.
+if ((Get-Command psmux -ErrorAction SilentlyContinue) -and
+    -not $env:TMUX -and
+    [Environment]::UserInteractive -and
+    -not $env:TERM_PROGRAM -and
+    -not $env:VSCODE_PID) {
+    psmux attach -t main 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        psmux new-session -s main
+    }
+}

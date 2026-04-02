@@ -74,7 +74,8 @@ The main configuration template `.chezmoi.toml.tmpl` defines:
 | `dot_config/zsh/aliases/aliases` | `~/.config/zsh/aliases/aliases` | Shell aliases |
 | `dot_config/git/config.tmpl` | `~/.config/git/config` | Git user config (templated email) |
 | `dot_config/nvim/init.vim` | `~/.config/nvim/init.vim` | Neovim configuration |
-| `dot_config/tmux/tmux.conf.tmpl` | `~/.config/tmux/tmux.conf` | Tmux configuration |
+| `dot_config/tmux/tmux.conf.tmpl` | `~/.config/tmux/tmux.conf` | Tmux configuration (macOS/Linux) |
+| `dot_config/psmux/psmux.conf.tmpl` | `~/.config/psmux/psmux.conf` | psmux configuration (Windows) |
 
 ### XDG Directory Structure
 This repo follows XDG Base Directory spec:
@@ -100,6 +101,14 @@ This repo follows XDG Base Directory spec:
 - **Windows paths**: Uses `$LOCALAPPDATA/nvim` instead of `$XDG_CONFIG_HOME/nvim`
 - Add custom cheatsheets at `~/.config/nvim/cheatsheet.txt` (format: `## Section` + `command | description`)
 
+### Terminal Multiplexer (tmux / psmux)
+- **tmux** (macOS/Linux) and **psmux** (Windows) share configuration via `.chezmoitemplates/tmux-shared`
+- Shared settings (mouse, vi keys, status bar, keybindings) live in the template; platform-specific settings live in each config file
+- Edit `.chezmoitemplates/tmux-shared` to change settings for both platforms at once
+- tmux config adds Unix-specific terminal settings (`default-terminal`, `terminal-overrides`, `allow-passthrough`)
+- psmux auto-launches on PowerShell terminal open (attaches to `main` session or creates one); skipped inside existing sessions, VS Code, and non-interactive contexts
+- **psmux installation**: Via Scoop when available, otherwise portable binary from GitHub releases to `~/.local/bin/psmux/` (installed by `run_once_after_01-install-cli-tools.ps1.tmpl`)
+
 ### Security Tools
 - **tirith** - Terminal security tool that guards against URL/ANSI injection attacks
   - macOS: Installed via Homebrew tap (`brew install sheeki03/tap/tirith`) — use fully qualified name in Brewfile
@@ -123,7 +132,7 @@ Scripts that run automatically during `chezmoi apply`:
 - `run_once_before_install-homebrew.sh.tmpl` - Installs Homebrew (first run only)
 - `run_onchange_after_install-packages.sh.tmpl` - Installs Brewfile/Scoopfile packages (when package files change)
 - `run_once_after_01-install-cli-tools.sh.tmpl` - Installs Claude Code, Shell Sage, nvim plugins (macOS/Linux)
-- `windows/run_once_after_01-install-cli-tools.ps1.tmpl` - Installs Claude Code, Tirith, nvim plugins (Windows)
+- `windows/run_once_after_01-install-cli-tools.ps1.tmpl` - Installs Claude Code, Tirith, psmux, nvim plugins (Windows)
 - `darwin/run_once_after_configure-macos.sh` - Configures macOS preferences
 
 ### Windows Portable Mode (`.chezmoiexternal.toml.tmpl`)
