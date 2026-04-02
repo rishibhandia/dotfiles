@@ -127,4 +127,67 @@ if (Get-Command nvim -ErrorAction SilentlyContinue) {
     Write-Warn "nvim not found, skipping plugin installation"
 }
 
+# -----------------------------------------------------------------------------
+# psmux (Terminal multiplexer - tmux alternative for Windows Terminal)
+# https://github.com/marlocarlo/psmux
+# Portable: direct binary from GitHub releases (SHA256 logged for audit)
+# Non-portable: via Scoop manifest URL
+# -----------------------------------------------------------------------------
+if (Get-Command psmux -ErrorAction SilentlyContinue) {
+    Write-Success "psmux already installed"
+} else {
+{{- if .portable }}
+    Write-Info "Installing psmux (portable binary from GitHub)..."
+    try {
+        $arch = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'arm64' }
+                elseif ([System.Environment]::Is64BitOperatingSystem) { 'x64' }
+                else { 'x86' }
+
+        $release = Invoke-RestMethod "https://api.github.com/repos/marlocarlo/psmux/releases/latest" -UseBasicParsing
+        $version = $release.tag_name
+        $zipName = "psmux-$version-windows-$arch.zip"
+        $downloadUrl = "https://github.com/marlocarlo/psmux/releases/download/$version/$zipName"
+
+        $tmpZip = Join-Path $env:TEMP $zipName
+        Write-Info "Downloading $downloadUrl..."
+        Invoke-WebRequest -Uri $downloadUrl -OutFile $tmpZip -UseBasicParsing
+
+        $hash = (Get-FileHash $tmpZip -Algorithm SHA256).Hash
+        Write-Info "psmux $version SHA256: $hash"
+
+        $installDir = "$env:USERPROFILE\.local\bin\psmux"
+        New-Item -ItemType Directory -Force -Path $installDir | Out-Null
+        Expand-Archive -Path $tmpZip -DestinationPath $installDir -Force
+        Remove-Item $tmpZip -Force
+
+        $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+        if ($userPath -notlike "*$installDir*") {
+            [Environment]::SetEnvironmentVariable("PATH", "$userPath;$installDir", "User")
+            $env:PATH = "$env:PATH;$installDir"
+        }
+
+        Write-Success "psmux $version installed to $installDir"
+    } catch {
+        Write-Warn "psmux installation failed: $_"
+    }
+{{- else }}
+    if (Get-Command scoop -ErrorAction SilentlyContinue) {
+        Write-Info "Installing psmux via Scoop..."
+        try {
+            scoop install https://raw.githubusercontent.com/marlocarlo/psmux/master/scoop/psmux.json 2>&1 | Out-Null
+            if ($LASTEXITCODE -eq 0) {
+                Write-Success "psmux installed via Scoop"
+            } else {
+                Write-Warn "psmux Scoop installation failed"
+            }
+        } catch {
+            Write-Warn "psmux installation failed: $_"
+        }
+    } else {
+        Write-Warn "Scoop not available. Install psmux manually:"
+        Write-Warn "  scoop install https://raw.githubusercontent.com/marlocarlo/psmux/master/scoop/psmux.json"
+    }
+{{- end }}
+}
+
 {{ end -}}
