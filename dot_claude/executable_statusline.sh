@@ -1,85 +1,59 @@
 #!/bin/bash
-# Claude Code statusline script
-# Shows: user@host dir [git_branch status_dots] [context_pct%]
-# From: https://github.com/kulesh/dotfiles
+# Claude Code statusline
+# Format: user@host dir [git_branch ●●●] [ctx:N%] [Model] [rl:N%]
 
-# Read stdin JSON input
 input=$(cat)
+cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd')
 
-# Extract information from JSON
-cwd=$(echo "$input" | jq -r '.workspace.current_dir')
-
-# Calculate context usage percentage
+# --- Context usage (color-coded) ---
 context_info=""
-usage=$(echo "$input" | jq '.context_window.current_usage')
-if [ "$usage" != "null" ]; then
-  # Get current context usage (input + cache tokens)
-  current=$(echo "$usage" | jq '.input_tokens + .cache_creation_input_tokens + .cache_read_input_tokens')
-  size=$(echo "$input" | jq '.context_window.context_window_size')
-
-  if [ "$current" != "null" ] && [ "$size" != "null" ]; then
-    pct=$((current * 100 / size))
-
-    # Color code based on usage: green (<50%), yellow (50-80%), red (>80%)
-    if [ "$pct" -lt 50 ]; then
-      color=$(printf '\033[32m')  # Green
-    elif [ "$pct" -lt 80 ]; then
-      color=$(printf '\033[33m')  # Yellow
-    else
-      color=$(printf '\033[31m')  # Red
-    fi
-
-    context_info=$(printf " %s[%d%%]" "$color" "$pct")
+current=$(echo "$input" | jq '(.context_window.current_usage.input_tokens // 0) + (.context_window.current_usage.cache_creation_input_tokens // 0) + (.context_window.current_usage.cache_read_input_tokens // 0)')
+size=$(echo "$input" | jq '.context_window.context_window_size // 0')
+if [ "$size" != "null" ] && [ "$size" -gt 0 ] 2>/dev/null; then
+  pct=$((current * 100 / size))
+  if   [ "$pct" -lt 50 ]; then color=$(printf '\033[32m')   # green
+  elif [ "$pct" -lt 80 ]; then color=$(printf '\033[33m')   # yellow
+  else                          color=$(printf '\033[31m')   # red
   fi
+  context_info=$(printf " %s[ctx:%d%%]" "$color" "$pct")
 fi
 
-# Get username and hostname
+# --- Model ---
+model_info=""
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // ""')
+if [ -n "$model" ] && [ "$model" != "null" ]; then
+  model_info=$(printf " \033[36m[%s]" "$model")
+fi
+
+# --- 5-hour rate limit (Max/Pro) ---
+rl_info=""
+rl_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // ""')
+if [ -n "$rl_pct" ] && [ "$rl_pct" != "null" ]; then
+  rl_int=$(printf "%.0f" "$rl_pct")
+  if   [ "$rl_int" -lt 50 ]; then rl_color=$(printf '\033[32m')   # green
+  elif [ "$rl_int" -lt 80 ]; then rl_color=$(printf '\033[33m')   # yellow
+  else                             rl_color=$(printf '\033[31m')   # red
+  fi
+  rl_info=$(printf " %s[rl:%d%%]" "$rl_color" "$rl_int")
+fi
+
+# --- User / host / dir ---
 username=$(whoami)
 hostname=$(hostname -s)
-
-# Get directory name (basename of current path)
 dir_display=$(basename "$cwd")
 
-# Get git information if in a git repository
+# --- Git info ---
 git_info=""
 if git -C "$cwd" rev-parse --git-dir > /dev/null 2>&1; then
-  # Get branch name
   branch=$(git -C "$cwd" branch --show-current 2>/dev/null || echo "detached")
-
-  # Check for changes (skip optional locks to avoid interference)
   git_status=$(git -C "$cwd" --no-optional-locks status --porcelain 2>/dev/null)
-
-  # Determine status indicators with colors
-  staged=""
-  unstaged=""
-  untracked=""
-
-  if echo "$git_status" | grep -q '^[MADRCU]'; then
-    staged=$(printf '\033[32m●')  # Green dot for staged changes
-  fi
-
-  if echo "$git_status" | grep -q '^.[MD]'; then
-    unstaged=$(printf '\033[33m●')  # Yellow dot for unstaged changes
-  fi
-
-  if echo "$git_status" | grep -q '^??'; then
-    untracked=$(printf '\033[31m●')  # Red dot for untracked files
-  fi
-
-  # Build git info string with colors
-  git_info=$(printf " [%s%s%s%s%s%s]" \
-    "$(printf '\033[32m')" "$branch" \
-    "$staged" "$unstaged" "$untracked" \
-    "$(printf '\033[34m')")
+  staged="" unstaged="" untracked=""
+  echo "$git_status" | grep -q '^[MADRCU]' && staged=$(printf '\033[32m●')
+  echo "$git_status" | grep -q '^.[MD]'    && unstaged=$(printf '\033[33m●')
+  echo "$git_status" | grep -q '^??'       && untracked=$(printf '\033[31m●')
+  git_info=$(printf " [\033[32m%s%s%s%s\033[34m]" "$branch" "$staged" "$unstaged" "$untracked")
 fi
 
-# Build the status line
-# Format: white(username@hostname dir) git_info context_info
-printf '%s%s@%s %s%s%s%s' \
-  "$(printf '\033[37m')" \
-  "$username" \
-  "$hostname" \
-  "$dir_display" \
-  "$git_info" \
-  "$context_info" \
-  "$(printf '\033[0m')"
+printf '\033[37m%s@%s %s%s%s%s%s\033[0m' \
+  "$username" "$hostname" "$dir_display" \
+  "$git_info" "$context_info" "$model_info" "$rl_info"
