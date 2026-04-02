@@ -164,6 +164,29 @@ Skills are synced via chezmoi to `~/.claude/skills/`. Included skills:
 
 **Custom skills:** Create a folder with a `SKILL.md` file containing YAML frontmatter (`name`, `description`) and markdown instructions. Add to `dot_claude/skills/` in this repo.
 
+### Learned Skills
+Extracted patterns and project-specific knowledge live in `dot_claude/skills/learned/` and sync via chezmoi to `~/.claude/skills/learned/`. These are reference files (not invocable commands) created by the `/learn` skill during sessions.
+
+**Important:** After `/learn` creates a new file in `~/.claude/skills/learned/`, it must be explicitly added to chezmoi and committed to sync across machines:
+```bash
+dots add ~/.claude/skills/learned/<new-file>.md
+dots git add -A && dots git commit -m "feat: add learned skill <name>"
+dots git push
+```
+
+Current learned files:
+- **matlab.md** — MATLAB R2025a best practices (polar plots, color lightening, region highlighting, error bounds, varargin)
+- **matlab-style-guide.md** — MATLAB coding style conventions
+- **matlab-performance.md** — MATLAB performance patterns
+- **matlab-color-lightening.md** — `brighten()` usage, avoiding nonexistent `lighten()`
+- **matlab-datatable-row-vector-convention.md** — Row vector conventions in data tables
+- **matlab-disc-ft-nfft-sizing.md** — Discrete FT NFFT sizing
+- **matlab-plot-region-highlighting.md** — Region highlighting with `patch()`
+- **matlab-polar-in-tiledlayout.md** — Polar axes workaround inside `tiledlayout`
+- **matlab-shg-normalization.md** — SHG normalization patterns
+- **mockobject-attribute-getattr-trap.md** — Python mock `__getattr__` trap
+- **qt-test-window-close-blocking-shutdown.md** — Qt test window close blocking shutdown
+
 ## Testing
 
 Run tests to verify setup:
