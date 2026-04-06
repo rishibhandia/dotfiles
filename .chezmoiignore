@@ -13,8 +13,9 @@
 {{ if ne .chezmoi.os "windows" }}
 .chezmoiscripts/windows/install-scoop.ps1
 .chezmoiscripts/windows/install-packages.ps1
-.chezmoiscripts/windows/install-cargo-packages.ps1
 .chezmoiscripts/windows/01-install-cli-tools.ps1
+.chezmoiscripts/windows/configure-windows-terminal.ps1
+.chezmoiscripts/windows/install-fonts.ps1
 {{ end }}
 
 # WSL-only scripts
