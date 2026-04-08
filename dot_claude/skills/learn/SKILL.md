@@ -65,7 +65,29 @@ Create a skill file at `~/.claude/skills/learned/[pattern-name].md`:
 2. Identify the most valuable/reusable insight
 3. Draft the skill file
 4. Ask user to confirm before saving
-5. Save to `~/.claude/skills/learned/`
+5. Write to **both** locations (see Saving below)
+
+## Saving — Chezmoi-Managed Dotfiles
+
+Skills are managed by chezmoi so they sync across machines. **Always write to both locations:**
+
+1. **Chezmoi source** (canonical, synced to other machines):
+   `~/.local/share/chezmoi/dot_claude/skills/learned/[pattern-name].md`
+
+2. **Live location** (used by Claude Code immediately):
+   Applied automatically via `dots apply` after writing to chezmoi source.
+
+After writing to the chezmoi source, run:
+```bash
+dots apply   # sync chezmoi source → ~/.claude/
+```
+
+Then remind the user to commit:
+```bash
+dots git add -A && dots git commit -m "learn: [description]"
+```
+
+**Important:** The chezmoi source uses `dot_claude/` (not `.claude/`) because chezmoi encodes dot-prefixed directories with the `dot_` prefix.
 
 ## Notes
 
