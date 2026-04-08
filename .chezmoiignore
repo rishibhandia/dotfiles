@@ -32,6 +32,9 @@ dot_config/ghostty
 dot_config/tmux
 dot_zshenv
 dot_Brewfile.tmpl
+# uv/uvx binaries get locked on Windows; install via uv's own installer instead
+.local/bin/uv.exe
+.local/bin/uvx.exe
 {{ end }}
 
 # =============================================================================

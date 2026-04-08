@@ -77,18 +77,6 @@
     executable = true
     path = "fastfetch.exe"
 
-[".local/bin/uv.exe"]
-    type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "astral-sh/uv" "uv-x86_64-pc-windows-msvc.zip" | quote }}
-    executable = true
-    path = "uv.exe"
-
-[".local/bin/uvx.exe"]
-    type = "archive-file"
-    url = {{ gitHubLatestReleaseAssetURL "astral-sh/uv" "uv-x86_64-pc-windows-msvc.zip" | quote }}
-    executable = true
-    path = "uvx.exe"
-
 [".local/bin/ruff.exe"]
     type = "archive-file"
     url = {{ gitHubLatestReleaseAssetURL "astral-sh/ruff" "ruff-x86_64-pc-windows-msvc.zip" | quote }}
