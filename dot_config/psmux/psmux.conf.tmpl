@@ -1,4 +1,7 @@
 # psmux configuration (Windows tmux alternative)
 # Shared settings are synced with tmux via .chezmoitemplates/tmux-shared
 
+# Use PowerShell 7 so the user profile (starship, PSReadLine, etc.) loads
+set -g default-shell "C:/Program Files/PowerShell/7/pwsh.exe"
+
 {{ template "tmux-shared" . }}
