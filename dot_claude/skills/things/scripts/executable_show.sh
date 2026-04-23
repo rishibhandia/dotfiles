@@ -1,7 +1,12 @@
 #!/bin/bash
 # Open Things 3 to a specific view
 # Usage: show.sh <view>
-# Views: inbox, today, upcoming, anytime, someday, logbook
+# Views: inbox, today, tomorrow, upcoming, anytime, someday, logbook, deadlines, repeating, all-projects, logged-projects
+
+if [[ "$(uname)" != "Darwin" ]]; then
+    echo "Error: Things 3 is macOS only"
+    exit 1
+fi
 
 if [[ -z "$1" ]]; then
     echo "Usage: show.sh <view>"

@@ -4,8 +4,13 @@
 
 set -e
 
+if [[ "$(uname)" != "Darwin" ]]; then
+    echo "Error: Things 3 is macOS only"
+    exit 1
+fi
+
 urlencode() {
-    python3 -c "import urllib.parse; print(urllib.parse.quote('''$1''', safe=''))"
+    printf '%s' "$1" | python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read(), safe=''))"
 }
 
 if [[ -z "$1" ]]; then
