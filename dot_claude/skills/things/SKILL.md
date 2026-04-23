@@ -1,48 +1,75 @@
 ---
 name: things
-description: Task management with Things 3 on macOS. Use when Claude needs to add todos, create projects, check today's tasks, search tasks, or manage task lists. Triggers on "add to things", "my todos", "what's on my list", "create task", "add project".
+description: Task management with Things 3 on macOS. Create todos with checklists, manage projects, check today's tasks, search, and navigate views. Triggers on "add to things", "my todos", "what's on my list", "create task", "add project".
 ---
 
 # Things 3 Task Management
 
-macOS-only skill for task management via Things 3.
+macOS-only skill for managing tasks in Things 3. Reading uses AppleScript; writing uses the Things URL scheme.
 
-## Reading Tasks (AppleScript)
+## Creating Tasks
 
-Uses `osascript` to talk directly to Things 3 — no external dependencies required.
+```bash
+scripts/add_todo.sh "Buy groceries"
+scripts/add_todo.sh "Review PR" --deadline tomorrow
+scripts/add_todo.sh "Call John" --when today --list "Work"
+scripts/add_todo.sh "Big task" --notes "Details here" --tags "urgent,work"
+scripts/add_todo.sh "Sprint task" --list "App Redesign" --heading "Sprint 1"
+scripts/add_todo.sh "Grocery run" --checklist "Milk,Eggs,Bread" --when today
+```
 
-Output format: `- [ ] Task Name  |  Project: X  |  Due: MM/DD/YYYY  |  Tags: tag1, tag2`
+| Parameter | Description |
+|-----------|-------------|
+| `--when DATE` | Start date: `today`, `tomorrow`, `evening`, `someday`, or `YYYY-MM-DD` |
+| `--deadline DATE` | Due date: `YYYY-MM-DD` or natural language (`tomorrow`, `next friday`) |
+| `--list PROJECT` | Target project name |
+| `--heading NAME` | Place under a heading within the target project |
+| `--notes TEXT` | Task description |
+| `--tags TAGS` | Comma-separated tag names |
+| `--checklist ITEMS` | Comma-separated checklist items (sub-tasks) |
+
+## Creating Projects
+
+```bash
+scripts/add_project.sh "New Website"
+scripts/add_project.sh "Q1 Goals" --area "Work"
+scripts/add_project.sh "Home Renovation" --deadline 2026-06-01 --notes "Budget: $10k"
+scripts/add_project.sh "Q2 Planning" --when 2026-05-01
+```
+
+| Parameter | Description |
+|-----------|-------------|
+| `--when DATE` | Start date: `today`, `tomorrow`, `evening`, `someday`, or `YYYY-MM-DD` |
+| `--deadline DATE` | Project deadline (`YYYY-MM-DD`) |
+| `--area AREA` | Target area name |
+| `--notes TEXT` | Project description |
+| `--tags TAGS` | Comma-separated tag names |
+
+## Reading Tasks
+
+Uses AppleScript — no external dependencies. Output format:
+
+```
+- [ ] Task Name  |  Project: X  |  Due: MM/DD/YYYY  |  Tags: tag1, tag2
+```
+
 Fields are omitted when not set.
 
-### Get Today's Tasks
+### Today's Tasks
 
 ```bash
 scripts/get_today.sh
 scripts/get_today.sh --limit 5
 ```
 
-### Get Inbox Tasks
+### Inbox
 
 ```bash
 scripts/get_inbox.sh
 scripts/get_inbox.sh --limit 10
 ```
 
-### List Projects
-
-```bash
-scripts/get_projects.sh
-```
-
-Lists all open projects with their area (if assigned).
-
-### List Areas
-
-```bash
-scripts/get_areas.sh
-```
-
-### Search Tasks
+### Search
 
 ```bash
 scripts/search.sh "meeting"
@@ -51,55 +78,37 @@ scripts/search.sh "old task" --all          # include completed & cancelled
 scripts/search.sh "report" --all --limit 10
 ```
 
-Parameters:
-- `--limit N` - Return at most N results
-- `--all` - Include completed and cancelled tasks (default: open only)
+| Parameter | Description |
+|-----------|-------------|
+| `--limit N` | Return at most N results |
+| `--all` | Include completed and cancelled tasks (default: open only) |
 
-Completed/cancelled tasks are marked with `[completed]` or `[cancelled]` prefix.
-
-## Writing Tasks (URL Scheme)
-
-Uses Things URL scheme via `open` command.
-
-### Add a Todo
+### List Projects
 
 ```bash
-scripts/add_todo.sh "Buy groceries"
-scripts/add_todo.sh "Review PR" --deadline tomorrow
-scripts/add_todo.sh "Call John" --when today --list "Work"
-scripts/add_todo.sh "Big task" --notes "Details here" --tags "urgent,work"
+scripts/get_projects.sh
 ```
 
-Parameters:
-- `--deadline DATE` - Due date (YYYY-MM-DD or natural: tomorrow, next friday)
-- `--when DATE` - Start date (today, tomorrow, evening, someday, YYYY-MM-DD)
-- `--list PROJECT` - Target project name
-- `--notes TEXT` - Task description/notes
-- `--tags TAGS` - Comma-separated tags
-
-### Add a Project
+### List Areas
 
 ```bash
-scripts/add_project.sh "New Website"
-scripts/add_project.sh "Q1 Goals" --area "Work"
-scripts/add_project.sh "Home Renovation" --deadline 2026-06-01 --notes "Budget: $10k"
+scripts/get_areas.sh
 ```
 
-Parameters:
-- `--deadline DATE` - Project deadline
-- `--area AREA` - Target area name
-- `--notes TEXT` - Project description/notes
-- `--tags TAGS` - Comma-separated tags
-
-### Open Things to View
+## Navigation
 
 ```bash
 scripts/show.sh today
 scripts/show.sh inbox
+scripts/show.sh tomorrow
 scripts/show.sh upcoming
 scripts/show.sh anytime
 scripts/show.sh someday
 scripts/show.sh logbook
+scripts/show.sh deadlines
+scripts/show.sh repeating
+scripts/show.sh all-projects
+scripts/show.sh logged-projects
 ```
 
 ## Limitations
