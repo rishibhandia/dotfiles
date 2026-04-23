@@ -21,6 +21,8 @@ if [[ -z "$1" ]]; then
     echo "  --list PROJECT    Target project name"
     echo "  --notes TEXT      Task description"
     echo "  --tags TAGS       Comma-separated tags"
+    echo "  --checklist ITEMS Comma-separated checklist items"
+    echo "  --heading NAME    Place under heading within project"
     exit 1
 fi
 
@@ -32,6 +34,8 @@ when=""
 list=""
 notes=""
 tags=""
+checklist=""
+heading=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -55,6 +59,14 @@ while [[ $# -gt 0 ]]; do
             tags="$2"
             shift 2
             ;;
+        --checklist)
+            checklist="$2"
+            shift 2
+            ;;
+        --heading)
+            heading="$2"
+            shift 2
+            ;;
         *)
             echo "Unknown option: $1"
             exit 1
@@ -69,6 +81,8 @@ url="things:///add?title=$(urlencode "$title")&reveal=true"
 [[ -n "$list" ]] && url="$url&list=$(urlencode "$list")"
 [[ -n "$notes" ]] && url="$url&notes=$(urlencode "$notes")"
 [[ -n "$tags" ]] && url="$url&tags=$(urlencode "$tags")"
+[[ -n "$checklist" ]] && url="$url&checklist-items=$(urlencode "${checklist//,/$'\n'}")"
+[[ -n "$heading" ]] && url="$url&heading=$(urlencode "$heading")"
 
 open "$url"
 echo "Added todo: $title"
