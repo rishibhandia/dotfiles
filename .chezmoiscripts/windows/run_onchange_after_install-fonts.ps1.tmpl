@@ -1,6 +1,6 @@
 {{- if eq .chezmoi.os "windows" -}}
 # Register Hack Nerd Font in per-user font registry
-# Hash: {{ include "dot_chezmoiexternal.toml.tmpl" | sha256sum }}
+# Hash: {{ include ".chezmoiexternal.toml.tmpl" | sha256sum }}
 
 $fontDir = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
 $regPath = "HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"

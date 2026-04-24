@@ -57,6 +57,7 @@ chezmoi init    # Re-run templates after config changes
 - `_config/` → `~/.config/`
 - `.tmpl` suffix → Go template processed with chezmoi data
 - Files in `.chezmoitemplates/` are reusable template snippets
+- **`include` paths use the actual source filename**, not the target name. For example, `.chezmoiexternal.toml.tmpl` is included as `{{ include ".chezmoiexternal.toml.tmpl" }}`, not `dot_chezmoiexternal.toml.tmpl`. The `dot_` prefix is only for files that chezmoi renames when applying to the home directory; chezmoi-native config files (`.chezmoi*.toml.tmpl`, `.chezmoiignore`, etc.) already start with a dot and don't use `dot_`.
 
 ### Template System
 The main configuration template `.chezmoi.toml.tmpl` defines:
