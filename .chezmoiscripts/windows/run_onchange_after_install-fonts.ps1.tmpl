@@ -12,6 +12,10 @@ if (-not (Test-Path $fontDir)) {
 
 $fonts = Get-ChildItem "$fontDir\HackNerdFont*.ttf" -ErrorAction SilentlyContinue
 if (-not $fonts) {
+    # Try alternate naming convention (older nerd-fonts releases)
+    $fonts = Get-ChildItem "$fontDir\Hack*Nerd*.ttf" -ErrorAction SilentlyContinue
+}
+if (-not $fonts) {
     Write-Host "[INFO] No Hack Nerd Font files found, skipping registration"
     exit 0
 }
@@ -27,5 +31,25 @@ foreach ($font in $fonts) {
     Write-Host "[OK] Registered $($font.Name)" -ForegroundColor Green
 }
 
-Write-Host "[OK] Hack Nerd Font registered ($($fonts.Count) files)" -ForegroundColor Green
+# Detect actual font family names from TTF metadata
+try {
+    Add-Type -AssemblyName System.Drawing
+    $fontCollection = [System.Drawing.Text.PrivateFontCollection]::new()
+    foreach ($font in $fonts) {
+        $fontCollection.AddFontFile($font.FullName)
+    }
+    $familyNames = $fontCollection.Families | ForEach-Object { $_.Name } | Sort-Object -Unique
+    Write-Host "[OK] Hack Nerd Font registered ($($fonts.Count) files)" -ForegroundColor Green
+    Write-Host "[INFO] Detected font family names:" -ForegroundColor Cyan
+    foreach ($name in $familyNames) {
+        Write-Host "       - $name" -ForegroundColor Cyan
+    }
+    Write-Host "[INFO] Use one of these names in Windows Terminal font settings" -ForegroundColor Cyan
+    $fontCollection.Dispose()
+} catch {
+    Write-Host "[OK] Hack Nerd Font registered ($($fonts.Count) files)" -ForegroundColor Green
+    Write-Host "[WARN] Could not detect font family names: $_" -ForegroundColor Yellow
+}
+
+Write-Host "[INFO] Per-user fonts may require sign-out/sign-in or reboot to appear in apps" -ForegroundColor Yellow
 {{ end -}}
