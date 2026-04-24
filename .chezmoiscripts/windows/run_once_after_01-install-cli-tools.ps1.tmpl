@@ -13,14 +13,29 @@ function Write-Warn { param($Message) Write-Host "[WARN] $Message" -ForegroundCo
 # -----------------------------------------------------------------------------
 # Claude Code (Anthropic's AI coding assistant)
 # https://code.claude.com/docs/en/setup
-# Try: winget -> native installer -> npm (in order of preference)
+# Try: native installer -> winget -> npm (in order of preference)
+# Native installer always gets the latest version; winget can lag behind.
 # -----------------------------------------------------------------------------
 if (Get-Command claude -ErrorAction SilentlyContinue) {
     Write-Success "Claude Code already installed"
 } else {
     $installed = $false
 
-    # Method 1: winget (if available)
+    # Method 1: Native installer (recommended by Anthropic — always latest)
+    if (-not $installed) {
+        Write-Info "Installing Claude Code via native installer..."
+        try {
+            Invoke-RestMethod https://claude.ai/install.ps1 | Invoke-Expression
+            if (Get-Command claude -ErrorAction SilentlyContinue) {
+                Write-Success "Claude Code installed via native installer"
+                $installed = $true
+            }
+        } catch {
+            Write-Warn "Native installer failed: $_"
+        }
+    }
+
+    # Method 2: winget (fallback — may install older version)
     if (-not $installed -and (Get-Command winget -ErrorAction SilentlyContinue)) {
         Write-Info "Installing Claude Code via winget..."
         try {
@@ -32,20 +47,6 @@ if (Get-Command claude -ErrorAction SilentlyContinue) {
             }
         } catch {
             Write-Warn "winget installation failed, trying alternative..."
-        }
-    }
-
-    # Method 2: Native installer (recommended by Anthropic)
-    if (-not $installed) {
-        Write-Info "Installing Claude Code via native installer..."
-        try {
-            Invoke-RestMethod https://claude.ai/install.ps1 | Invoke-Expression
-            if (Get-Command claude -ErrorAction SilentlyContinue) {
-                Write-Success "Claude Code installed via native installer"
-                $installed = $true
-            }
-        } catch {
-            Write-Warn "Native installer failed: $_"
         }
     }
 
@@ -65,8 +66,8 @@ if (Get-Command claude -ErrorAction SilentlyContinue) {
 
     if (-not $installed) {
         Write-Warn "Claude Code installation failed. Install manually:"
-        Write-Warn "  winget install Anthropic.ClaudeCode"
-        Write-Warn "  OR: irm https://claude.ai/install.ps1 | iex"
+        Write-Warn "  irm https://claude.ai/install.ps1 | iex"
+        Write-Warn "  OR: winget install Anthropic.ClaudeCode"
     }
 }
 
