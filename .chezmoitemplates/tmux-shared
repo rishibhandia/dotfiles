@@ -5,6 +5,7 @@
 # Mouse & Input
 # =============================================================================
 set -g mouse on
+set -g focus-events on
 
 # Show pane ID and time in status bar
 set -g status-right '#{pane_id} | %H:%M '
