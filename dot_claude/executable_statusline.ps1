@@ -2,7 +2,13 @@
 # Claude Code statusline for Windows
 # Format: user@host dir [git_branch ●●●] [ctx:N%] [Model] [rl:N%]
 
-$data = $Input | Out-String | ConvertFrom-Json
+try {
+    $data = $Input | Out-String | ConvertFrom-Json
+} catch {
+    # If piped data can't be parsed, show minimal fallback
+    Write-Host -NoNewline "$env:USERNAME@$env:COMPUTERNAME"
+    exit 0
+}
 
 $ESC     = [char]27
 $Green   = "$ESC[32m"
@@ -14,6 +20,12 @@ $White   = "$ESC[37m"
 $Reset   = "$ESC[0m"
 
 $cwd = $data.workspace.current_dir ?? $data.cwd
+
+if ([string]::IsNullOrEmpty($cwd)) {
+    # No workspace data — show minimal fallback
+    Write-Host -NoNewline "$env:USERNAME@$env:COMPUTERNAME"
+    exit 0
+}
 
 # --- Context usage ---
 $contextInfo = ""
