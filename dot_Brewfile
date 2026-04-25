@@ -11,6 +11,7 @@ brew "zsh"                    # Shell
 brew "starship"               # Cross-shell prompt
 brew "neovim"                 # Text editor
 brew "tmux"                   # Terminal multiplexer
+brew "mosh"                   # SSH replacement for unreliable links (with tmux for remote sessions)
 
 # =============================================================================
 # CLI Tools - Modern replacements
