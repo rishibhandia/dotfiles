@@ -73,7 +73,23 @@ Claude: Found it. Let me extract just the installation section.
 
 ## Implementation
 
-Run the Python scripts in the `scripts/` directory.
+**Preferred path: LiteParse `lit` CLI** if installed (`command -v lit`). It implements selective-page extraction natively via `--target-pages`, runs locally with built-in OCR, and avoids the Python dependency setup.
+
+```bash
+# Stats-equivalent: page count + text-layer presence (no full extraction)
+lit parse --max-pages 1 --format json document.pdf | jq '{pages: .pageCount, hasText: (.pages[0].text | length > 0)}'
+
+# Extract a page range only — equivalent to /pdf-chunk pages 1-10
+lit parse --target-pages "1-10" --format text -o /dev/stdout document.pdf
+
+# Multi-range, e.g. TOC + installation section
+lit parse --target-pages "1-5,12-25" --format text -o out.txt document.pdf
+
+# Full extraction to file (no context cost)
+lit parse --format text -o out.txt document.pdf
+```
+
+When `lit` is unavailable (non-personal machines, restricted work environments), fall back to the Python scripts below.
 
 ### Stats Command
 
@@ -132,9 +148,10 @@ If you're in an environment where:
 - You cannot install packages
 
 **Options:**
-1. Ask IT to pre-install `pypdf` and `pdfplumber` system-wide
-2. Use CLI tools instead: `pdftotext -f 1 -l 10 document.pdf` (from poppler-utils)
-3. Use the built-in `/pdf` skill which may have different dependencies
+1. Use **LiteParse** if available (`command -v lit`) — single binary via Homebrew tap on personal machines, no Python deps
+2. Ask IT to pre-install `pypdf` and `pdfplumber` system-wide
+3. Use CLI tools instead: `pdftotext -f 1 -l 10 document.pdf` (from poppler-utils)
+4. Use the built-in `/pdf` skill which may have different dependencies
 
 ## Tips
 

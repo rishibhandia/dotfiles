@@ -25,6 +25,30 @@ for page in reader.pages:
     text += page.extract_text()
 ```
 
+## Preferred Tool for Plain Text Extraction: LiteParse
+
+If `lit` is on PATH (`command -v lit`), prefer it over pypdf/pdfplumber/pdftotext for **plain text extraction**. It runs locally, has built-in OCR for scanned PDFs, and handles complex layouts (multi-column, tables-as-text) more cleanly than the Python alternatives. Use the Python libraries below for operations LiteParse does not cover (form filling, page-level mutation, table-as-structured-data extraction).
+
+```bash
+# Plain text
+lit parse --format text -o out.txt document.pdf
+
+# Specific pages only (great for large PDFs — avoids loading the whole thing)
+lit parse --target-pages "1-5,10,15-20" -o out.txt document.pdf
+
+# Structured JSON with bounding boxes (when you need positional info)
+lit parse --format json -o out.json document.pdf
+
+# Disable OCR for speed if you know the PDF has a text layer
+lit parse --no-ocr --format text -o out.txt document.pdf
+```
+
+Fall back to the Python tools below when:
+- LiteParse is not installed (non-personal machines)
+- You need **structured table extraction** (use `pdfplumber.extract_tables()`)
+- You need **page-level mutation** like merge/split/rotate (use `pypdf`)
+- You're **filling a form** (see forms.md)
+
 ## Python Libraries
 
 ### pypdf - Basic Operations
