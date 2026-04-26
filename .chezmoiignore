@@ -51,6 +51,13 @@ dot_bash_profile
 {{ end }}
 
 # =============================================================================
+# Mac-mini-only files — skip everywhere else
+# =============================================================================
+{{ if ne .hostname "rishi-macmini-2020" }}
+.local/share/adguardhome-seed
+{{ end }}
+
+# =============================================================================
 # Project-specific CLAUDE.md stays in repo only, not applied to ~/
 # (Global rules are in ~/.claude/CLAUDE.md, managed via dot_claude/CLAUDE.md)
 # =============================================================================
