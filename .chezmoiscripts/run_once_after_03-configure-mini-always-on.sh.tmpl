@@ -1,0 +1,29 @@
+{{ if and (eq .chezmoi.os "darwin") (eq .hostname "rishi-macmini-2020") -}}
+#!/bin/bash
+# Configure the Mac mini for 24/7 operation.
+# This mini hosts LAN DNS — if it sleeps, the whole house loses resolution.
+# No-op on every other machine.
+
+set -e
+
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+info() { printf "${BLUE}[INFO]${NC} %s\n" "$1"; }
+success() { printf "${GREEN}[OK]${NC} %s\n" "$1"; }
+
+info "Configuring pmset for always-on operation..."
+
+# Apply to all power sources (-a). pmset is idempotent — re-running with the
+# same values is a no-op.
+sudo pmset -a sleep 0          # never sleep the system
+sudo pmset -a disksleep 0      # never spin down the disk
+sudo pmset -a displaysleep 10  # display can sleep after 10 min — system can't
+sudo pmset -a womp 1           # wake-on-LAN (magic packet)
+sudo pmset -a autorestart 1    # restart automatically after a power cut
+sudo pmset -a powernap 0       # avoid Power Nap waking-then-sleeping cycles
+
+success "Mac mini configured for 24/7 operation"
+sudo pmset -g custom | sed 's/^/  /'
+{{- end }}
