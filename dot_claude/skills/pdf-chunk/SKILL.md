@@ -93,21 +93,14 @@ When `lit` is unavailable (non-personal machines, restricted work environments),
 
 ### Stats Command
 
-**macOS/Linux (with uv):**
+**macOS/Linux:**
 ```bash
 uv run ~/.claude/skills/pdf-chunk/scripts/pdf_stats.py document.pdf
-```
-
-**macOS/Linux (without uv):**
-```bash
-python3 ~/.claude/skills/pdf-chunk/scripts/pdf_stats.py document.pdf
 ```
 
 **Windows:**
 ```powershell
 uv run $env:USERPROFILE\.claude\skills\pdf-chunk\scripts\pdf_stats.py document.pdf
-# or without uv:
-python $env:USERPROFILE\.claude\skills\pdf-chunk\scripts\pdf_stats.py document.pdf
 ```
 
 ### Extract Pages Command
@@ -129,29 +122,17 @@ Arguments: `<pdf_file> <start_page> <end_page> [output_file]`
 
 ## Dependencies
 
-Required Python packages:
-- `pypdf` - for page count and metadata
-- `pdfplumber` - for text extraction
+Both scripts declare their dependencies inline via PEP 723 script metadata (`pypdf`, `pdfplumber`). `uv run` provisions an isolated environment and auto-installs them on first invocation — no manual install step.
 
-**With uv (recommended):** Dependencies auto-install on first run via inline script metadata.
-
-**Without uv / Work environments:** Pre-install dependencies:
-```bash
-pip install pypdf pdfplumber   # or: uv pip install pypdf pdfplumber
-```
+`uv` ships in the Brewfile / Scoopfile and is required across all machines for this skill.
 
 ## Work/Restricted Environments
 
-If you're in an environment where:
-- `uv` is not available
-- Network access to pypi.org is blocked
-- You cannot install packages
+If you're in an environment where `uv` is unavailable or network access to pypi.org is blocked:
 
-**Options:**
 1. Use **LiteParse** if available (`command -v lit`) — single binary via Homebrew tap on personal machines, no Python deps
-2. Ask IT to pre-install `pypdf` and `pdfplumber` system-wide
-3. Use CLI tools instead: `pdftotext -f 1 -l 10 document.pdf` (from poppler-utils)
-4. Use the built-in `/pdf` skill which may have different dependencies
+2. Use CLI tools instead: `pdftotext -f 1 -l 10 document.pdf` (from poppler-utils)
+3. Use the built-in `/pdf` skill which may have different dependencies
 
 ## Tips
 
