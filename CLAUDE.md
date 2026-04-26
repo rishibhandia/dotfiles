@@ -193,6 +193,98 @@ Current learned files:
 - **mockobject-attribute-getattr-trap.md** — Python mock `__getattr__` trap
 - **qt-test-window-close-blocking-shutdown.md** — Qt test window close blocking shutdown
 
+## Mac Mini AdGuard Home Setup
+
+The Mac mini (`rishi-macmini-2020`) hosts LAN-wide DNS via AdGuard Home. Most setup is automated by chezmoi's `run_once_after_0[2-4]` scripts; the items below are the bits that genuinely can't live in chezmoi.
+
+### What's automated by chezmoi
+- **Install** AGH binary into `/Applications/AdGuardHome` (`run_once_after_02`)
+- **Always-on** `pmset` settings so the mini doesn't sleep (`run_once_after_03`)
+- **DNS loopback** — point the mini's resolver at `127.0.0.1` once AGH answers (`run_once_after_04`)
+- **Seed restore** — if `~/.local/share/adguardhome-seed/AdGuardHome.yaml` is present (decrypted from the age-encrypted source), `run_once_after_02` copies it to `/Applications/AdGuardHome/` so AGH boots fully configured (no first-run wizard)
+
+### Manual checklist (one-time per machine / per Apple ID / per device)
+
+**Router (Linksys MR7500, lives on the device, not chezmoi-able)**
+- [ ] DHCP Reservation pinning the mini's MAC → `192.168.1.185` — Connectivity → Local Network → DHCP Reservations
+- [ ] Static DNS 1 = `192.168.1.185`, DNS 2 + 3 empty — same screen, DHCP Server section. Use the *web UI* at `http://192.168.1.1`; the Linksys app hides this field on Hydra firmware
+
+**Per-Apple-ID** — apply to the iCloud account, not to chezmoi
+- [ ] iCloud Private Relay off — Settings → [your name] → iCloud → Private Relay → Off. (Otherwise Safari bypasses local DNS for HTTPS.)
+
+**Per-browser** — app-internal preference, gets clobbered if chezmoi'd
+- [ ] Chrome: Settings → Privacy & Security → "Use secure DNS" → Off (or "With current service provider"). DoH inside Chrome bypasses the system resolver.
+- [ ] Firefox: Settings → Privacy & Security → "DNS over HTTPS" → "Off"
+- [ ] Edge: similar to Chrome — Settings → Privacy → "Use secure DNS" → Off
+
+**Per-device on the LAN** — usually nothing required (DHCP hands DNS out to clients), but force a lease renewal after the router DHCP change so devices pick up the new DNS server right away.
+
+### Age encryption setup (one-time, mini only)
+
+Push-button rebuild requires the AGH config seed to live in git, encrypted with `age` so the public dotfiles repo doesn't expose secrets.
+
+```bash
+# 1. Generate keypair
+mkdir -p ~/.config/age
+age-keygen -o ~/.config/age/key.txt
+chmod 600 ~/.config/age/key.txt
+
+# 2. Capture the public key (copy this)
+grep '^# public key:' ~/.config/age/key.txt
+#   → "# public key: age1xxxx...zzzz"
+
+# 3. Store the private key in 1Password
+#    Create a new item:
+#      - Category: Secure Note
+#      - Title: "Age Encryption Key"
+#      - Field "credential" (concealed) ← paste FULL contents of ~/.config/age/key.txt
+#    (manually via the 1Password UI or `op item create`)
+
+# 4. Add the [age] section to ~/.config/chezmoi/chezmoi.toml (NOT the .tmpl yet —
+#    we'll move it into the template once verified):
+#      [age]
+#          identity = "~/.config/age/key.txt"
+#          recipient = "age1xxxx...zzzz"   # the public key from step 2
+
+# 5. Verify
+echo hello | chezmoi encrypt | chezmoi decrypt
+#   → "hello" if the round-trip works
+```
+
+### Snapshot the live AGH config to the encrypted seed
+
+After completing the AGH first-run wizard (or after any config change you want preserved):
+
+```bash
+# Copy the live config (root:wheel mode 600) to a user-readable temp,
+# then let chezmoi add+encrypt it as a managed source file.
+mkdir -p ~/.local/share/adguardhome-seed
+sudo cat /Applications/AdGuardHome/AdGuardHome.yaml > ~/.local/share/adguardhome-seed/AdGuardHome.yaml
+chmod 600 ~/.local/share/adguardhome-seed/AdGuardHome.yaml
+
+chezmoi add --encrypt ~/.local/share/adguardhome-seed/AdGuardHome.yaml
+# → creates dot_local/share/adguardhome-seed/encrypted_AdGuardHome.yaml.age in source
+
+dots git add dot_local/share/adguardhome-seed/
+dots git commit -m "chore: snapshot AGH config seed"
+dots git push
+```
+
+### Fresh-machine rebuild flow
+
+```
+1. Bootstrap dotfiles (curl install.sh)
+2. chezmoi init  → prompts; one prompt fetches the age key from 1Password
+3. chezmoi apply → installs age, decrypts seed, runs run_once_after_0[2-4]:
+                   - 02: installs AGH, copies seed to /Applications, restarts service
+                   - 03: pmset always-on
+                   - 04: AGH is already answering (because seeded), DNS flips to 127.0.0.1
+4. Manual one-off:
+   - Router DHCP: set Static DNS 1 → 192.168.1.185 (one click in Linksys UI)
+   - iCloud Private Relay off (if reusing same Apple ID, already off)
+   - Browser DoH off (per browser, per profile)
+```
+
 ## Testing
 
 Run tests to verify setup:
