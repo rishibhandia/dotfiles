@@ -1,0 +1,56 @@
+{{ if and (eq .chezmoi.os "darwin") (eq .hostname "rishi-macmini-2020") -}}
+#!/bin/bash
+# Point the Mac mini's own DNS at AdGuard Home running locally (127.0.0.1)
+# instead of routing through the LAN address. Saves a network hop and keeps
+# the mini's resolver working even if its NIC briefly drops.
+# No-op on every other machine.
+
+set -e
+
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[0;33m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+info() { printf "${BLUE}[INFO]${NC} %s\n" "$1"; }
+success() { printf "${GREEN}[OK]${NC} %s\n" "$1"; }
+warn() { printf "${YELLOW}[WARN]${NC} %s\n" "$1"; }
+err() { printf "${RED}[ERR]${NC} %s\n" "$1"; }
+
+# Pre-flight: AGH must actually be answering on 127.0.0.1:53 before we flip
+# the resolver. If the first-run wizard hasn't been completed, AGH refuses
+# queries and we'd break local DNS.
+if ! dig @127.0.0.1 -p 53 +time=2 +tries=1 +short example.com >/dev/null 2>&1; then
+    warn "AdGuard Home is not answering on 127.0.0.1:53 yet."
+    warn "Complete the first-run wizard at http://localhost:3000, then re-run this script:"
+    warn "  chezmoi state delete-bucket --bucket=scriptState"
+    warn "  chezmoi apply"
+    exit 0   # exit success so chezmoi marks the script done; user re-runs explicitly
+fi
+
+# Iterate active network services. networksetup -listallnetworkservices puts
+# a header line first ("An asterisk (*)...") and prefixes disabled services
+# with '*' — strip both.
+changed=0
+networksetup -listallnetworkservices | tail -n +2 | while IFS= read -r service; do
+    [[ -z "$service" ]] && continue
+    [[ "$service" == \** ]] && continue   # disabled service
+
+    current=$(networksetup -getdnsservers "$service" 2>/dev/null | head -1)
+    if [[ "$current" == "127.0.0.1" ]]; then
+        success "$service: DNS already 127.0.0.1"
+        continue
+    fi
+
+    info "$service: setting DNS to 127.0.0.1 (was: ${current:-DHCP})"
+    sudo networksetup -setdnsservers "$service" 127.0.0.1
+    changed=1
+done
+
+# Flush macOS resolver cache so the change is observable immediately
+sudo dscacheutil -flushcache
+sudo killall -HUP mDNSResponder
+
+success "Mac mini DNS now resolves via local AdGuard Home (127.0.0.1)"
+{{- end }}
