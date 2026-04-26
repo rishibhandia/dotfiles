@@ -135,6 +135,9 @@ Scripts that run automatically during `chezmoi apply`:
 - `run_once_after_01-install-cli-tools.sh.tmpl` - Installs Claude Code, Shell Sage, nvim plugins (macOS/Linux)
 - `windows/run_once_after_01-install-cli-tools.ps1.tmpl` - Installs Claude Code, Tirith, psmux, nvim plugins (Windows)
 - `darwin/run_once_after_configure-macos.sh` - Configures macOS preferences
+- `run_once_after_02-install-adguardhome.sh.tmpl` - Installs AdGuard Home on the Mac mini (LAN DNS host) — gated to `rishi-macmini-2020`
+- `run_once_after_03-configure-mini-always-on.sh.tmpl` - `pmset` 24/7 settings for the Mac mini — gated to `rishi-macmini-2020`
+- `run_once_after_04-set-mini-dns-loopback.sh.tmpl` - Points the Mac mini's resolver at `127.0.0.1` once AGH is answering — gated to `rishi-macmini-2020`. Re-run after the AGH first-run wizard with: `chezmoi state delete-bucket --bucket=scriptState && chezmoi apply`.
 
 ### Windows Portable Mode (`.chezmoiexternal.toml.tmpl`)
 Fallback for Windows machines where Scoop is unavailable (`.portable = true`). Downloads pre-built binaries directly from GitHub releases to `~/.local/bin`, which is added to PATH in the PowerShell profile. Covers: rg, fd, bat, fzf, zoxide, starship, lsd, jq, yq, gh, duf, fastfetch, uv, uvx, ruff. Note: nvim, navi, and tirith are NOT included in portable mode.
