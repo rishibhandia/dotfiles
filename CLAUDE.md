@@ -112,7 +112,7 @@ This repo follows XDG Base Directory spec:
 
 ### Security Tools
 - **tirith** - Terminal security tool that guards against URL/ANSI injection attacks
-  - macOS: Installed via Homebrew tap (`brew install sheeki03/tap/tirith`) — use fully qualified name in Brewfile
+  - macOS: Installed via Homebrew tap as `sheeki03/tap/tirith` (see "Tap-based formulae" rule above)
   - Windows: Installed via Scoop (`scoop bucket add tirith https://github.com/sheeki03/scoop-tirith && scoop install tirith`)
   - Initialized in shell via `eval "$(tirith init)"` (zsh) or `Invoke-Expression (& tirith init powershell)` (PowerShell)
   - **Claude Code MCP**: Registered as MCP server on personal machines (`settings.json.tmpl`) — provides `tirith_check_command`, `tirith_check_url`, `tirith_scan_file`, etc.
@@ -140,9 +140,11 @@ Scripts that run automatically during `chezmoi apply`:
 Fallback for Windows machines where Scoop is unavailable (`.portable = true`). Downloads pre-built binaries directly from GitHub releases to `~/.local/bin`, which is added to PATH in the PowerShell profile. Covers: rg, fd, bat, fzf, zoxide, starship, lsd, jq, yq, gh, duf, fastfetch, uv, uvx, ruff. Note: nvim, navi, and tirith are NOT included in portable mode.
 
 ### Package Management
-- `dot_Brewfile` → `~/.Brewfile` - Homebrew packages for macOS/Linux
+- `dot_Brewfile.tmpl` → `~/.Brewfile` - Homebrew packages for macOS/Linux (templated; supports per-machine gating via `{{ if .personal }}` etc.)
 - `dot_Scoopfile` → `~/.Scoopfile` - Scoop packages for Windows
-- Packages auto-install when package files change via `run_onchange` scripts
+- Packages auto-install when package files change via `run_onchange` scripts. The Brewfile install script reads the rendered `~/.Brewfile`, not the template source.
+
+**Tap-based formulae:** Always use the fully qualified `tap/formula` name in the Brewfile when adding entries from a third-party tap. `brew bundle` resolves unqualified `brew "name"` lines against the formula index loaded at startup, which doesn't include taps added later in the same Brewfile, so a fresh-machine apply will fail with `No available formula`. Examples in this repo: `sheeki03/tap/tirith`, `run-llama/liteparse/llamaindex-liteparse`.
 
 **Windows package manager policy:** Use Scoop exclusively. Do not use npm, cargo, winget, or other package managers as alternatives for CLI tools.
 
