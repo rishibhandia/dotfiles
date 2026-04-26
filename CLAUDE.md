@@ -224,29 +224,34 @@ The Mac mini (`rishi-macmini-2020`) hosts LAN-wide DNS via AdGuard Home. Most se
 Push-button rebuild requires the AGH config seed to live in git, encrypted with `age` so the public dotfiles repo doesn't expose secrets.
 
 ```bash
-# 1. Generate keypair
-mkdir -p ~/.config/age
+# 1. Generate keypair (only needed once for your identity, ever)
+mkdir -p ~/.config/age && chmod 700 ~/.config/age
 age-keygen -o ~/.config/age/key.txt
 chmod 600 ~/.config/age/key.txt
 
-# 2. Capture the public key (copy this)
+# 2. Capture the public key
 grep '^# public key:' ~/.config/age/key.txt
 #   → "# public key: age1xxxx...zzzz"
 
-# 3. Store the private key in 1Password
-#    Create a new item:
-#      - Category: Secure Note
-#      - Title: "Age Encryption Key"
-#      - Field "credential" (concealed) ← paste FULL contents of ~/.config/age/key.txt
-#    (manually via the 1Password UI or `op item create`)
+# 3. Push the private key to 1Password as the source of truth
+op item create --category="Secure Note" --title="Age Encryption Key" \
+  --vault=Personal "credential[concealed]=$(cat ~/.config/age/key.txt)"
 
-# 4. Add the [age] section to ~/.config/chezmoi/chezmoi.toml (NOT the .tmpl yet —
-#    we'll move it into the template once verified):
+# 4. Verify the 1Password backup matches local exactly
+diff ~/.config/age/key.txt <(op read 'op://Personal/Age Encryption Key/credential') \
+  && echo "✓ 1Password backup verified"
+
+# 5. Wire chezmoi to the recipient.
+#    On a NEW machine: `chezmoi init` will prompt you for the public key automatically.
+#    On an EXISTING machine that already initialized: chezmoi init won't re-prompt;
+#    add the [age] section manually to ~/.config/chezmoi/chezmoi.toml:
 #      [age]
 #          identity = "~/.config/age/key.txt"
 #          recipient = "age1xxxx...zzzz"   # the public key from step 2
+#    (No need to touch the local key file — `dot_config/private_age/private_key.txt.tmpl`
+#    has been chezmoi-managing it via 1Password since the encryption was set up.)
 
-# 5. Verify
+# 6. Round-trip test
 echo hello | chezmoi encrypt | chezmoi decrypt
 #   → "hello" if the round-trip works
 ```
