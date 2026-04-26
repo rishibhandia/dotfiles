@@ -118,3 +118,11 @@ cask "font-meslo-lg-nerd-font"    # Meslo font for terminal
 # =============================================================================
 brew "mas"                    # Mac App Store CLI
 # mas "Xcode", id: 497799835
+
+{{ if .personal -}}
+# =============================================================================
+# Personal-only tools (gated by .personal in chezmoi data)
+# =============================================================================
+tap "run-llama/liteparse"
+brew "llamaindex-liteparse"   # Local PDF parser (LlamaIndex, runs offline)
+{{- end }}
