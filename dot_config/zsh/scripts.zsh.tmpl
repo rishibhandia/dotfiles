@@ -1226,3 +1226,28 @@ function repeat_cmd() {
         "$@"
     done
 }
+
+{{ if eq .hostname "rishi-macmini-2020" -}}
+# =============================================================================
+# AdGuard Home control wrapper (Mac mini only — host runs the LAN DNS server)
+# Installed via the official script (no Homebrew formula exists). Function form
+# instead of an alias so subcommands can be dispatched and the wrapper can
+# whitelist allowed args before passing them to sudo.
+# =============================================================================
+agh() {
+    local bin=/Applications/AdGuardHome/AdGuardHome
+    local cmd=${1:-status}
+    case "$cmd" in
+        ui|open)
+            open http://localhost:3000
+            ;;
+        status|start|stop|restart|install|uninstall)
+            sudo "$bin" -s "$cmd"
+            ;;
+        *)
+            echo "usage: agh [status|start|stop|restart|install|uninstall|ui]" >&2
+            return 2
+            ;;
+    esac
+}
+{{- end }}
