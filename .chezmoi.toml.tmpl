@@ -107,3 +107,9 @@
     # Optional: specify account and vault if you have multiple
     # account = "my-account"
     # vault = "my-vault"
+
+{{ if $personal -}}
+[age]
+    identity = "~/.config/age/key.txt"
+    recipient = "{{ promptStringOnce . "age_recipient" "Your age public key (run on the source machine: grep '^# public key:' ~/.config/age/key.txt)" }}"
+{{- end }}
