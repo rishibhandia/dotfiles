@@ -25,7 +25,11 @@ if [ -x /Applications/AdGuardHome/AdGuardHome ]; then
 else
     info "Installing AdGuard Home via the official install script..."
     info "(install.sh requires sudo to register the launchd service)"
-    # Auto-detects darwin/arm64, downloads latest release, registers launchd.
+    # Trust: AdguardTeam (https://github.com/AdguardTeam/AdGuardHome).
+    # Vendor-controlled URL, no integrity check, escalates to sudo via the
+    # script — accepted because Homebrew has no AdGuard Home formula and the
+    # manual binary-download path duplicates what install.sh already does
+    # (release detection, launchd plist registration, service start).
     curl -fsSL https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v
     success "AdGuard Home installed and started"
 fi
