@@ -73,6 +73,9 @@
 {{- end -}}
 {{- $name := "Rishi Bhandia" -}}
 
+{{ if $personal -}}
+encryption = "age"
+{{ end -}}
 [data]
     name = {{ $name | quote }}
     email = {{ $email | quote }}
