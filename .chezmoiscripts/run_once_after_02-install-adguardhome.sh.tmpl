@@ -1,6 +1,7 @@
 {{ if and (eq .chezmoi.os "darwin") (eq .hostname "rishi-macmini-2020") -}}
 #!/bin/bash
-# Install AdGuard Home on the Mac mini.
+# Install AdGuard Home on the Mac mini, optionally seeding it with a
+# previously snapshotted config so it boots fully configured (no wizard).
 # This mini hosts LAN DNS, so AGH needs to be present after a fresh setup.
 # No-op on every other machine.
 
@@ -15,19 +16,35 @@ info() { printf "${BLUE}[INFO]${NC} %s\n" "$1"; }
 success() { printf "${GREEN}[OK]${NC} %s\n" "$1"; }
 warn() { printf "${YELLOW}[WARN]${NC} %s\n" "$1"; }
 
+SEED="$HOME/.local/share/adguardhome-seed/AdGuardHome.yaml"
+LIVE="/Applications/AdGuardHome/AdGuardHome.yaml"
+
+# --- Install binary if missing ---------------------------------------------
 if [ -x /Applications/AdGuardHome/AdGuardHome ]; then
     success "AdGuard Home already installed at /Applications/AdGuardHome"
-    exit 0
+else
+    info "Installing AdGuard Home via the official install script..."
+    info "(install.sh requires sudo to register the launchd service)"
+    # Auto-detects darwin/arm64, downloads latest release, registers launchd.
+    curl -fsSL https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v
+    success "AdGuard Home installed and started"
 fi
 
-info "Installing AdGuard Home via the official install script..."
-info "(install.sh requires sudo to register the launchd service)"
-
-# The script auto-detects darwin/arm64, downloads the latest release, and
-# registers a launchd plist that starts AGH at boot.
-curl -fsSL https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v
-
-success "AdGuard Home installed and started"
-warn "Complete first-run wizard at http://localhost:3000 (admin password, upstreams, blocklists)"
-warn "After wizard, re-run 'chezmoi apply' so the DNS-loopback script can flip the mini's resolver."
+# --- Seed config from chezmoi-managed snapshot if present ------------------
+# The seed file is decrypted by chezmoi from a *.age source. If it exists
+# and the live config doesn't, copy it across so AGH boots configured.
+if [ -f "$SEED" ] && [ ! -f "$LIVE" ]; then
+    info "Seeding AGH config from chezmoi snapshot..."
+    sudo cp "$SEED" "$LIVE"
+    sudo chown root:wheel "$LIVE"
+    sudo chmod 600 "$LIVE"
+    sudo /Applications/AdGuardHome/AdGuardHome -s restart
+    success "AGH restarted with seeded config — no wizard needed"
+elif [ -f "$LIVE" ]; then
+    success "Live AGH config already present at $LIVE — leaving it alone"
+else
+    warn "No seed file at $SEED. Complete the first-run wizard at http://localhost:3000."
+    warn "After the wizard, re-run 'chezmoi apply' so the DNS-loopback script can flip the resolver."
+    warn "To capture the live config as a seed for future rebuilds, see the Mac mini section in CLAUDE.md."
+fi
 {{- end }}
