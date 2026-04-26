@@ -2,7 +2,7 @@
 #!/bin/bash
 # Install packages from Brewfile
 # This runs whenever the Brewfile changes
-# Brewfile hash: {{ include "dot_Brewfile" | sha256sum }}
+# Brewfile hash: {{ include "dot_Brewfile.tmpl" | sha256sum }}
 
 set -e
 
@@ -33,7 +33,7 @@ if ! command -v brew &>/dev/null; then
     exit 0
 fi
 
-BREWFILE="{{ .chezmoi.sourceDir }}/dot_Brewfile"
+BREWFILE="{{ .chezmoi.homeDir }}/.Brewfile"
 
 if [ ! -f "$BREWFILE" ]; then
     warn "Brewfile not found at $BREWFILE"
