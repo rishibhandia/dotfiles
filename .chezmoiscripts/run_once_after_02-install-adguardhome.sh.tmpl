@@ -1,0 +1,33 @@
+{{ if and (eq .chezmoi.os "darwin") (eq .hostname "rishi-macmini-2020") -}}
+#!/bin/bash
+# Install AdGuard Home on the Mac mini.
+# This mini hosts LAN DNS, so AGH needs to be present after a fresh setup.
+# No-op on every other machine.
+
+set -e
+
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+info() { printf "${BLUE}[INFO]${NC} %s\n" "$1"; }
+success() { printf "${GREEN}[OK]${NC} %s\n" "$1"; }
+warn() { printf "${YELLOW}[WARN]${NC} %s\n" "$1"; }
+
+if [ -x /Applications/AdGuardHome/AdGuardHome ]; then
+    success "AdGuard Home already installed at /Applications/AdGuardHome"
+    exit 0
+fi
+
+info "Installing AdGuard Home via the official install script..."
+info "(install.sh requires sudo to register the launchd service)"
+
+# The script auto-detects darwin/arm64, downloads the latest release, and
+# registers a launchd plist that starts AGH at boot.
+curl -fsSL https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v
+
+success "AdGuard Home installed and started"
+warn "Complete first-run wizard at http://localhost:3000 (admin password, upstreams, blocklists)"
+warn "After wizard, re-run 'chezmoi apply' so the DNS-loopback script can flip the mini's resolver."
+{{- end }}
