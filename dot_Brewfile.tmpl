@@ -135,3 +135,10 @@ brew "mas"                    # Mac App Store CLI
 tap "run-llama/liteparse"
 brew "run-llama/liteparse/llamaindex-liteparse"   # Local PDF parser (LlamaIndex, runs offline)
 {{- end }}
+
+{{ if and (eq .chezmoi.os "darwin") (eq .hostname "rishi-macmini-2020") -}}
+# =============================================================================
+# Mac mini only - always-on LAN services
+# =============================================================================
+cask "jellyfin"               # Self-hosted media server (LAN-wide)
+{{- end }}
