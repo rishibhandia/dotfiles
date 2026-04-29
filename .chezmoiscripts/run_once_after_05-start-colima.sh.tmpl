@@ -1,0 +1,18 @@
+{{ if and (eq .chezmoi.os "darwin") (eq .hostname "rishi-macmini-2020") -}}
+#!/bin/bash
+# Auto-start Colima on the Mac mini (always-on LAN host).
+# Registers Colima as a brew service so the Linux VM (and Docker daemon)
+# starts at user login. No-op on every other machine.
+
+set -e
+
+eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null || true
+
+if ! command -v colima &>/dev/null; then
+    echo "colima not installed yet; brew bundle should install it before this runs" >&2
+    exit 0
+fi
+
+# Idempotent: brew services start is a no-op if already running.
+brew services start colima >/dev/null
+{{ end -}}
