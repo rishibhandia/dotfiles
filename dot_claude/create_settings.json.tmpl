@@ -60,6 +60,12 @@
       "Bash(git:*)",
       "Bash(tree:*)",
       "Bash(find:*)"
+{{- if eq .chezmoi.os "windows" }},
+      "Bash(pwsh:*)",
+      "Bash(pwsh.exe:*)",
+      "Bash(powershell:*)",
+      "Bash(powershell.exe:*)"
+{{- end }}
     ],
     "deny": [
 {{- if eq .chezmoi.os "windows" }}
@@ -69,7 +75,21 @@
       "Bash(Format-Volume*)",
       "Bash(Clear-Disk*)",
       "Bash(diskpart*)",
-      "Bash(bcdedit*)"
+      "Bash(bcdedit*)",
+      "Bash(*powershell*Stop-Computer*)",
+      "Bash(*powershell*Restart-Computer*)",
+      "Bash(*powershell*shutdown*)",
+      "Bash(*powershell*Format-Volume*)",
+      "Bash(*powershell*Clear-Disk*)",
+      "Bash(*powershell*diskpart*)",
+      "Bash(*powershell*bcdedit*)",
+      "Bash(*pwsh*Stop-Computer*)",
+      "Bash(*pwsh*Restart-Computer*)",
+      "Bash(*pwsh*shutdown*)",
+      "Bash(*pwsh*Format-Volume*)",
+      "Bash(*pwsh*Clear-Disk*)",
+      "Bash(*pwsh*diskpart*)",
+      "Bash(*pwsh*bcdedit*)"
 {{- else }}
       "Bash(shutdown)",
       "Bash(reboot)",
