@@ -62,6 +62,14 @@ dot_bash_profile
 {{ end }}
 
 # =============================================================================
+# Age encryption key — pulled from 1Password, only useful on personal
+# machines that also have `op` CLI. Skip on portable installs (no 1Password).
+# =============================================================================
+{{ if .portable }}
+.config/age/key.txt
+{{ end }}
+
+# =============================================================================
 # Project-specific CLAUDE.md stays in repo only, not applied to ~/
 # (Global rules are in ~/.claude/CLAUDE.md, managed via dot_claude/CLAUDE.md)
 # =============================================================================
