@@ -67,9 +67,16 @@ if (Get-Module -ListAvailable -Name PSReadLine) {
 # PATH Configuration
 # =============================================================================
 
-# Add portable binaries to PATH (for portable mode without Scoop)
+# Add ~/.local/bin to PATH (portable mode binaries + Claude Code native install)
+# Persist to User PATH so tools that check the env var (e.g. Claude Code
+# auto-updater) see it, not just the current session.
 $LocalBin = Join-Path $env:USERPROFILE ".local\bin"
 if (Test-Path $LocalBin) {
+    $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+    if ($userPath -notlike "*$LocalBin*") {
+        $newUserPath = if ([string]::IsNullOrEmpty($userPath)) { $LocalBin } else { "$LocalBin;$userPath" }
+        [Environment]::SetEnvironmentVariable("PATH", $newUserPath, "User")
+    }
     if ($env:PATH -notlike "*$LocalBin*") {
         $env:PATH = "$LocalBin;$env:PATH"
     }
