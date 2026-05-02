@@ -72,6 +72,10 @@
 {{-   $email = "rb3926@nyu.edu" -}}
 {{- end -}}
 {{- $name := "Rishi Bhandia" -}}
+{{- $age_recipient := "" -}}
+{{- if $personal -}}
+{{-   $age_recipient = promptStringOnce . "age_recipient" "Your age public key (run on the source machine: grep '^# public key:' ~/.config/age/key.txt)" -}}
+{{- end -}}
 
 {{ if $personal -}}
 encryption = "age"
@@ -86,6 +90,9 @@ encryption = "age"
     personal = {{ $personal }}
     portable = {{ $portable }}
     osid = {{ $osID | quote }}
+{{- if $personal }}
+    age_recipient = {{ $age_recipient | quote }}
+{{- end }}
 
 {{ if eq .chezmoi.os "windows" }}
 [cd]
@@ -114,5 +121,5 @@ encryption = "age"
 {{ if $personal -}}
 [age]
     identity = "~/.config/age/key.txt"
-    recipient = "{{ promptStringOnce . "age_recipient" "Your age public key (run on the source machine: grep '^# public key:' ~/.config/age/key.txt)" }}"
+    recipient = {{ $age_recipient | quote }}
 {{- end }}

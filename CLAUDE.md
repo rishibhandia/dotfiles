@@ -242,12 +242,9 @@ diff ~/.config/age/key.txt <(op read 'op://Personal/Age Encryption Key/credentia
   && echo "✓ 1Password backup verified"
 
 # 5. Wire chezmoi to the recipient.
-#    On a NEW machine: `chezmoi init` will prompt you for the public key automatically.
-#    On an EXISTING machine that already initialized: chezmoi init won't re-prompt;
-#    add the [age] section manually to ~/.config/chezmoi/chezmoi.toml:
-#      [age]
-#          identity = "~/.config/age/key.txt"
-#          recipient = "age1xxxx...zzzz"   # the public key from step 2
+#    `chezmoi init` prompts for the public key on the first run per machine
+#    and caches the answer in `[data].age_recipient` of
+#    ~/.config/chezmoi/chezmoi.toml, so subsequent inits don't re-prompt.
 #    (No need to touch the local key file — `dot_config/private_age/private_key.txt.tmpl`
 #    has been chezmoi-managing it via 1Password since the encryption was set up.)
 
