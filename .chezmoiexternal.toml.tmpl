@@ -86,6 +86,14 @@
 {{- end }}
 
 {{- if eq .chezmoi.os "windows" }}
+# rtk - Claude Code output compressor (no Scoop manifest exists, so always
+# installed from GitHub releases on Windows regardless of portable mode)
+[".local/bin/rtk.exe"]
+    type = "archive-file"
+    url = {{ gitHubLatestReleaseAssetURL "rtk-ai/rtk" "rtk-x86_64-pc-windows-msvc.zip" | quote }}
+    executable = true
+    path = "rtk.exe"
+
 # Hack Nerd Font - per-user installation (no Scoop required)
 # Extracted directly to the Windows per-user fonts directory
 # Removed automatically by chezmoi purge/uninstall
