@@ -1,13 +1,96 @@
 ---
 name: matlab
-description: MATLAB R2025a coding patterns — polar plots in tiledlayout, color lightening, region highlighting, error bounds, varargin helpers, graceful per-file loading for in-progress scans
+description: MATLAB R2025a coding patterns for THz/TA analysis — the +thz package layout and call patterns, polar plots in tiledlayout, color lightening, region highlighting, error bounds, varargin helpers, graceful per-file loading for in-progress scans
 type: reference
 ---
 
 # MATLAB Best Practices (R2025a)
 
 **Extracted:** 2026-03-15
-**Context:** NbOI2 SHG/THz pump-probe scripts; general MATLAB R2025a
+**Updated:** 2026-05-03
+**Context:** NbOI2 SHG/THz pump-probe scripts; general MATLAB R2025a; the personal `+thz` analysis package at `~/Documents/MATLAB/`
+
+---
+
+## The +thz Analysis Package
+
+All shared THz/TA analysis lives in the `+thz` package at the root of
+`~/Documents/MATLAB/` (synced across machines via the
+`rishibhandia/matlab-thz-analysis` GitHub repo). Per-experiment scripts
+live in `~/Documents/Scientific Data/` and call into the package.
+
+### Package layout
+
+```
++thz/
+├── +eos/      % Electro-optic sampling, E-field conversion (calcEOS, calcEOSAdv, ...)
+├── +fft/      % Windowed FFT, frequency utilities (disc_ft, rfftFreq, fft2DMap, ...)
+├── +io/       % Importers, loaders, generators (TAData, loadTHzPumpProbeTimeTrace, ...)
+├── +models/   % Drude / Lorentz / Fano fitting (drudeLorentz, twoDrude, ...)
+├── +optics/   % Transmission, conductivity, index, thin-film thickness
+├── +plot/     % Plotting and figure export helpers
+├── +spec2d/   % 2D-spectroscopy classes (TimeTrace2D, FreqTrace2D)
+├── +ta/       % Transient absorption primitives (sidebands, fluence scaling)
+├── +util/     % General utilities (averages, ratios, label helpers)
+└── plotDefaults.m   % Publication-style figure defaults (export-safe sizes)
+```
+
+### Calling conventions
+
+Use fully qualified names in new code:
+
+```matlab
+ft        = thz.fft.disc_ft(signal, 1024, @hanning);
+freq      = thz.fft.rfftFreq(time, 1024);
+Ef        = thz.eos.calcEOS(0.01, 0.3, 'GaP', 0);
+ta        = thz.io.TAData("scan.h5");
+oscPower  = thz.ta.oscillatoryPower(ta, 3.0, Bandwidth=0.15);
+```
+
+Or `import` for brevity inside a script:
+
+```matlab
+import thz.fft.* thz.ta.*
+ft  = disc_ft(signal, 1024, @hanning);
+sb  = findSidebands(oscPower, ta.Wavelengths, 600);
+```
+
+Bare unqualified calls (`disc_ft(...)`, `calcEOS(...)`) still work via thin
+root wrappers that delegate to the package — kept indefinitely so existing
+analysis scripts on other computers don't need edits.
+
+### TA analysis primitives in `+thz/+ta`
+
+Five reusable helpers for transient-absorption work — see the relevant
+sub-skills (`ta-sideband-analysis`, `matlab-ta-fluence-scaling`) for
+end-to-end workflows:
+
+| Function | Purpose |
+|---|---|
+| `thz.ta.oscillatoryPower(ta, freq, Bandwidth=...)` | Per-pixel FFT power in a +/-bandwidth window around a phonon frequency |
+| `thz.ta.findSidebands(oscPower, wl, centerWl, ExclusionRadius=...)` | Blue/red sideband peak struct (pixel, wavelength, THz shift, power) |
+| `thz.ta.wavelengthToFreqShift(lambda, lambdaCenter)` | `c/lambda - c/lambdaCenter` in THz |
+| `thz.ta.wireGridFieldFactor(angleDeg)` | Malus-law `cos^2` (field) and `cos^4` (intensity) factors |
+| `thz.ta.fitPowerLaw(x, y)` | Log-log regression returning exponent, intercept, RMS residual |
+
+### Figure defaults
+
+Always call `thz.plotDefaults()` at the top of plotting scripts (after
+`clc; clear; close all`). It sets export-safe sizes (axes 11pt, lines
+1.5, normal weight) so `exportgraphics` output never clips and matches
+the on-screen figure.
+
+```matlab
+clc; clear; close all
+thz.plotDefaults()
+```
+
+### When NOT to add to the package
+
+Per-experiment glue (filename templates, hardcoded sample names,
+specific fluence sweeps) belongs in the analysis script, not the
+package. The bar for promoting code into `+thz` is: *will I want to
+call this from a future, unrelated experiment?*
 
 ---
 
@@ -16,9 +99,9 @@ type: reference
 Wrap each file load in try/catch and guard against too-short traces. Without the length guard, a 0-length trace sets `L = min(existing, 0) = 0`, zeroing all previously loaded rows and crashing downstream FFT code.
 
 ```matlab
-for i = 1:length(angles)
+for ii = 1:length(angles)
     try
-        t = loadTHzPumpProbeTimeTrace(fname, ...);
+        t = thz.io.loadTHzPumpProbeTimeTrace(fname, ...);
         t.hwpAngle = repmat(ang, height(t), 1);
         if height(t) == 0 || size(t.Time_ps, 2) < 50
             warning('Skipping %g° — trace too short (%d points).', ang, size(t.Time_ps,2));
@@ -37,6 +120,9 @@ for i = 1:length(angles)
     end
 end
 ```
+
+Use `ii` (not `i`) as the loop counter — `i` shadows the imaginary unit
+and breaks complex math elsewhere in the script.
 
 ## Polar Axes Inside tiledlayout
 
@@ -154,3 +240,9 @@ Any MATLAB R2025a script involving:
 - Color-coded region highlighting in time/frequency plots
 - Error bound visualization on polar data
 - Helper functions that need to accept N frequency bands
+
+Also load this skill at the start of any work in `~/Documents/MATLAB/`
+(the `+thz` package) or any analysis script in
+`~/Documents/Scientific Data/` that calls into it — the package layout
+section above is the canonical reference for which subpackage owns
+which function.

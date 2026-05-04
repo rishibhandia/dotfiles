@@ -1,6 +1,7 @@
 # TA Fluence Dependence with Wire Grid Polarizers
 
 **Extracted:** 2026-05-01
+**Updated:** 2026-05-03
 **Context:** Pump fluence dependence using two wire grid polarizers to control THz field
 
 ## Problem
@@ -19,6 +20,25 @@ Exponent interpretation:
 - n ≈ 2: quadratic in E_pump / linear in intensity (χ³ process)
 
 ## Example
+
+The `+thz/+ta` package now provides both pieces:
+
+```matlab
+% Per-scan field/intensity factors from the wire-grid angle
+[fieldFactors, intFactors] = thz.ta.wireGridFieldFactor(angles);
+
+% Power-law fit: log(P) = n*log(F) + c
+[exponent, intercept, residRMS] = thz.ta.fitPowerLaw(fieldFactors, peaks);
+
+fprintf('Exponent in field: %.2f (RMS log-resid %.3f)\n', exponent, residRMS);
+```
+
+The exponent in *field factor F* tells you the order of the process:
+`n ≈ 1` is `chi^2` (linear in E_pump), `n ≈ 2` is `chi^3` (linear in
+intensity). Pass `intFactors` instead if you want the exponent in
+*intensity* and expect to see those values halved.
+
+### Open-coded equivalent (for reference)
 ```matlab
 logF = log(fieldFactors(:));
 logP = log(peaks(:));
