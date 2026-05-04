@@ -11,6 +11,37 @@ Analyze the current session and extract any patterns worth saving as skills.
 
 Run `/learn` at any point during a session when you've solved a non-trivial problem.
 
+## Routing — Where Does This Pattern Belong?
+
+Before writing anything, classify the new pattern by topic:
+
+- **MATLAB / `+thz` package / THz / TA pump-probe / spectroscopy** →
+  append to the relevant section of an **existing** topic file in the
+  `matlab` skill at
+  `~/.local/share/chezmoi/dot_claude/skills/matlab/`. The current
+  topic files are:
+  - `SKILL.md` — `+thz` package overview, calling conventions, the
+    in-progress per-file loader pattern
+  - `style-guide.md` — naming, formatting, function/class authoring
+  - `performance.md` — vectorization, pre-allocation, JIT-friendly idioms
+  - `plotting.md` — color, polar in tiledlayout, region highlighting,
+    figure font and `exportgraphics` sizing
+  - `fft.md` — `thz.fft.disc_ft` / `rfftFreq` table conventions and
+    nfft sizing
+  - `ta.md` — TA pump-probe workflow: sideband analysis, fluence
+    scaling, frequency axis, SHG normalization, `varargin` integration
+    helpers
+
+  Only create a new topic file in `skills/matlab/` if the pattern
+  genuinely doesn't fit any of the existing ones (and update
+  `SKILL.md`'s navigation table when you do).
+
+- **Anything else** (Python, Qt, Windows quirks, vendor SDKs,
+  mock-object traps, etc.) → flat dump to
+  `~/.local/share/chezmoi/dot_claude/skills/learned/<pattern-name>.md`,
+  one pattern per file. Each topic earns promotion to its own real
+  skill (`skills/<topic>/`) once it accumulates ~3+ related notes.
+
 ## What to Extract
 
 Look for:
@@ -38,7 +69,14 @@ Look for:
 
 ## Output Format
 
-Create a skill file at `~/.claude/skills/learned/[pattern-name].md`:
+For an **existing topic file** (the MATLAB case), append a new section
+to the file rather than rewriting it. Match the file's existing heading
+depth and add a `**Updated:** [date]` line near the top if it's not
+already there.
+
+For a **new file in `learned/`** (the catch-all case), create at
+`~/.local/share/chezmoi/dot_claude/skills/learned/[pattern-name].md`
+with this template:
 
 ```markdown
 # [Descriptive Pattern Name]
@@ -69,15 +107,18 @@ Create a skill file at `~/.claude/skills/learned/[pattern-name].md`:
 
 ## Saving — Chezmoi-Managed Dotfiles
 
-Skills are managed by chezmoi so they sync across machines. **Always write to both locations:**
+Skills are managed by chezmoi so they sync across machines. **Always
+write to the chezmoi source, then `dots apply` to mirror into
+`~/.claude/`.**
 
-1. **Chezmoi source** (canonical, synced to other machines):
-   `~/.local/share/chezmoi/dot_claude/skills/learned/[pattern-name].md`
+Chezmoi source paths (pick one based on the routing decision above):
 
-2. **Live location** (used by Claude Code immediately):
-   Applied automatically via `dots apply` after writing to chezmoi source.
+- MATLAB pattern → existing topic file under
+  `~/.local/share/chezmoi/dot_claude/skills/matlab/<topic>.md`
+- Anything else → new file at
+  `~/.local/share/chezmoi/dot_claude/skills/learned/[pattern-name].md`
 
-After writing to the chezmoi source, run:
+After writing the chezmoi source:
 ```bash
 dots apply   # sync chezmoi source → ~/.claude/
 ```
@@ -87,7 +128,9 @@ Then remind the user to commit:
 dots git add -A && dots git commit -m "learn: [description]"
 ```
 
-**Important:** The chezmoi source uses `dot_claude/` (not `.claude/`) because chezmoi encodes dot-prefixed directories with the `dot_` prefix.
+**Important:** The chezmoi source uses `dot_claude/` (not `.claude/`)
+because chezmoi encodes dot-prefixed directories with the `dot_`
+prefix.
 
 ## Notes
 
