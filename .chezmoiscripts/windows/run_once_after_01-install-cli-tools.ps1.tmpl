@@ -102,6 +102,31 @@ if (Get-Command tirith -ErrorAction SilentlyContinue) {
 
 
 # -----------------------------------------------------------------------------
+# rtk - wire the Bash output-compression hook into Claude Code's global config
+# https://github.com/rtk-ai/rtk
+# --auto-patch: non-interactive (no Y/N prompt)
+# --hook-only: install the Bash hook only; skip RTK.md and the @RTK.md
+#              reference in CLAUDE.md (the hook works transparently — Claude
+#              doesn't need to know rtk exists).
+# Idempotent: rtk init re-applies the same hook entry on subsequent runs.
+# -----------------------------------------------------------------------------
+if (Get-Command rtk -ErrorAction SilentlyContinue) {
+    Write-Info "Wiring rtk hook into Claude Code (global)..."
+    try {
+        rtk init -g --auto-patch --hook-only 2>&1 | Out-Null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Success "rtk hook installed"
+        } else {
+            Write-Warn "rtk init failed (non-fatal — run 'rtk init -g --auto-patch --hook-only' manually)"
+        }
+    } catch {
+        Write-Warn "rtk init failed: $_"
+    }
+} else {
+    Write-Warn "rtk not found, skipping hook setup"
+}
+
+# -----------------------------------------------------------------------------
 # Neovim plugins (vim-plug + PlugInstall)
 # -----------------------------------------------------------------------------
 if (Get-Command nvim -ErrorAction SilentlyContinue) {

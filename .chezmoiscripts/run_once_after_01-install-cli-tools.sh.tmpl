@@ -54,6 +54,26 @@ fi
 
 
 # -----------------------------------------------------------------------------
+# rtk - wire the Bash output-compression hook into Claude Code's global config
+# https://github.com/rtk-ai/rtk
+# --auto-patch: non-interactive (no Y/N prompt)
+# --hook-only: install the Bash hook only; skip RTK.md and the @RTK.md
+#              reference in CLAUDE.md (the hook works transparently — Claude
+#              doesn't need to know rtk exists).
+# Idempotent: rtk init re-applies the same hook entry on subsequent runs.
+# -----------------------------------------------------------------------------
+if command -v rtk &>/dev/null; then
+    info "Wiring rtk hook into Claude Code (global)..."
+    if rtk init -g --auto-patch --hook-only >/dev/null 2>&1; then
+        success "rtk hook installed"
+    else
+        warn "rtk init failed (non-fatal — run 'rtk init -g --auto-patch --hook-only' manually)"
+    fi
+else
+    warn "rtk not found, skipping hook setup"
+fi
+
+# -----------------------------------------------------------------------------
 # Neovim plugins (vim-plug + PlugInstall)
 # -----------------------------------------------------------------------------
 if command -v nvim &>/dev/null; then
