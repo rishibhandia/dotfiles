@@ -12,7 +12,10 @@ Guided end-of-session workflow. Work through each step in order, pausing for use
 Run `/learn` to review the session and identify reusable patterns.
 
 - Patterns worth saving: debugging techniques, project conventions, tool quirks, workarounds
-- Save to `~/.claude/skills/learned/<pattern-name>.md`
+- `/learn` routes the pattern to the right destination automatically:
+  - MATLAB / `+thz` package / THz / TA pump-probe → appended to a topic
+    file under `~/.claude/skills/matlab/<topic>.md`
+  - everything else → new file at `~/.claude/skills/learned/<pattern-name>.md`
 - Skip if the session had no non-trivial technical work
 
 ## Step 2: Create or Update Skills (`/skill-creator`)
@@ -30,9 +33,15 @@ A skill is warranted when the pattern involves a multi-step workflow, tool integ
 Track any new or modified files under `~/.claude/` with chezmoi, then commit.
 
 ```bash
-# Add new/changed files (repeat for each)
+# Add new/changed files (repeat for each path that changed)
 chezmoi add ~/.claude/skills/<skill-name>/SKILL.md
 chezmoi add ~/.claude/skills/<skill-name>/scripts/<file>
+
+# MATLAB patterns land in the matlab skill, not learned/
+chezmoi add ~/.claude/skills/matlab/SKILL.md
+chezmoi add ~/.claude/skills/matlab/<topic>.md
+
+# Anything else stays in learned/
 chezmoi add ~/.claude/skills/learned/<pattern-name>.md
 
 # Verify what's staged
