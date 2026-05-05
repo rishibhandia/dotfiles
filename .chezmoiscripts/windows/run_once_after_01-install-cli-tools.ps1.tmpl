@@ -71,6 +71,36 @@ if (Get-Command claude -ErrorAction SilentlyContinue) {
     }
 }
 
+{{- if .portable }}
+# -----------------------------------------------------------------------------
+# uv - Fast Python package manager (portable Windows only)
+# https://github.com/astral-sh/uv
+# Non-portable Windows installs uv via Scoop (see dot_Scoopfile.tmpl).
+# Chezmoi-external download was removed (commit 0a8b52c) because uv.exe
+# gets file-locked during chezmoi apply. The official Astral installer
+# handles its own replacement logic, so no lock conflict.
+# Lands at ~/.local/bin/uv.exe (already excluded by .chezmoiignore).
+# -----------------------------------------------------------------------------
+if (Get-Command uv -ErrorAction SilentlyContinue) {
+    Write-Success "uv already installed"
+} else {
+    Write-Info "Installing uv via official Astral installer..."
+    try {
+        # Trust: Astral (https://astral.sh/uv/install.ps1). Vendor-controlled
+        # URL, no integrity check — accepted because the alternative is manual
+        # install on every fresh-machine bootstrap.
+        Invoke-RestMethod https://astral.sh/uv/install.ps1 | Invoke-Expression
+        if (Get-Command uv -ErrorAction SilentlyContinue) {
+            Write-Success "uv installed"
+        } else {
+            Write-Warn "uv installation completed but binary not on PATH yet (restart shell)"
+        }
+    } catch {
+        Write-Warn "uv installation failed: $_"
+    }
+}
+{{- end }}
+
 # -----------------------------------------------------------------------------
 # Tirith (Terminal security - guards against URL/ANSI injection attacks)
 # https://github.com/sheeki03/tirith
