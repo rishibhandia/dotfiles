@@ -117,6 +117,13 @@ This repo follows XDG Base Directory spec:
   - Initialized in shell via `eval "$(tirith init)"` (zsh) or `Invoke-Expression (& tirith init powershell)` (PowerShell)
   - **Claude Code MCP**: Registered as MCP server on personal machines (`settings.json.tmpl`) — provides `tirith_check_command`, `tirith_check_url`, `tirith_scan_file`, etc.
 
+### AI/LLM Tools
+- **rtk** - Claude Code output compressor (intercepts common dev commands and filters their output before it reaches Claude's context, ~60-90% token reduction)
+  - macOS/Linux: Installed via official Homebrew formula (`brew "rtk"` in Brewfile, no tap needed)
+  - Windows: Not in Scoop. Always installed from GitHub releases via `.chezmoiexternal.toml.tmpl` (outside the `.portable` gate, since the Scoop path can't supply it). Lands at `~/.local/bin/rtk.exe`
+  - **Claude Code hook**: `run_once_after_01` runs `rtk init -g --auto-patch --hook-only` to register the `Bash` PreToolUse hook in `~/.claude/settings.json`. Flags chosen so the install is non-interactive and doesn't add `RTK.md` / `@RTK.md` to the global CLAUDE.md (the hook works transparently — Claude doesn't need to know rtk exists)
+  - **Bypass for one command**: rtk's matchers are pattern-based; off-pattern variants pass through. Run `git -P status` or pipe through `cat` to skip rewriting. Full removal: `rtk init -g --uninstall`. There is no `RTK_HOOK_DISABLE` env var
+
 ### Template Variables
 When editing `.tmpl` files, these variables are available:
 - `.chezmoi.hostname` - Machine hostname
@@ -132,8 +139,8 @@ When editing `.tmpl` files, these variables are available:
 Scripts that run automatically during `chezmoi apply`:
 - `run_once_before_install-homebrew.sh.tmpl` - Installs Homebrew (first run only)
 - `run_onchange_after_install-packages.sh.tmpl` - Installs Brewfile/Scoopfile packages (when package files change)
-- `run_once_after_01-install-cli-tools.sh.tmpl` - Installs Claude Code, Shell Sage, nvim plugins (macOS/Linux)
-- `windows/run_once_after_01-install-cli-tools.ps1.tmpl` - Installs Claude Code, Tirith, psmux, nvim plugins (Windows)
+- `run_once_after_01-install-cli-tools.sh.tmpl` - Installs Claude Code, Shell Sage, nvim plugins, wires rtk hook (macOS/Linux)
+- `windows/run_once_after_01-install-cli-tools.ps1.tmpl` - Installs Claude Code, Tirith, psmux, nvim plugins, wires rtk hook (Windows)
 - `darwin/run_once_after_configure-macos.sh` - Configures macOS preferences
 - `run_once_after_02-install-adguardhome.sh.tmpl` - Installs AdGuard Home on the Mac mini (LAN DNS host) — gated to `rishi-macmini-2020`
 - `run_once_after_03-configure-mini-always-on.sh.tmpl` - `pmset` 24/7 settings for the Mac mini — gated to `rishi-macmini-2020`
@@ -141,6 +148,8 @@ Scripts that run automatically during `chezmoi apply`:
 
 ### Windows Portable Mode (`.chezmoiexternal.toml.tmpl`)
 Fallback for Windows machines where Scoop is unavailable (`.portable = true`). Downloads pre-built binaries directly from GitHub releases to `~/.local/bin`, which is added to PATH in the PowerShell profile. Covers: rg, fd, bat, fzf, zoxide, starship, lsd, jq, yq, gh, duf, fastfetch, uv, uvx, ruff. Note: nvim, navi, and tirith are NOT included in portable mode.
+
+**Always-on Windows externals (regardless of `.portable`):** rtk is installed from GitHub releases on every Windows machine because rtk-ai publishes no Scoop manifest. Listed outside the `.portable` block in `.chezmoiexternal.toml.tmpl`.
 
 ### Package Management
 - `dot_Brewfile.tmpl` → `~/.Brewfile` - Homebrew packages for macOS/Linux (templated; supports per-machine gating via `{{ if .personal }}` etc.)
