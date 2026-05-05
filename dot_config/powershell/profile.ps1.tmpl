@@ -70,14 +70,18 @@ if (Get-Module -ListAvailable -Name PSReadLine) {
 # Add ~/.local/bin to PATH (portable mode binaries + Claude Code native install)
 # Persist to User PATH so tools that check the env var (e.g. Claude Code
 # auto-updater) see it, not just the current session.
+# Use exact-segment matching on `;` — substring matches would be fooled by
+# nested entries like ".local\bin\psmux".
 $LocalBin = Join-Path $env:USERPROFILE ".local\bin"
 if (Test-Path $LocalBin) {
     $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
-    if ($userPath -notlike "*$LocalBin*") {
+    $userSegments = if ([string]::IsNullOrEmpty($userPath)) { @() } else { $userPath -split ';' }
+    if ($userSegments -notcontains $LocalBin) {
         $newUserPath = if ([string]::IsNullOrEmpty($userPath)) { $LocalBin } else { "$LocalBin;$userPath" }
         [Environment]::SetEnvironmentVariable("PATH", $newUserPath, "User")
     }
-    if ($env:PATH -notlike "*$LocalBin*") {
+    $sessionSegments = $env:PATH -split ';'
+    if ($sessionSegments -notcontains $LocalBin) {
         $env:PATH = "$LocalBin;$env:PATH"
     }
 }
