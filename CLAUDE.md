@@ -149,7 +149,7 @@ Scripts that run automatically during `chezmoi apply`:
 ### Windows Portable Mode (`.chezmoiexternal.toml.tmpl`)
 Fallback for Windows machines where Scoop is unavailable (`.portable = true`). Downloads pre-built binaries directly from GitHub releases to `~/.local/bin`, which is added to PATH in the PowerShell profile. Covers: rg, fd, bat, fzf, zoxide, starship, lsd, jq, yq, gh, duf, fastfetch, ruff. Note: nvim, navi, and tirith are NOT included in portable mode.
 
-**uv / uvx exception:** Used to be in the list above, but `uv.exe` gets file-locked on Windows during `chezmoi apply` (commit `0a8b52c`). `.chezmoiignore` now blocks `.local/bin/uv.exe` and `.local/bin/uvx.exe` on all Windows targets. Install paths now: Scoop (`main/uv`) on non-portable Windows; manual `irm https://astral.sh/uv/install.ps1 | iex` on portable Windows (no chezmoi automation — CI does this in `.github/workflows/test.yml`).
+**uv / uvx exception:** Used to be in the list above, but `uv.exe` gets file-locked on Windows during `chezmoi apply` (commit `0a8b52c`). `.chezmoiignore` now blocks `.local/bin/uv.exe` and `.local/bin/uvx.exe` on all Windows targets. Install paths now: Scoop (`main/uv`) on non-portable Windows; the official Astral installer (`irm https://astral.sh/uv/install.ps1 | iex`) run from `windows/run_once_after_01-install-cli-tools.ps1.tmpl` on portable Windows. The Astral installer manages its own replacement logic, so it doesn't trigger the file-lock that prompted the chezmoi-external removal.
 
 **Always-on Windows externals (regardless of `.portable`):** rtk is installed from GitHub releases on every Windows machine because rtk-ai publishes no Scoop manifest. Listed outside the `.portable` block in `.chezmoiexternal.toml.tmpl`.
 
