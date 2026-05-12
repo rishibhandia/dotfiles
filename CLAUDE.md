@@ -206,6 +206,7 @@ Current learned files:
 - **ta-fft-frequency-axis.md** — TA FFT frequency axis: use `abs(dt)` and manual freq construction
 - **ta-sideband-analysis.md** — Coherent phonon sideband analysis workflow in broadband TA
 - **matlab-figure-font-sizes.md** — Default font sizes for MATLAB figures (~10-11pt labels, 8pt annotations)
+- **powershell-utf8-bom-em-dash.md** — ASCII-only in `*.ps1.tmpl`: PowerShell 5.1 mis-decodes UTF-8 without BOM and em-dashes break parsing
 
 ## Mac Mini AdGuard Home Setup
 
