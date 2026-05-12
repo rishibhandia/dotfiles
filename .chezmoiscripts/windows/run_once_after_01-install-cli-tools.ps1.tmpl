@@ -21,7 +21,7 @@ if (Get-Command claude -ErrorAction SilentlyContinue) {
 } else {
     $installed = $false
 
-    # Method 1: Native installer (recommended by Anthropic — always latest)
+    # Method 1: Native installer (recommended by Anthropic --always latest)
     if (-not $installed) {
         Write-Info "Installing Claude Code via native installer..."
         try {
@@ -35,7 +35,7 @@ if (Get-Command claude -ErrorAction SilentlyContinue) {
         }
     }
 
-    # Method 2: winget (fallback — may install older version)
+    # Method 2: winget (fallback --may install older version)
     if (-not $installed -and (Get-Command winget -ErrorAction SilentlyContinue)) {
         Write-Info "Installing Claude Code via winget..."
         try {
@@ -87,7 +87,7 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
     Write-Info "Installing uv via official Astral installer..."
     try {
         # Trust: Astral (https://astral.sh/uv/install.ps1). Vendor-controlled
-        # URL, no integrity check — accepted because the alternative is manual
+        # URL, no integrity check --accepted because the alternative is manual
         # install on every fresh-machine bootstrap.
         Invoke-RestMethod https://astral.sh/uv/install.ps1 | Invoke-Expression
         if (Get-Command uv -ErrorAction SilentlyContinue) {
@@ -136,7 +136,7 @@ if (Get-Command tirith -ErrorAction SilentlyContinue) {
 # https://github.com/rtk-ai/rtk
 # --auto-patch: non-interactive (no Y/N prompt)
 # --hook-only: install the Bash hook only; skip RTK.md and the @RTK.md
-#              reference in CLAUDE.md (the hook works transparently — Claude
+#              reference in CLAUDE.md (the hook works transparently --Claude
 #              doesn't need to know rtk exists).
 # Idempotent: rtk init re-applies the same hook entry on subsequent runs.
 # -----------------------------------------------------------------------------
@@ -147,7 +147,7 @@ if (Get-Command rtk -ErrorAction SilentlyContinue) {
         if ($LASTEXITCODE -eq 0) {
             Write-Success "rtk hook installed"
         } else {
-            Write-Warn "rtk init failed (non-fatal — run 'rtk init -g --auto-patch --hook-only' manually)"
+            Write-Warn "rtk init failed (non-fatal --run 'rtk init -g --auto-patch --hook-only' manually)"
         }
     } catch {
         Write-Warn "rtk init failed: $_"
