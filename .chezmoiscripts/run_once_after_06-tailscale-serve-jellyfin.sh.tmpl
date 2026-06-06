@@ -1,0 +1,23 @@
+{{ if and (eq .chezmoi.os "darwin") (eq .hostname "rishi-macmini-2020") -}}
+#!/bin/bash
+# Expose Jellyfin over Tailscale Serve on https://<mini>.<tailnet>.ts.net:8443.
+# Idempotent: tailscale serve overwrites the existing config for the same port.
+# No-op on every other machine.
+
+set -e
+
+eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null || true
+
+if ! command -v tailscale &>/dev/null; then
+    echo "tailscale not installed yet; brew bundle should install it before this runs" >&2
+    exit 0
+fi
+
+# Skip if not logged into a tailnet (fresh machine before manual login).
+if ! tailscale status >/dev/null 2>&1; then
+    echo "tailscale not logged in; skipping Jellyfin serve setup" >&2
+    exit 0
+fi
+
+tailscale serve --bg --https=8443 http://localhost:8096 >/dev/null
+{{ end -}}

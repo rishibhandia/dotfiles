@@ -145,6 +145,8 @@ Scripts that run automatically during `chezmoi apply`:
 - `run_once_after_02-install-adguardhome.sh.tmpl` - Installs AdGuard Home on the Mac mini (LAN DNS host) — gated to `rishi-macmini-2020`
 - `run_once_after_03-configure-mini-always-on.sh.tmpl` - `pmset` 24/7 settings for the Mac mini — gated to `rishi-macmini-2020`
 - `run_once_after_04-set-mini-dns-loopback.sh.tmpl` - Points the Mac mini's resolver at `127.0.0.1` once AGH is answering — gated to `rishi-macmini-2020`. Re-run after the AGH first-run wizard with: `chezmoi state delete-bucket --bucket=scriptState && chezmoi apply`.
+- `run_once_after_05-start-colima.sh.tmpl` - Registers Colima as a brew service so the Linux VM/Docker daemon starts at login — gated to `rishi-macmini-2020`.
+- `run_once_after_06-tailscale-serve-jellyfin.sh.tmpl` - Exposes Jellyfin over Tailscale Serve at `https://<mini>.<tailnet>.ts.net:8443` — gated to `rishi-macmini-2020`. Requires the mini to already be logged into a tailnet; otherwise it logs a notice and exits.
 
 ### Windows Portable Mode (`.chezmoiexternal.toml.tmpl`)
 Fallback for Windows machines where Scoop is unavailable (`.portable = true`). Downloads pre-built binaries directly from GitHub releases to `~/.local/bin`, which is added to PATH in the PowerShell profile. Covers: rg, fd, bat, fzf, zoxide, starship, lsd, jq, yq, gh, duf, fastfetch, ruff. Note: nvim, navi, and tirith are NOT included in portable mode.
