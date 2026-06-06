@@ -1,7 +1,9 @@
 {{ if and (eq .chezmoi.os "darwin") (eq .hostname "rishi-macmini-2020") -}}
 #!/bin/bash
-# Expose Jellyfin over Tailscale Serve on https://<mini>.<tailnet>.ts.net:8443.
-# Idempotent: tailscale serve overwrites the existing config for the same port.
+# Expose Jellyfin over Tailscale Serve at https://<mini>.<tailnet>.ts.net/jellyfin.
+# Jellyfin's BaseUrl must be set to /jellyfin in network.xml for the path mount
+# to work (Dashboard -> Networking -> Base URL; restart Jellyfin to apply).
+# Idempotent: tailscale serve overwrites the existing config for the same path.
 # No-op on every other machine.
 
 set -e
@@ -19,5 +21,5 @@ if ! tailscale status >/dev/null 2>&1; then
     exit 0
 fi
 
-tailscale serve --bg --https=8443 http://localhost:8096 >/dev/null
+tailscale serve --bg --set-path=/jellyfin http://localhost:8096 >/dev/null
 {{ end -}}
