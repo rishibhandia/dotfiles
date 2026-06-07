@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Keep Jellyfin running on the always-on Mac mini. A lightweight watchdog:
+  every 15s it checks the Jellyfin API and, if it's down, reopens the app.
+  Covers login/reboot startup, crashes, and (importantly) the macOS Jellyfin
+  app's in-app "Restart", which shuts the server down without relaunching it.
+  Drives the real .app via `open` so Jellyfin keeps its macOS file-access (TCC)
+  permission to the external media drive (the raw server binary under launchd
+  would not). Managed by chezmoi; gated to the mini via .chezmoiignore.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.rishi.jellyfin</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>while true; do curl -fsS --max-time 5 -o /dev/null http://127.0.0.1:8096/System/Info/Public || open -a Jellyfin; sleep 15; done</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/jellyfin-keepalive.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/jellyfin-keepalive.err.log</string>
+</dict>
+</plist>

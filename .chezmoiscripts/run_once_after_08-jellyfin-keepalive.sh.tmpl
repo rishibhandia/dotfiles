@@ -1,0 +1,19 @@
+{{ if and (eq .chezmoi.os "darwin") (eq .hostname "rishi-macmini-2020") -}}
+#!/bin/bash
+# Load the Jellyfin keep-alive LaunchAgent on the always-on Mac mini. The agent
+# (chezmoi-managed plist) watchdogs Jellyfin and relaunches it if it goes down --
+# including after the macOS app's in-app "Restart", which otherwise stops the
+# server without bringing it back. No-op on every other machine.
+
+set -e
+
+: "${XDG_STATE_HOME:=$HOME/.local/state}"
+PLIST="$HOME/Library/LaunchAgents/com.rishi.jellyfin.plist"
+
+mkdir -p "$XDG_STATE_HOME"
+
+if [ -f "$PLIST" ]; then
+    launchctl unload "$PLIST" >/dev/null 2>&1 || true
+    launchctl load "$PLIST" >/dev/null 2>&1 || true
+fi
+{{ end -}}

@@ -60,6 +60,7 @@ dot_bash_profile
 {{ if ne .hostname "rishi-macmini-2020" }}
 .local/share/adguardhome-seed
 Library/LaunchAgents/com.rishi.colima.plist
+Library/LaunchAgents/com.rishi.jellyfin.plist
 {{ end }}
 
 # =============================================================================
