@@ -22,6 +22,12 @@ export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$XDG_CONFIG_HOME/cache"
 export XDG_STATE_HOME="$HOME/.local/state"
+{{- if eq .hostname "rishi-macmini-2020" }}
+
+# Colima: pin config to the XDG location instead of legacy ~/.colima
+# (Colima 0.10.x has flaky XDG auto-detection; set it explicitly).
+export COLIMA_HOME="$XDG_CONFIG_HOME/colima"
+{{- end }}
 
 # editor
 export EDITOR="nvim"
