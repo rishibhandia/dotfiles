@@ -147,6 +147,7 @@ Scripts that run automatically during `chezmoi apply`:
 - `run_once_after_04-set-mini-dns-loopback.sh.tmpl` - Points the Mac mini's resolver at `127.0.0.1` once AGH is answering — gated to `rishi-macmini-2020`. Re-run after the AGH first-run wizard with: `chezmoi state delete-bucket --bucket=scriptState && chezmoi apply`.
 - `run_once_after_05-start-colima.sh.tmpl` - Runs Colima from its XDG location (`~/.config/colima`) with 4 CPU / 6 GiB and `/Volumes/Easystore` mounted **read-only** (so the Shoko container can read the anime library) — gated to `rishi-macmini-2020`. Replaces the old `brew services` approach with a chezmoi-managed LaunchAgent (`~/Library/LaunchAgents/com.rishi.colima.plist`, gated via `.chezmoiignore`) that pins `COLIMA_HOME` because Colima 0.10.x has flaky XDG auto-detection (`COLIMA_HOME` is also exported in `private_dot_zshenv.tmpl` for interactive shells). Idempotent: creates the VM only if missing, **never deletes** an existing VM (that would wipe Docker named volumes such as Shoko's DB). Recreating the VM (e.g. to change mounts/resources) is a deliberate manual step: `colima delete && rm -rf ~/.colima` then re-run.
 - `run_once_after_06-tailscale-serve-jellyfin.sh.tmpl` - Exposes Jellyfin over Tailscale Serve at `https://<mini>.<tailnet>.ts.net:8443` — gated to `rishi-macmini-2020`. Uses a dedicated HTTPS port instead of a path mount: Jellyfin double-prefixes its `BaseUrl` on redirects (e.g. `/jellyfin/System/Info/Public` → `/jellyfin/jellyfin/web/`), which browsers tolerate but native mobile apps don't. Requires the mini to already be logged into a tailnet; otherwise the script logs a notice and exits.
+- `run_once_after_07-install-shoko.sh.tmpl` - Runs **Shoko Server** as a Docker container (`ghcr.io/shokoanime/server`) on Colima — gated to `rishi-macmini-2020`. Shoko is the anime metadata/organization backend for Jellyfin's Shokofin plugin. Writes `~/.config/shoko/docker-compose.yml` then `docker compose up -d`. The anime drive is bind-mounted at its identical host path (`/Volumes/Easystore/Movies & Shows`, read-only) so Shokofin's host-side symlinks resolve without remapping; Shoko's own data lives in the `shoko-config` Docker named volume. API/UI on `127.0.0.1:8111` (localhost-only). Idempotent. See the "Mac Mini Shoko + Jellyfin Anime" section for the manual UI steps.
 
 ### Windows Portable Mode (`.chezmoiexternal.toml.tmpl`)
 Fallback for Windows machines where Scoop is unavailable (`.portable = true`). Downloads pre-built binaries directly from GitHub releases to `~/.local/bin`, which is added to PATH in the PowerShell profile. Covers: rg, fd, bat, fzf, zoxide, starship, lsd, jq, yq, gh, duf, fastfetch, ruff. Note: nvim, navi, and tirith are NOT included in portable mode.
@@ -294,6 +295,37 @@ dots git push
    - Router DHCP: set Static DNS 1 → 192.168.1.185 (one click in Linksys UI)
    - iCloud Private Relay off (if reusing same Apple ID, already off)
    - Browser DoH off (per browser, per profile)
+```
+
+## Mac Mini Shoko + Jellyfin Anime
+
+The Mac mini runs **Shoko Server** (Docker, via Colima) as the metadata/organization backend for the anime library, surfaced in Jellyfin through the **Shokofin** plugin. Shoko identifies every file by hash against AniDB, giving correct franchise grouping, seasons, OVAs, movies, and AniDB episode numbering — replacing the old per-provider plugins (AniDB / AniList / AniSearch / Kitsu).
+
+### Architecture decisions
+- **Docker, not native:** Shoko doesn't officially support native Apple Silicon (missing-library risk) and has no brew formula; the official image runs fine on Colima.
+- **Identical-path mount:** Jellyfin runs natively on the host and Shokofin builds a symlink VFS pointing at the paths Shoko reports. So the media is bind-mounted into the container at its *real host path* (`/Volumes/Easystore/Movies & Shows`, read-only), and `/Volumes/Easystore` is mounted into the Colima VM by `run_once_after_05`. Shokofin's host-side symlinks then resolve with zero path remapping — no path-substitution config needed.
+- **Persistence:** Shoko's config/DB lives in the `shoko-config` Docker named volume (mounting `/home/shoko/.shoko` wrong is a known data-loss footgun).
+- **Networking:** API/UI bound to `127.0.0.1:8111` (localhost-only). Reach it on the mini directly, or `ssh -L 8111:127.0.0.1:8111 <mini>` from elsewhere.
+
+### What's automated by chezmoi
+- Colima VM with the Easystore mount + resources (`run_once_after_05`)
+- Shoko container install + start (`run_once_after_07`)
+
+### Manual one-time steps (Jellyfin/Shoko UI — not chezmoi-able)
+
+1. **Remove conflicting Jellyfin plugins** (done 2026-06-06): stop Jellyfin, remove `AniDB` / `AniList` / `AniSearch` / `Kitsu` from `~/.local/share/jellyfin/plugins/`, restart. They were moved to `~/.local/share/jellyfin/.plugins-removed-2026-06-06/` (delete once happy). Removing plugins does **not** delete cached posters/metadata (those live in `~/.local/share/jellyfin/metadata/` + the DB).
+
+2. **Shoko first-run wizard** at `http://127.0.0.1:8111`: create the Shoko admin account (its own login), link AniDB (your AniDB username/password), and add an import folder pointing at `/Volumes/Easystore/Movies & Shows`, then start the import. AniDB is heavily rate-limited — initial matching of a large library takes hours and may span a day; that's normal throttling, not a hang.
+
+3. **Install + configure Shokofin in Jellyfin**: Dashboard → Plugins → Repositories → add `Shokofin Stable` = `https://raw.githubusercontent.com/ShokoAnime/Shokofin/metadata/stable/manifest.json`; install **Shoko** from the catalog; restart Jellyfin. Then Plugins → Shoko: Host = `http://127.0.0.1:8111`, enter the Shoko credentials, enable the **VFS** and group **by Shoko Groups** (franchise grouping). See https://docs.shokoanime.com/jellyfin/configuring-shokofin.
+
+4. **Create the Jellyfin library** named **"Anime (Shoko)"** with **Shokofin as the only metadata + image provider** (disable TMDb/OMDb/etc. for it), per the Shokofin docs. Leave the existing "Anime" library (same drive) untouched until the new one is verified, then retire it.
+
+### Updating Shoko
+```bash
+docker compose -f ~/.config/shoko/docker-compose.yml pull
+docker compose -f ~/.config/shoko/docker-compose.yml up -d   # restart: unless-stopped keeps it running
+docker logs shoko                                            # troubleshooting
 ```
 
 ## Testing
