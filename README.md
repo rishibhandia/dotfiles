@@ -59,12 +59,12 @@ Portable binaries downloaded directly from GitHub releases:
 ├── .chezmoiexternal.toml.tmpl  # Portable Windows binaries
 ├── .chezmoiscripts/            # Auto-run scripts during apply
 │   ├── run_once_before_install-homebrew.sh.tmpl
-│   ├── run_onchange_after_install-packages.sh.tmpl
+│   ├── run_onchange_after_00-install-packages.sh.tmpl
 │   ├── darwin/                 # macOS-specific scripts
 │   └── windows/                # Windows-specific scripts
-├── dot_Brewfile                # Homebrew packages → ~/.Brewfile
-├── dot_Scoopfile               # Scoop packages → ~/.Scoopfile
-├── dot_zshenv.tmpl             # Environment variables → ~/.zshenv
+├── dot_Brewfile.tmpl           # Homebrew packages → ~/.Brewfile
+├── dot_Scoopfile.tmpl          # Scoop packages → ~/.Scoopfile
+├── private_dot_zshenv.tmpl     # Environment variables → ~/.zshenv
 ├── dot_config/
 │   ├── ghostty/                # Terminal emulator config
 │   ├── git/                    # Git config & ignore
@@ -202,7 +202,7 @@ The `.chezmoi.toml.tmpl` template sets feature flags based on machine type:
 
 ## Custom Shell Functions
 
-Defined in `dot_config/zsh/scripts.zsh`:
+Defined in `dot_config/zsh/scripts.zsh.tmpl`:
 
 | Function | Description |
 |----------|-------------|

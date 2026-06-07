@@ -69,9 +69,9 @@ The main configuration template `.chezmoi.toml.tmpl` defines:
 ### Key Configuration Files
 | Source Path | Target | Purpose |
 |-------------|--------|---------|
-| `dot_zshenv.tmpl` | `~/.zshenv` | Environment variables, XDG paths, API keys |
+| `private_dot_zshenv.tmpl` | `~/.zshenv` | Environment variables, XDG paths, API keys |
 | `dot_config/zsh/dot_zshrc` | `~/.config/zsh/.zshrc` | Main shell config, history, completions |
-| `dot_config/zsh/scripts.zsh` | `~/.config/zsh/scripts.zsh` | Custom shell functions |
+| `dot_config/zsh/scripts.zsh.tmpl` | `~/.config/zsh/scripts.zsh` | Custom shell functions |
 | `dot_config/zsh/aliases/aliases` | `~/.config/zsh/aliases/aliases` | Shell aliases |
 | `dot_config/git/config.tmpl` | `~/.config/git/config` | Git user config (templated email) |
 | `dot_config/nvim/init.vim` | `~/.config/nvim/init.vim` | Neovim configuration |
@@ -83,7 +83,7 @@ This repo follows XDG Base Directory spec:
 - `XDG_CONFIG_HOME` = `~/.config`
 - `ZDOTDIR` = `~/.config/zsh` (zsh files in config, not home)
 
-### Notable Shell Functions (in `scripts.zsh`)
+### Notable Shell Functions (in `scripts.zsh.tmpl`)
 - `dots()` - Dotfiles management command (see Common Commands above)
 - `extract()` / `x` - Universal archive extractor (20+ formats)
 - `gcm()` - AI-powered git commit message generator using LLM
@@ -138,7 +138,7 @@ When editing `.tmpl` files, these variables are available:
 ### Chezmoi Scripts (`.chezmoiscripts/`)
 Scripts that run automatically during `chezmoi apply`:
 - `run_once_before_install-homebrew.sh.tmpl` - Installs Homebrew (first run only)
-- `run_onchange_after_install-packages.sh.tmpl` - Installs Brewfile/Scoopfile packages (when package files change)
+- `run_onchange_after_00-install-packages.sh.tmpl` - Installs Brewfile/Scoopfile packages (when package files change)
 - `run_once_after_01-install-cli-tools.sh.tmpl` - Installs Claude Code, Shell Sage, nvim plugins, wires rtk hook (macOS/Linux)
 - `windows/run_once_after_01-install-cli-tools.ps1.tmpl` - Installs Claude Code, Tirith, psmux, nvim plugins, wires rtk hook (Windows)
 - `darwin/run_once_after_configure-macos.sh` - Configures macOS preferences
@@ -157,7 +157,7 @@ Fallback for Windows machines where Scoop is unavailable (`.portable = true`). D
 
 ### Package Management
 - `dot_Brewfile.tmpl` → `~/.Brewfile` - Homebrew packages for macOS/Linux (templated; supports per-machine gating via `{{ if .personal }}` etc.)
-- `dot_Scoopfile` → `~/.Scoopfile` - Scoop packages for Windows
+- `dot_Scoopfile.tmpl` → `~/.Scoopfile` - Scoop packages for Windows
 - Packages auto-install when package files change via `run_onchange` scripts. The Brewfile install script reads the rendered `~/.Brewfile`, not the template source.
 
 **Tap-based formulae:** Always use the fully qualified `tap/formula` name in the Brewfile when adding entries from a third-party tap. `brew bundle` resolves unqualified `brew "name"` lines against the formula index loaded at startup, which doesn't include taps added later in the same Brewfile, so a fresh-machine apply will fail with `No available formula`. Examples in this repo: `sheeki03/tap/tirith`, `run-llama/liteparse/llamaindex-liteparse`.
@@ -194,21 +194,13 @@ dots git push
 ```
 
 Current learned files:
-- **matlab.md** — MATLAB R2025a best practices (polar plots, color lightening, region highlighting, error bounds, varargin)
-- **matlab-style-guide.md** — MATLAB coding style conventions
-- **matlab-performance.md** — MATLAB performance patterns
-- **matlab-color-lightening.md** — `brighten()` usage, avoiding nonexistent `lighten()`
-- **matlab-datatable-row-vector-convention.md** — Row vector conventions in data tables
-- **matlab-disc-ft-nfft-sizing.md** — Discrete FT NFFT sizing
-- **matlab-plot-region-highlighting.md** — Region highlighting with `patch()`
-- **matlab-polar-in-tiledlayout.md** — Polar axes workaround inside `tiledlayout`
-- **matlab-shg-normalization.md** — SHG normalization patterns
+- **andor-sdk-dll-lifecycle.md** — Never force-kill Python holding Andor SDK handles (`atmcd64d.dll` / `ShamrockCIF.dll`); avoids `DRV_NOT_AVAILABLE` DLL lockups
+- **windows-phantom-usb-devices.md** — Recovering Andor USB instruments that show as phantom (`CM_PROB_PHANTOM`) devices in Windows Device Manager
 - **mockobject-attribute-getattr-trap.md** — Python mock `__getattr__` trap
 - **qt-test-window-close-blocking-shutdown.md** — Qt test window close blocking shutdown
-- **ta-fft-frequency-axis.md** — TA FFT frequency axis: use `abs(dt)` and manual freq construction
-- **ta-sideband-analysis.md** — Coherent phonon sideband analysis workflow in broadband TA
-- **matlab-figure-font-sizes.md** — Default font sizes for MATLAB figures (~10-11pt labels, 8pt annotations)
 - **powershell-utf8-bom-em-dash.md** — ASCII-only in `*.ps1.tmpl`: PowerShell 5.1 mis-decodes UTF-8 without BOM and em-dashes break parsing
+
+> MATLAB/TA patterns formerly listed here were consolidated into the **matlab** skill (`dot_claude/skills/matlab/`): `fft.md`, `performance.md`, `plotting.md`, `style-guide.md`, `ta.md`.
 
 ## Mac Mini AdGuard Home Setup
 
