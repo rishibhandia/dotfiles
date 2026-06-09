@@ -86,7 +86,8 @@ Library/LaunchAgents/com.rishi.jellyfin.plist
 
 # =============================================================================
 # Repo-only files — never applied to ~/ (chezmoi treats any non-dot source
-# file as a target). CLAUDE.md global rules live in dot_claude/CLAUDE.md.
+# file as a target). CLAUDE.md global rules live in dot_claude/CLAUDE.md;
+# docs/ holds repo-only runbooks.
 # =============================================================================
 CLAUDE.md
 LICENSE
@@ -94,3 +95,4 @@ README.md
 install.sh
 install.ps1
 scripts
+docs/**
