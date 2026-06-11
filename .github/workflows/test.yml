@@ -7,6 +7,11 @@ on:
     branches: [main]
   workflow_dispatch:  # Allow manual trigger
 
+env:
+  # chezmoi's gitHub* template functions call the GitHub API; runners share
+  # unauthenticated rate limits, so authenticate every chezmoi invocation.
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   # ==========================================================================
   # Lint shell scripts
@@ -51,10 +56,19 @@ jobs:
         run: |
           brew install chezmoi
 
-      - name: Initialize chezmoi (dry run)
-        run: |
-          chezmoi init --source="${{ github.workspace }}" --no-tty
-          chezmoi diff || true
+      # chezmoi init does NOT persist a non-default --source, so every
+      # invocation below passes it explicitly.
+      - name: Initialize chezmoi
+        run: chezmoi init --source="${{ github.workspace }}" --no-tty
+
+      - name: Render full target state
+        run: chezmoi diff --source="${{ github.workspace }}"
+
+      - name: Apply dotfiles (files only)
+        run: chezmoi apply --source="${{ github.workspace }}" --exclude=scripts,externals
+
+      - name: Verify applied state
+        run: chezmoi verify --source="${{ github.workspace }}" --exclude=scripts,externals
 
       - name: Test install script syntax
         run: |
@@ -65,9 +79,7 @@ jobs:
           brew bundle check --file=dot_Brewfile || true
 
       - name: Run tests
-        run: |
-          # Source the test script in a way that won't fail the workflow
-          bash scripts/test.sh || echo "Some tests failed (expected in CI)"
+        run: DOTFILES_CI=1 bash scripts/test.sh
 
   # ==========================================================================
   # Test on Ubuntu
@@ -83,18 +95,24 @@ jobs:
         run: |
           sh -c "$(curl -fsSL https://get.chezmoi.io)" -- -b /usr/local/bin
 
-      - name: Initialize chezmoi (dry run)
-        run: |
-          chezmoi init --source="${{ github.workspace }}" --no-tty
-          chezmoi diff || true
+      - name: Initialize chezmoi
+        run: chezmoi init --source="${{ github.workspace }}" --no-tty
+
+      - name: Render full target state
+        run: chezmoi diff --source="${{ github.workspace }}"
+
+      - name: Apply dotfiles (files only)
+        run: chezmoi apply --source="${{ github.workspace }}" --exclude=scripts,externals
+
+      - name: Verify applied state
+        run: chezmoi verify --source="${{ github.workspace }}" --exclude=scripts,externals
 
       - name: Test install script syntax
         run: |
           bash -n install.sh
 
       - name: Run tests
-        run: |
-          bash scripts/test.sh || echo "Some tests failed (expected in CI)"
+        run: DOTFILES_CI=1 bash scripts/test.sh
 
   # ==========================================================================
   # Test on Windows
@@ -111,11 +129,21 @@ jobs:
         run: |
           choco install chezmoi -y
 
-      - name: Initialize chezmoi (dry run)
+      - name: Initialize chezmoi
         shell: pwsh
-        run: |
-          chezmoi init --source="${{ github.workspace }}" --no-tty
-          chezmoi diff || true
+        run: chezmoi init --source="${{ github.workspace }}" --no-tty
+
+      - name: Render full target state
+        shell: pwsh
+        run: chezmoi diff --source="${{ github.workspace }}"
+
+      - name: Apply dotfiles (files only)
+        shell: pwsh
+        run: chezmoi apply --source="${{ github.workspace }}" --exclude=scripts,externals
+
+      - name: Verify applied state
+        shell: pwsh
+        run: chezmoi verify --source="${{ github.workspace }}" --exclude=scripts,externals
 
       - name: Test install script syntax
         shell: pwsh
