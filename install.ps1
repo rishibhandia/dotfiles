@@ -4,13 +4,15 @@
 # Or run locally: .\install.ps1
 #
 # Environment variables:
-#   $env:DOTFILES_DEBUG = 1     - Enable debug output
+#   $env:DOTFILES_DEBUG = 1      - Enable debug output
 #   $env:DOTFILES_BRANCH = "xxx" - Use a specific branch (default: main)
+#   $env:DOTFILES_PORTABLE = 1   - Skip Scoop install, force portable mode
 #
-# This script automatically detects the best installation method:
-#   1. If Scoop is available → use Scoop for all packages
-#   2. If winget is available → use winget for chezmoi, portable binaries for tools
-#   3. Otherwise → download portable chezmoi, portable binaries for tools
+# Installation method:
+#   1. Install Scoop if missing (unless DOTFILES_PORTABLE=1), then use it
+#      for git/chezmoi and let chezmoi run the Scoopfile package scripts
+#   2. If Scoop unavailable: winget for git/chezmoi, portable binaries for tools
+#   3. Otherwise: download portable chezmoi, portable binaries for tools
 
 #Requires -Version 5.1
 $ErrorActionPreference = "Stop"
@@ -44,6 +46,47 @@ function Get-InstallMode {
         return "winget"
     }
     return "portable"
+}
+
+# Install Scoop so chezmoi init detects the full (non-portable) profile.
+# chezmoi sets portable=true whenever scoop is missing at init time, so
+# without this step a fresh machine always lands in portable mode.
+# Set $env:DOTFILES_PORTABLE = 1 to skip Scoop and force portable mode.
+function Install-Scoop {
+    if (Test-Command "scoop") {
+        Write-Success "Scoop already installed"
+        return
+    }
+    if ($env:DOTFILES_PORTABLE -eq "1") {
+        Write-Info "DOTFILES_PORTABLE=1 set - skipping Scoop (portable mode)"
+        return
+    }
+
+    Write-Info "Installing Scoop (user-scope package manager)..."
+    try {
+        $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
+            ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+        if ($isAdmin) {
+            # get.scoop.sh refuses elevated shells unless -RunAsAdmin is passed
+            Invoke-Expression "& {$(Invoke-RestMethod get.scoop.sh)} -RunAsAdmin"
+        } else {
+            Invoke-RestMethod get.scoop.sh | Invoke-Expression
+        }
+    } catch {
+        Write-Warn "Scoop installation failed: $_"
+    }
+
+    # The installer updates the user PATH; make shims visible to this session
+    $shims = Join-Path $env:USERPROFILE "scoop\shims"
+    if ((Test-Path $shims) -and ($env:PATH -notlike "*$shims*")) {
+        $env:PATH = "$env:PATH;$shims"
+    }
+
+    if (Test-Command "scoop") {
+        Write-Success "Scoop installed"
+    } else {
+        Write-Warn "Scoop unavailable - continuing in portable mode"
+    }
 }
 
 # Install chezmoi via the best available method
@@ -228,23 +271,28 @@ function Main {
 
     Write-Info "Detected: Windows $arch, Install mode: $mode"
 
-    # Step 1: Install Git (required for chezmoi init)
+    # Step 1: Install Scoop (so chezmoi init detects the non-portable profile)
+    Install-Scoop
+    $mode = Get-InstallMode
+    Write-Info "Install mode after Scoop bootstrap: $mode"
+
+    # Step 2: Install Git (required for chezmoi init)
     Install-Git
 
-    # Step 2: Install chezmoi
+    # Step 3: Install chezmoi
     Install-Chezmoi
 
-    # Step 3: Initialize dotfiles
+    # Step 4: Initialize dotfiles
     # This will:
     # - Prompt for personal/work/ephemeral settings
     # - If Scoop available: run Scoop install scripts
     # - If portable mode: pull binaries via .chezmoiexternal
     Initialize-Dotfiles
 
-    # Step 4: Configure PowerShell profile
+    # Step 5: Configure PowerShell profile
     Set-PowerShellProfile
 
-    # Step 5: Show next steps
+    # Step 6: Show next steps
     Show-NextSteps
 }
 
