@@ -5,6 +5,16 @@
 
 $ErrorActionPreference = "Continue"
 
+# On a first apply this process was started before Scoop shims and the
+# chezmoi-external binaries (~\.local\bin, e.g. rtk.exe) existed, so they
+# are not on this process's PATH yet. Add them so Get-Command resolves.
+$extraPaths = @("$env:USERPROFILE\scoop\shims", "$env:USERPROFILE\.local\bin")
+foreach ($p in $extraPaths) {
+    if ((Test-Path $p) -and ($env:PATH -notlike "*$p*")) {
+        $env:PATH = "$env:PATH;$p"
+    }
+}
+
 # Colors
 function Write-Info { param($Message) Write-Host "[INFO] $Message" -ForegroundColor Blue }
 function Write-Success { param($Message) Write-Host "[OK] $Message" -ForegroundColor Green }
