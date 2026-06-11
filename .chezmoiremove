@@ -1,0 +1,5 @@
+# Targets chezmoi should delete from machines (target paths, like .chezmoiignore)
+
+# Dead config: zsh reads $ZDOTDIR/.zprofile, never ".zshprofile", and nothing
+# sourced this file. Removed from source 2026-06-11; clean up applied copies.
+.config/zsh/.zshprofile
