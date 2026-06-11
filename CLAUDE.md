@@ -64,7 +64,6 @@ The main configuration template `.chezmoi.toml.tmpl` defines:
 - **Machine detection**: Identifies specific machines (MacBook Pro 2019, Mac Mini 2020, Ubuntu) by hostname
 - **Feature flags**: `ephemeral`, `work`, `headless`, `personal` for conditional configuration
 - **1Password integration**: API keys and secrets retrieved via `onepassword` template function
-- **CPU detection**: Cross-platform CPU info via `.chezmoitemplates/cpu`
 
 ### Key Configuration Files
 | Source Path | Target | Purpose |
