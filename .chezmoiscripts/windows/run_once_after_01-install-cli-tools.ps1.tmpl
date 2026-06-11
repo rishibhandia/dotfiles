@@ -140,6 +140,31 @@ if (Get-Command tirith -ErrorAction SilentlyContinue) {
     Write-Warn "  scoop bucket add tirith https://github.com/sheeki03/scoop-tirith && scoop install tirith"
 }
 
+{{ if .personal -}}
+# -----------------------------------------------------------------------------
+# Tirith MCP server for Claude Code (personal machines)
+# A "mcpServers" key in settings.json is NOT honored by Claude Code;
+# user-scope servers must be registered via `claude mcp add`, which
+# writes ~/.claude.json.
+# -----------------------------------------------------------------------------
+if ((Get-Command claude -ErrorAction SilentlyContinue) -and (Get-Command tirith -ErrorAction SilentlyContinue)) {
+    $mcpList = claude mcp list 2>$null | Out-String
+    if ($mcpList -match '(?m)^tirith') {
+        Write-Success "tirith MCP server already registered"
+    } else {
+        Write-Info "Registering tirith MCP server with Claude Code (user scope)..."
+        claude mcp add --scope user tirith -- tirith mcp-server 2>&1 | Out-Null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Success "tirith MCP server registered"
+        } else {
+            Write-Warn "tirith MCP registration failed (run: claude mcp add --scope user tirith -- tirith mcp-server)"
+        }
+    }
+} else {
+    Write-Warn "claude or tirith not found, skipping tirith MCP registration"
+}
+{{ end -}}
+
 
 # -----------------------------------------------------------------------------
 # rtk - wire the Bash output-compression hook into Claude Code's global config

@@ -115,7 +115,7 @@ This repo follows XDG Base Directory spec:
   - macOS: Installed via Homebrew tap as `sheeki03/tap/tirith` (see "Tap-based formulae" rule above)
   - Windows: Installed via Scoop (`scoop bucket add tirith https://github.com/sheeki03/scoop-tirith && scoop install tirith`)
   - Initialized in shell via `eval "$(tirith init)"` (zsh) or `Invoke-Expression (& tirith init powershell)` (PowerShell)
-  - **Claude Code MCP**: Registered as MCP server on personal machines (`settings.json.tmpl`) — provides `tirith_check_command`, `tirith_check_url`, `tirith_scan_file`, etc.
+  - **Claude Code MCP**: Registered user-scope on personal machines by the `run_once_after_01-install-cli-tools` scripts via `claude mcp add --scope user tirith -- tirith mcp-server` (a `mcpServers` key in settings.json is NOT honored by Claude Code) — provides `tirith_check_command`, `tirith_check_url`, `tirith_scan_file`, etc.
 
 ### AI/LLM Tools
 - **rtk** - Claude Code output compressor (intercepts common dev commands and filters their output before it reaches Claude's context, ~60-90% token reduction)

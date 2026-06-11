@@ -422,4 +422,4 @@ Configuration managed via `~/.claude/settings.json` (templated from `create_sett
 **MCP Servers (personal machines):**
 | Server | Tools | Notes |
 |--------|-------|-------|
-| `tirith` | `tirith_check_command`, `tirith_check_url`, `tirith_check_paste`, `tirith_scan_file`, `tirith_scan_directory`, `tirith_verify_mcp_config`, `tirith_fetch_cloaking` | Terminal security analysis. Installed via Homebrew on personal machines only. |
+| `tirith` | `tirith_check_command`, `tirith_check_url`, `tirith_check_paste`, `tirith_scan_file`, `tirith_scan_directory`, `tirith_verify_mcp_config`, `tirith_fetch_cloaking` | Terminal security analysis. Installed via Homebrew on personal machines only. Registered user-scope via `claude mcp add` by the cli-tools run_once script (settings.json `mcpServers` is not honored by Claude Code). |

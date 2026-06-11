@@ -73,6 +73,29 @@ else
     warn "rtk not found, skipping hook setup"
 fi
 
+{{ if .personal -}}
+# -----------------------------------------------------------------------------
+# Tirith MCP server for Claude Code (personal machines)
+# A "mcpServers" key in settings.json is NOT honored by Claude Code;
+# user-scope servers must be registered via `claude mcp add`, which
+# writes ~/.claude.json.
+# -----------------------------------------------------------------------------
+if command -v claude &>/dev/null && command -v tirith &>/dev/null; then
+    if claude mcp list 2>/dev/null | grep -q '^tirith'; then
+        success "tirith MCP server already registered"
+    else
+        info "Registering tirith MCP server with Claude Code (user scope)..."
+        if claude mcp add --scope user tirith -- tirith mcp-server >/dev/null 2>&1; then
+            success "tirith MCP server registered"
+        else
+            warn "tirith MCP registration failed (run: claude mcp add --scope user tirith -- tirith mcp-server)"
+        fi
+    fi
+else
+    warn "claude or tirith not found, skipping tirith MCP registration"
+fi
+{{ end -}}
+
 # -----------------------------------------------------------------------------
 # Neovim plugins (vim-plug + PlugInstall)
 # -----------------------------------------------------------------------------

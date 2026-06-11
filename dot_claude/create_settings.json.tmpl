@@ -126,12 +126,5 @@
 {{- else }}
     "command": "bash ~/.claude/statusline.sh"
 {{- end }}
-  }{{ if .personal }},
-  "mcpServers": {
-    "tirith": {
-      "command": "tirith",
-      "args": ["mcp-server"],
-      "type": "stdio"
-    }
-  }{{ end }}
+  }
 }
