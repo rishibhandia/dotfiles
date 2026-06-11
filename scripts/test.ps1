@@ -13,31 +13,31 @@ $script:TestsSkipped = 0
 
 function Pass {
     param($Message)
-    Write-Host "✓ $Message" -ForegroundColor Green
+    Write-Host "[OK] $Message" -ForegroundColor Green
     $script:TestsPassed++
 }
 
 function Fail {
     param($Message)
-    Write-Host "✗ $Message" -ForegroundColor Red
+    Write-Host "[X] $Message" -ForegroundColor Red
     $script:TestsFailed++
 }
 
 function Skip {
     param($Message)
-    Write-Host "○ $Message (skipped)" -ForegroundColor Yellow
+    Write-Host "[SKIP] $Message (skipped)" -ForegroundColor Yellow
     $script:TestsSkipped++
 }
 
 function Info {
     param($Message)
-    Write-Host "ℹ $Message" -ForegroundColor Blue
+    Write-Host "[i] $Message" -ForegroundColor Blue
 }
 
 function Section {
     param($Title)
     Write-Host ""
-    Write-Host "━━━ $Title ━━━" -ForegroundColor Blue
+    Write-Host "=== $Title ===" -ForegroundColor Blue
 }
 
 function Test-CommandExists {
@@ -304,9 +304,9 @@ function Test-ChezmoiState {
 
 function Main {
     Write-Host ""
-    Write-Host "╔════════════════════════════════════════════╗" -ForegroundColor Blue
-    Write-Host "║      Dotfiles Setup Verification Tests     ║" -ForegroundColor Blue
-    Write-Host "╚════════════════════════════════════════════╝" -ForegroundColor Blue
+    Write-Host "==============================================" -ForegroundColor Blue
+    Write-Host "      Dotfiles Setup Verification Tests" -ForegroundColor Blue
+    Write-Host "==============================================" -ForegroundColor Blue
 
     Test-EssentialCommands
     Test-CliTools
