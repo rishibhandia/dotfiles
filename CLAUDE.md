@@ -275,7 +275,7 @@ sudo cat /Applications/AdGuardHome/AdGuardHome.yaml > ~/.local/share/adguardhome
 chmod 600 ~/.local/share/adguardhome-seed/AdGuardHome.yaml
 
 chezmoi add --encrypt ~/.local/share/adguardhome-seed/AdGuardHome.yaml
-# → creates dot_local/share/adguardhome-seed/encrypted_AdGuardHome.yaml.age in source
+# → creates dot_local/share/adguardhome-seed/encrypted_private_AdGuardHome.yaml.age in source
 
 dots git add dot_local/share/adguardhome-seed/
 dots git commit -m "chore: snapshot AGH config seed"

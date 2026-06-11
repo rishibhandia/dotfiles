@@ -3,3 +3,6 @@
 # Claude Code drops settings.local.json into any directory it runs in;
 # the source dir is not a target — keep it out of the repo.
 .claude/
+
+# macOS Finder metadata (don't rely on contributors' global git ignore)
+.DS_Store

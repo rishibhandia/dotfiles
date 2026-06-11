@@ -3,3 +3,12 @@
 # Dead config: zsh reads $ZDOTDIR/.zprofile, never ".zshprofile", and nothing
 # sourced this file. Removed from source 2026-06-11; clean up applied copies.
 .config/zsh/.zshprofile
+
+# Repo-only files that older versions of this repo applied into ~/ before
+# they were .chezmoiignore'd (2026-06-11). Note: ~/README.md, ~/install.sh,
+# and ~/install.ps1 can't be listed here - an exact .chezmoiignore match
+# suppresses the corresponding remove entry (children of an ignored dir,
+# like these, still work) - delete those three by hand per machine.
+scripts/test.sh
+scripts/test.ps1
+scripts/uninstall.ps1
