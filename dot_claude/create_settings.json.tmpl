@@ -11,27 +11,14 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash(git push*)",
+        "matcher": "Write",
         "hooks": [
           {
             "type": "command",
 {{- if eq .chezmoi.os "windows" }}
-            "command": "Write-Host '[Hook] Review changes before push. Press Enter to continue or Ctrl+C to abort...' -ForegroundColor Yellow; Read-Host | Out-Null"
+            "command": "powershell -NoProfile -Command \"$d=[Console]::In.ReadToEnd()|ConvertFrom-Json; $f=[string]$d.tool_input.file_path; if($f -match '\\.(md|txt)$' -and $f -notmatch '(README|CLAUDE|AGENTS|CONTRIBUTING|SKILL|MEMORY)\\.(md|txt)$' -and $f -notmatch '[/\\\\](skills|memory)[/\\\\]'){[Console]::Error.WriteLine('[Hook] BLOCKED: arbitrary documentation file: ' + $f + '. Use README.md, CLAUDE.md, AGENTS.md, or CONTRIBUTING.md instead.'); exit 2}\""
 {{- else }}
-            "command": "echo '[Hook] Review changes before push. Press Enter to continue or Ctrl+C to abort...' >&2 && read -r"
-{{- end }}
-          }
-        ]
-      },
-      {
-        "matcher": "Write(*.md)",
-        "hooks": [
-          {
-            "type": "command",
-{{- if eq .chezmoi.os "windows" }}
-            "command": "$input = $Input | Out-String; $json = $input | ConvertFrom-Json; $file_path = $json.tool_input.file_path; if ($file_path -match '\\.(md|txt)$' -and $file_path -notmatch '(README|CLAUDE|AGENTS|CONTRIBUTING|SKILL)\\.md$' -and $file_path -notmatch '[/\\\\]skills[/\\\\]') { Write-Error '[Hook] BLOCKED: Arbitrary documentation file creation'; Write-Error \"[Hook] File: $file_path\"; Write-Error '[Hook] Use README.md, CLAUDE.md, AGENTS.md, or CONTRIBUTING.md instead'; exit 1 }; Write-Output $input"
-{{- else }}
-            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\nif [[ \"$file_path\" =~ \\.(md|txt)$ ]] && [[ ! \"$file_path\" =~ (README|CLAUDE|AGENTS|CONTRIBUTING|SKILL)\\.md$ ]] && [[ ! \"$file_path\" =~ /skills/ ]]; then\n  echo \"[Hook] BLOCKED: Arbitrary documentation file creation\" >&2\n  echo \"[Hook] File: $file_path\" >&2\n  echo \"[Hook] Use README.md, CLAUDE.md, AGENTS.md, or CONTRIBUTING.md instead\" >&2\n  exit 1\nfi\necho \"$input\""
+            "command": "input=$(cat); file_path=$(printf '%s' \"$input\" | jq -r '.tool_input.file_path // \"\"'); case \"$file_path\" in *.md|*.txt) case \"$file_path\" in *README.md|*CLAUDE.md|*AGENTS.md|*CONTRIBUTING.md|*SKILL.md|*MEMORY.md|*/skills/*|*/memory/*) ;; *) echo \"[Hook] BLOCKED: arbitrary documentation file: $file_path. Use README.md, CLAUDE.md, AGENTS.md, or CONTRIBUTING.md instead.\" >&2; exit 2 ;; esac ;; esac"
 {{- end }}
           }
         ]
@@ -39,14 +26,14 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Edit(*.ts)|Edit(*.tsx)|Edit(*.js)|Edit(*.jsx)",
+        "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
 {{- if eq .chezmoi.os "windows" }}
-            "command": "$input = $Input | Out-String; $json = $input | ConvertFrom-Json; $file_path = $json.tool_input.file_path; if ($file_path -and (Test-Path $file_path)) { $matches = Select-String -Path $file_path -Pattern 'console\\.log' -AllMatches; if ($matches) { Write-Warning \"[Hook] WARNING: console.log found in $file_path\"; $matches | Select-Object -First 5 | ForEach-Object { Write-Warning $_.Line }; Write-Warning '[Hook] Remove console.log before committing' } }; Write-Output $input"
+            "command": "powershell -NoProfile -Command \"$d=[Console]::In.ReadToEnd()|ConvertFrom-Json; $f=[string]$d.tool_input.file_path; if($f -match '\\.(ts|tsx|js|jsx)$' -and (Test-Path $f)){$m=Select-String -Path $f -Pattern 'console\\.log'; if($m){[Console]::Error.WriteLine('[Hook] WARNING: console.log found in ' + $f); $m | Select-Object -First 5 | ForEach-Object {[Console]::Error.WriteLine($_.Line)}; [Console]::Error.WriteLine('[Hook] Remove console.log before committing'); exit 2}}\""
 {{- else }}
-            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\nif [ -n \"$file_path\" ] && [ -f \"$file_path\" ]; then\n  console_logs=$(grep -n \"console\\\\.log\" \"$file_path\" 2>/dev/null || true)\n  if [ -n \"$console_logs\" ]; then\n    echo \"[Hook] WARNING: console.log found in $file_path\" >&2\n    echo \"$console_logs\" | head -5 >&2\n    echo \"[Hook] Remove console.log before committing\" >&2\n  fi\nfi\necho \"$input\""
+            "command": "input=$(cat); file_path=$(printf '%s' \"$input\" | jq -r '.tool_input.file_path // \"\"'); case \"$file_path\" in *.ts|*.tsx|*.js|*.jsx) if [ -f \"$file_path\" ] && grep -q 'console\\.log' \"$file_path\" 2>/dev/null; then { echo \"[Hook] WARNING: console.log found in $file_path:\"; grep -n 'console\\.log' \"$file_path\" | head -5; echo \"[Hook] Remove console.log before committing\"; } >&2; exit 2; fi ;; esac"
 {{- end }}
           }
         ]
@@ -108,6 +95,7 @@
 {{- end }}
     ],
     "ask": [
+      "Bash(git push:*)",
 {{- if eq .chezmoi.os "windows" }}
       "Bash(Remove-Item*)",
       "Bash(del *)",
