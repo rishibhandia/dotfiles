@@ -371,7 +371,7 @@ function calc {
 # Keeps all apps and packages up to date.
 # Syntax: `update [all]`
 function update() {
-    if command -v softwarepudate &> /dev/null; then
+    if command -v softwareupdate &> /dev/null; then
         echo 'Checking for system updates...'
         softwareupdate -l -i -a
     fi
@@ -380,7 +380,6 @@ function update() {
         echo 'Updating packages with Homebrew/Linuxbrew...'
         brew update
         brew upgrade
-        brew cask update
         brew cleanup
     fi
 
@@ -415,7 +414,7 @@ function update() {
         npm update -g
     fi
 
-    if command -v npm &> /dev/null; then
+    if command -v gem &> /dev/null; then
         echo 'Updating Ruby gems...'
         which gem
         gem update --system
