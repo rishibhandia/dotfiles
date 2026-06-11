@@ -90,12 +90,6 @@ brew "zsh-completions"         # Additional zsh completions
 
 {{ if eq .chezmoi.os "darwin" -}}
 # =============================================================================
-# macOS Casks - Core
-# =============================================================================
-cask "1password"              # Password manager
-cask "1password-cli"          # 1Password CLI
-
-# =============================================================================
 # macOS Casks - Terminal
 # =============================================================================
 cask "ghostty"                # GPU-accelerated terminal
@@ -104,22 +98,27 @@ cask "ghostty"                # GPU-accelerated terminal
 # macOS Casks - Development
 # =============================================================================
 cask "zed"                    # Code editor
-cask "github"                 # GitHub Desktop
 
 # =============================================================================
 # macOS Casks - Productivity
 # =============================================================================
-cask "logseq"                 # Note taking / PKM
-brew "mpv"                    # Video player
 cask "skim"                   # PDF reader
 cask "zotero"                 # Reference manager (browser connector: install from zotero.org/download/connectors)
 
+{{ if not .work -}}
 # =============================================================================
-# macOS Casks - Utilities
+# Personal-only apps - mirrors the Scoopfile's work-machine exclusions
+# (personal accounts and mesh networking stay off corp machines)
 # =============================================================================
-cask "tailscale-app"          # VPN/mesh network
+cask "1password"              # Password manager
+cask "1password-cli"          # 1Password CLI
+cask "github"                 # GitHub Desktop
+cask "logseq"                 # Note taking / PKM
+brew "mpv"                    # Video player
+cask "tailscale-app"          # VPN/mesh network (security risk on corp networks)
 cask "ollama-app"             # Local LLM runtime
 cask "signal"                 # Secure messaging
+{{ end -}}
 
 # =============================================================================
 # Fonts
