@@ -1,8 +1,11 @@
 {{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") -}}
 #!/bin/bash
 # Install packages from Brewfile
-# This runs whenever the Brewfile changes
-# Brewfile hash: {{ include "dot_Brewfile.tmpl" | sha256sum }}
+# This runs whenever the Brewfile changes.
+# Hash the RENDERED Brewfile, not the template source: data flips
+# (.personal, .work, hostname) change the rendered file without touching
+# the template, and must re-trigger brew bundle too.
+# Brewfile hash: {{ includeTemplate "dot_Brewfile.tmpl" . | sha256sum }}
 
 set -e
 
