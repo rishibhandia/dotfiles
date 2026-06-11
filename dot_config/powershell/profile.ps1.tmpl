@@ -151,7 +151,8 @@ function fd { Get-ChildItem -Path . -Directory -Recurse -Name -Include @args }
 
 # General
 function c { Clear-Host }
-function reload { & $SHELL }
+# Re-dot-source the dotfiles profile ($SHELL is a Unix-ism, undefined here)
+function reload { . "$env:USERPROFILE\.config\powershell\profile.ps1" }
 function path { $env:PATH -split ';' }
 function which { param([string]$cmd) Get-Command $cmd -ErrorAction SilentlyContinue }
 
