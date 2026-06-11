@@ -49,15 +49,15 @@ export VIMCONFIG="$XDG_CONFIG_HOME/nvim"
 # Homebrew
 {{- if eq .chezmoi.os "darwin" }}
 {{-   if eq .chezmoi.arch "arm64" }}
-# Apple Silicon Mac
-eval "$(/opt/homebrew/bin/brew shellenv)"
+# Apple Silicon Mac (guarded: don't error before Homebrew is bootstrapped)
+[ -x /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)"
 {{-   else }}
-# Intel Mac
-eval "$(/usr/local/bin/brew shellenv)"
+# Intel Mac (guarded: don't error before Homebrew is bootstrapped)
+[ -x /usr/local/bin/brew ] && eval "$(/usr/local/bin/brew shellenv)"
 {{-   end }}
 {{- else if eq .chezmoi.os "linux" }}
-# Linux
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+# Linux (guarded: don't error before Linuxbrew is bootstrapped)
+[ -x /home/linuxbrew/.linuxbrew/bin/brew ] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 {{- end }}
 
 # Local bin
