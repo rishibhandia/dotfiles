@@ -10,11 +10,9 @@
 ###############################
 # EXPORT ENVIRONMENT VARIABLE #
 ###############################
-{{- if eq .chezmoi.os "darwin" }}
-export TERM='xterm-256color'
-{{- else }}
-export TERM='rxvt-256color'
-{{- end }}
+# Don't force TERM here: terminals (Ghostty: xterm-ghostty) and tmux
+# (tmux-256color) set it correctly themselves; .zshenv runs for every zsh
+# and would clobber it.
 export COLORTERM='truecolor'
 
 # XDG
@@ -112,6 +110,4 @@ export SSH_AUTH_SOCK=~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agen
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
 
-# Ghostty sets TERM automatically; keep truecolor support
-# For tmux, ensure TERM is properly set in tmux.conf
 
