@@ -351,6 +351,20 @@ function repeat() {
 }
 alias r=repeat
 
+# Math
+# -----------------------------------------------------------------------------
+
+# Numeric calculator. Preloads `math` and `cmath.sqrt as csqrt`.
+# Syntax: `calc <expression>`  (quote to escape shell globs)
+function calc {
+    if [ "$#" -eq 0 ]; then
+        echo "Usage: calc <expression>  (quote to escape shell globs)"
+        echo "Examples: calc '2**32', calc 'sqrt(2)', calc 'sin(pi/4)', calc 'csqrt(-1)'"
+        return 1
+    fi
+    python3 -c "from math import *; from cmath import sqrt as csqrt; print($*)"
+}
+
 # Sysadmin
 # -----------------------------------------------------------------------------
 
