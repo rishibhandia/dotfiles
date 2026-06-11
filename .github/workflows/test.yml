@@ -26,15 +26,41 @@ jobs:
       - name: Install shellcheck
         run: sudo apt-get install -y shellcheck
 
-      - name: Lint shell scripts
+      - name: Install chezmoi
+        run: sh -c "$(curl -fsSL https://get.chezmoi.io)" -- -b /usr/local/bin
+
+      - name: Initialize chezmoi
+        run: chezmoi init --source="${{ github.workspace }}" --no-tty
+
+      - name: Lint shell scripts (blocking at error severity)
         run: |
-          find . -name "*.sh" -not -path "./.git/*" | while read -r file; do
+          find . -name "*.sh" -not -path "./.git/*" -print0 | xargs -0 shellcheck -S error
+
+      - name: Lint rendered shell script templates
+        run: |
+          fail=0
+          while IFS= read -r file; do
+            rendered="$(chezmoi execute-template --source="${{ github.workspace }}" < "$file")"
+            # Machine-gated scripts render empty off their machine - skip those
+            if [ -z "$(printf '%s' "$rendered" | tr -d '[:space:]')" ]; then
+              echo "Skipping $file (renders empty for this machine class)"
+              continue
+            fi
             echo "Checking $file"
-            shellcheck "$file" || true
-          done
+            if ! printf '%s\n' "$rendered" | shellcheck -S error -; then
+              echo "::error file=${file}::shellcheck failed on rendered template"
+              fail=1
+            fi
+          done < <(find . -name "*.sh.tmpl" -not -path "./.git/*" | sort)
+          exit "$fail"
+
+      - name: Shell script warnings (advisory)
+        run: |
+          find . -name "*.sh" -not -path "./.git/*" -print0 | xargs -0 shellcheck -S warning \
+            || echo "::warning::shellcheck reported warnings (non-blocking)"
 
       - name: Lint with shfmt
-        uses: luizm/action-sh-checker@master
+        uses: luizm/action-sh-checker@v0.10.0
         env:
           SHFMT_OPTS: -i 4 -ci
         with:
