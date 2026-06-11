@@ -771,7 +771,7 @@ function sync_tise2() {
 # Brewfile management helpers
 # -----------------------------------------------------------------------------
 _dots_brew() {
-    local BREWFILE="${HOME}/.local/share/chezmoi/dot_Brewfile"
+    local BREWFILE="${HOME}/.local/share/chezmoi/dot_Brewfile.tmpl"
     local subcmd="${1:-}"
     [ $# -gt 0 ] && shift
 
