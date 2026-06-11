@@ -1,5 +1,6 @@
-{{- if eq .chezmoi.os "windows" -}}
-# Register Hack Nerd Font in per-user font registry
+{{- if and (eq .chezmoi.os "windows") .portable -}}
+# Register Hack Nerd Font in per-user font registry (portable mode only;
+# Scoop's nerd-fonts/Hack-NF handles registration on non-portable machines)
 # Hash: {{ include ".chezmoiexternal.toml.tmpl" | sha256sum }}
 
 $fontDir = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"

@@ -83,6 +83,16 @@
     executable = true
     path = "ruff.exe"
 
+# Hack Nerd Font - per-user installation for portable mode only.
+# Non-portable Windows gets it from Scoop (nerd-fonts/Hack-NF), which
+# registers the same HKCU font names; installing both ways made the two
+# copies fight over registry entries (and font files in use get locked,
+# the same failure class that evicted uv.exe from externals).
+["AppData/Local/Microsoft/Windows/Fonts"]
+    type = "archive"
+    url = {{ gitHubLatestReleaseAssetURL "ryanoasis/nerd-fonts" "Hack.zip" | quote }}
+    include = ["*.ttf"]
+
 {{- end }}
 
 {{- if eq .chezmoi.os "windows" }}
@@ -93,12 +103,4 @@
     url = {{ gitHubLatestReleaseAssetURL "rtk-ai/rtk" "rtk-x86_64-pc-windows-msvc.zip" | quote }}
     executable = true
     path = "rtk.exe"
-
-# Hack Nerd Font - per-user installation (no Scoop required)
-# Extracted directly to the Windows per-user fonts directory
-# Removed automatically by chezmoi purge/uninstall
-["AppData/Local/Microsoft/Windows/Fonts"]
-    type = "archive"
-    url = {{ gitHubLatestReleaseAssetURL "ryanoasis/nerd-fonts" "Hack.zip" | quote }}
-    include = ["*.ttf"]
 {{- end }}
