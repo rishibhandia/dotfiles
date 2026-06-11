@@ -76,7 +76,11 @@ jobs:
 
       - name: Validate Brewfile syntax
         run: |
-          brew bundle check --file=dot_Brewfile || true
+          # Render the Brewfile template, then have brew parse it.
+          # 'brew bundle list' evaluates the Ruby DSL without installing.
+          chezmoi cat --source="${{ github.workspace }}" ~/.Brewfile > "$RUNNER_TEMP/Brewfile"
+          brew bundle list --all --file="$RUNNER_TEMP/Brewfile" > /dev/null
+          echo "Brewfile renders and parses"
 
       - name: Run tests
         run: DOTFILES_CI=1 bash scripts/test.sh
