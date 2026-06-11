@@ -1,12 +1,6 @@
 # ~/.ssh/config
 # Managed by chezmoi
 
-# =============================================================================
-# Global defaults
-# =============================================================================
-ServerAliveInterval 15
-ServerAliveCountMax 3
-
 {{- if eq .chezmoi.os "darwin" }}
 # Colima (Docker) SSH configs
 Include ~/.config/colima/ssh_config
@@ -72,3 +66,12 @@ Host greene
     StrictHostKeyChecking accept-new
     LogLevel ERROR
     User rb3926
+
+# =============================================================================
+# Global defaults - must stay LAST: ssh uses the first value it finds per
+# option, so top-of-file globals would override the host blocks above
+# (e.g. Greene's ServerAliveInterval 60)
+# =============================================================================
+Host *
+    ServerAliveInterval 15
+    ServerAliveCountMax 3
