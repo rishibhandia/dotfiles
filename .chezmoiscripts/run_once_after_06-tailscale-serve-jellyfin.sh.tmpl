@@ -11,16 +11,25 @@ set -e
 
 eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null || true
 
-if ! command -v tailscale &>/dev/null; then
-    echo "tailscale not installed yet; brew bundle should install it before this runs" >&2
+# The tailscale-app cask does NOT symlink the CLI onto PATH; the app bundle
+# binary doubles as the CLI, so fall back to it.
+TAILSCALE="$(command -v tailscale || true)"
+if [ -z "$TAILSCALE" ] && [ -x "/Applications/Tailscale.app/Contents/MacOS/Tailscale" ]; then
+    TAILSCALE="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+fi
+if [ -z "$TAILSCALE" ]; then
+    echo "tailscale CLI not found (checked PATH and /Applications/Tailscale.app); skipping" >&2
     exit 0
 fi
 
 # Skip if not logged into a tailnet (fresh machine before manual login).
-if ! tailscale status >/dev/null 2>&1; then
+# NOTE: run_once records this script as done even on these graceful skips;
+# after logging in, re-run with:
+#   chezmoi state delete-bucket --bucket=scriptState && chezmoi apply
+if ! "$TAILSCALE" status >/dev/null 2>&1; then
     echo "tailscale not logged in; skipping Jellyfin serve setup" >&2
     exit 0
 fi
 
-tailscale serve --bg --https=8443 http://localhost:8096 >/dev/null
+"$TAILSCALE" serve --bg --https=8443 http://localhost:8096 >/dev/null
 {{ end -}}
