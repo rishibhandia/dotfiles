@@ -74,9 +74,10 @@ Library/LaunchAgents/com.rishi.jellyfin.plist
 
 # =============================================================================
 # Age encryption key — pulled from 1Password, only useful on personal
-# machines that also have `op` CLI. Skip on portable installs (no 1Password).
+# machines that also have `op` CLI. Skip on non-personal machines (work,
+# ephemeral) and portable installs (no 1Password) so apply never invokes op.
 # =============================================================================
-{{ if .portable }}
+{{ if or .portable (not .personal) }}
 .config/age/key.txt
 {{ end }}
 

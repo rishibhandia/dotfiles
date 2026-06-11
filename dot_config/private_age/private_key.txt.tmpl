@@ -1,1 +1,3 @@
-{{- onepasswordRead "op://Personal/Age Encryption Key/credential" }}
+{{ if .personal -}}
+{{ onepasswordRead "op://Personal/Age Encryption Key/credential" }}
+{{ end -}}
