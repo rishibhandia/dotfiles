@@ -21,6 +21,21 @@ if command -v brew &>/dev/null; then
     exit 0
 fi
 
+{{- if .ephemeral }}
+
+# Ephemeral machines (containers, Codespaces, CI) frequently run as root,
+# which the Homebrew installer refuses - and as a *before* script, a failure
+# here aborts the entire apply before any dotfile lands. Skip gracefully.
+info "Ephemeral machine - skipping Homebrew install"
+exit 0
+{{- end }}
+
+# The Homebrew installer refuses to run as root; don't take down the apply
+if [ "$(id -u)" -eq 0 ]; then
+    error "Running as root - Homebrew installer refuses root; skipping"
+    exit 0
+fi
+
 info "Installing Homebrew..."
 
 # Install Homebrew
