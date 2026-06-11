@@ -27,11 +27,11 @@
 # Unix-only configs — skip on Windows
 # =============================================================================
 {{ if eq .chezmoi.os "windows" }}
-dot_config/zsh
-dot_config/ghostty
-dot_config/tmux
-dot_zshenv
-dot_Brewfile.tmpl
+.config/zsh
+.config/ghostty
+.config/tmux
+.zshenv
+.Brewfile
 # uv/uvx binaries get locked on Windows; install via uv's own installer instead
 .local/bin/uv.exe
 .local/bin/uvx.exe
@@ -41,17 +41,17 @@ dot_Brewfile.tmpl
 # macOS-only skills (require macOS apps)
 # =============================================================================
 {{ if ne .chezmoi.os "darwin" }}
-dot_claude/skills/things
-dot_claude/skills/fantastical
-dot_claude/skills/keynote
+.claude/skills/things
+.claude/skills/fantastical
+.claude/skills/keynote
 {{ end }}
 
 # =============================================================================
 # Personal-machine-only skills (local Zotero library, Keynote decks)
 # =============================================================================
 {{ if not .personal }}
-dot_claude/skills/keynote
-dot_claude/skills/zotero
+.claude/skills/keynote
+.claude/skills/zotero
 {{ end }}
 
 # =============================================================================
@@ -59,8 +59,8 @@ dot_claude/skills/zotero
 # existing .bashrc/.bash_profile on those platforms
 # =============================================================================
 {{ if ne .chezmoi.os "windows" }}
-dot_bashrc
-dot_bash_profile
+.bashrc
+.bash_profile
 {{ end }}
 
 # =============================================================================
