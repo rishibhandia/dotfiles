@@ -192,15 +192,28 @@ jobs:
         run: |
           sh -c "$(curl -fsSL https://get.chezmoi.io)" -- -b /usr/local/bin
 
+      - name: Initialize chezmoi
+        run: chezmoi init --source="${{ github.workspace }}" --no-tty
+
       - name: Validate templates
         run: |
-          # Check that all .tmpl files are valid Go templates
-          find . -name "*.tmpl" -not -path "./.git/*" | while read -r file; do
+          # Every .tmpl file must render with the CI machine's data
+          # (non-personal/ephemeral, so 1Password calls must stay gated).
+          fail=0
+          while IFS= read -r file; do
             echo "Validating $file"
-            # chezmoi will fail if template is invalid
-            chezmoi execute-template < "$file" > /dev/null 2>&1 || echo "  Warning: $file may have template issues (needs chezmoi data)"
-          done
+            flags=""
+            case "$file" in
+              *.chezmoi.toml.tmpl) flags="--init" ;;
+            esac
+            if ! chezmoi execute-template --source="${{ github.workspace }}" $flags < "$file" > /dev/null 2> "$RUNNER_TEMP/tmpl-err.txt"; then
+              echo "::error file=${file}::template failed to render"
+              cat "$RUNNER_TEMP/tmpl-err.txt"
+              fail=1
+            fi
+          done < <(find . -name "*.tmpl" -not -path "./.git/*" | sort)
+          exit "$fail"
 
-      - name: Check chezmoi config
+      - name: Check chezmoi config (informational)
         run: |
-          chezmoi doctor || true
+          chezmoi doctor --source="${{ github.workspace }}" || true
