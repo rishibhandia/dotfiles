@@ -43,6 +43,15 @@ dot_Brewfile.tmpl
 {{ if ne .chezmoi.os "darwin" }}
 dot_claude/skills/things
 dot_claude/skills/fantastical
+dot_claude/skills/keynote
+{{ end }}
+
+# =============================================================================
+# Personal-machine-only skills (local Zotero library, Keynote decks)
+# =============================================================================
+{{ if not .personal }}
+dot_claude/skills/keynote
+dot_claude/skills/zotero
 {{ end }}
 
 # =============================================================================
