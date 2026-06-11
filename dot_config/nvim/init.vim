@@ -46,11 +46,9 @@ set ignorecase
 set smartcase
 
 " Auto-install vim-plug if missing (fallback for when run_once script hasn't run)
-if has('win32')
-  let s:plug_path = expand('$LOCALAPPDATA') . '/nvim/autoload/plug.vim'
-else
-  let s:plug_path = expand('$XDG_CONFIG_HOME') . '/nvim/autoload/plug.vim'
-endif
+" stdpath('config') = ~/.config/nvim (Unix) or $LOCALAPPDATA/nvim (Windows);
+" unlike $XDG_CONFIG_HOME it is always set, even for GUI-launched nvim
+let s:plug_path = stdpath('config') . '/autoload/plug.vim'
 if !filereadable(s:plug_path)
   silent execute '!curl -fLo "' . s:plug_path . '" --create-dirs
     \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
@@ -58,11 +56,7 @@ if !filereadable(s:plug_path)
 endif
 
 " Plugins
-if has('win32')
-  call plug#begin(expand('$LOCALAPPDATA') . '/nvim/plugged')
-else
-  call plug#begin(expand('$XDG_CONFIG_HOME') . '/nvim/plugged')
-endif
+call plug#begin(stdpath('config') . '/plugged')
 
 Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
 Plug 'nvim-lua/plenary.nvim'

@@ -30,6 +30,7 @@
 .config/zsh
 .config/ghostty
 .config/tmux
+.config/nvim
 .zshenv
 .Brewfile
 # uv/uvx binaries get locked on Windows; install via uv's own installer instead
@@ -56,11 +57,13 @@
 
 # =============================================================================
 # Windows-only shell configs — skip on macOS/Linux to avoid clobbering
-# existing .bashrc/.bash_profile on those platforms
+# existing .bashrc/.bash_profile on those platforms. AppData holds Windows
+# targets (nvim's $LOCALAPPDATA config).
 # =============================================================================
 {{ if ne .chezmoi.os "windows" }}
 .bashrc
 .bash_profile
+AppData
 {{ end }}
 
 # =============================================================================

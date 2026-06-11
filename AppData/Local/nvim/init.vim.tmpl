@@ -1,0 +1,3 @@
+{{- /* Windows nvim reads $LOCALAPPDATA/nvim, not ~/.config/nvim.
+Emit the same init.vim there; the Unix copy is the source of truth. */ -}}
+{{- include "dot_config/nvim/init.vim" -}}

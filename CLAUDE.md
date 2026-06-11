@@ -99,7 +99,7 @@ This repo follows XDG Base Directory spec:
   - `<leader>ff` — fuzzy file finder (telescope)
   - `<leader>fg` — live grep (telescope)
 - **New machine setup**: `run_once_after_01` scripts run `nvim --headless +PlugInstall` on both macOS/Linux and Windows
-- **Windows paths**: Uses `$LOCALAPPDATA/nvim` instead of `$XDG_CONFIG_HOME/nvim`
+- **Windows target**: Windows nvim reads `$LOCALAPPDATA/nvim`, not `~/.config/nvim`, so `AppData/Local/nvim/init.vim.tmpl` emits the same config there (via `include` of the Unix source, which stays the single source of truth). Paths inside init.vim use `stdpath('config')` so one file works on every OS. `.chezmoiignore` skips `AppData` on Unix and `.config/nvim` on Windows.
 - Add custom cheatsheets at `~/.config/nvim/cheatsheet.txt` (format: `## Section` + `command | description`)
 
 ### Terminal Multiplexer (tmux / psmux)
