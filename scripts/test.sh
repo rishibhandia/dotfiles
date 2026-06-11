@@ -72,6 +72,12 @@ is_wsl() {
     [[ -f /proc/version ]] && grep -qi "microsoft\|wsl" /proc/version 2>/dev/null
 }
 
+# CI mode (DOTFILES_CI=1): skip checks that assume a fully bootstrapped,
+# interactive machine (login-shell env, default shell, installed packages).
+is_ci() {
+    [[ "${DOTFILES_CI:-0}" == "1" ]]
+}
+
 # =============================================================================
 # Tests: Essential Commands
 # =============================================================================
@@ -82,6 +88,9 @@ test_essential_commands() {
     local commands=(
         "chezmoi:Dotfiles manager"
         "git:Version control"
+    )
+    # Installed by chezmoi scripts, which CI excludes
+    local bootstrapped=(
         "zsh:Shell"
         "nvim:Text editor"
     )
@@ -91,6 +100,18 @@ test_essential_commands() {
         local desc="${entry#*:}"
         if command_exists "$cmd"; then
             pass "$desc ($cmd)"
+        else
+            fail "$desc ($cmd) - not installed"
+        fi
+    done
+
+    for entry in "${bootstrapped[@]}"; do
+        local cmd="${entry%%:*}"
+        local desc="${entry#*:}"
+        if command_exists "$cmd"; then
+            pass "$desc ($cmd)"
+        elif is_ci; then
+            skip "$desc ($cmd) - not installed in CI"
         else
             fail "$desc ($cmd) - not installed"
         fi
@@ -175,6 +196,11 @@ test_dotfiles_structure() {
 test_environment_variables() {
     section "Environment Variables"
 
+    if is_ci; then
+        skip "Environment variables (CI has no zsh login shell)"
+        return
+    fi
+
     # Check XDG variables
     if [[ -n "${XDG_CONFIG_HOME:-}" ]]; then
         pass "XDG_CONFIG_HOME is set ($XDG_CONFIG_HOME)"
@@ -211,7 +237,9 @@ test_shell_config() {
     section "Shell Configuration"
 
     # Check if zsh is default shell
-    if [[ "$SHELL" == *"zsh"* ]]; then
+    if is_ci; then
+        skip "Default shell check (CI runner)"
+    elif [[ "$SHELL" == *"zsh"* ]]; then
         pass "Zsh is default shell"
     else
         fail "Zsh is not default shell (current: $SHELL)"
@@ -297,14 +325,16 @@ test_homebrew() {
     pass "Homebrew is installed"
 
     # Check brew health
-    if brew doctor &>/dev/null; then
+    if is_ci; then
+        skip "Homebrew health (CI runners are routinely unhealthy)"
+    elif brew doctor &>/dev/null; then
         pass "Homebrew is healthy"
     else
         fail "Homebrew has issues (run 'brew doctor')"
     fi
 
     # Check if Brewfile exists
-    if file_exists "$HOME/.Brewfile" || file_exists "$HOME/.local/share/chezmoi/dot_Brewfile"; then
+    if file_exists "$HOME/.Brewfile" || file_exists "$HOME/.local/share/chezmoi/dot_Brewfile.tmpl"; then
         pass "Brewfile exists"
     else
         skip "Brewfile not found"
@@ -417,6 +447,11 @@ test_wsl_specific() {
 
 test_chezmoi_state() {
     section "Chezmoi State"
+
+    if is_ci; then
+        skip "Chezmoi state (CI verifies apply/verify directly with --source)"
+        return
+    fi
 
     if ! command_exists chezmoi; then
         fail "Chezmoi not installed"
