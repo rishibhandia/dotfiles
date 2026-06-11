@@ -1,7 +1,7 @@
 # Plotting Recipes
 
 **Sources:** consolidated from learned/matlab-color-lightening (2026-03-15), learned/matlab-polar-in-tiledlayout (2026-03-15), learned/matlab-plot-region-highlighting (2026-03-15), learned/matlab-figure-export-sizing (2026-05-01), learned/matlab-figure-font-sizes (2026-04-08).
-**Updated:** 2026-05-04
+**Updated:** 2026-06-11
 
 Patterns for color, polar axes inside grid layouts, region highlighting,
 and figure-export font sizing in MATLAB R2025a. Most of these were
@@ -161,6 +161,38 @@ If a particular figure needs heavier styling (e.g. for a slide), set the
 relevant `set(groot, ...)` after `thz.plotDefaults()` runs, or set
 properties on the specific axes/legend handle to keep the default
 unchanged for the rest of the script.
+
+## `exportgraphics` Resolution — keep PNGs under 2000 px
+
+Claude's image inspection rejects any PNG over 2000 px per dimension
+once a session contains many images — and a single oversized image in
+the conversation blocks ALL later image reads until compaction.
+Slide-figure exports at 220 dpi silently cross this (13.5 in × 220 dpi
+= 2970 px) and stalled the NbOI2 deck session (2026-06).
+
+Rule: **`Resolution` × figure width (inches) < 2000**.
+
+```matlab
+% 13.5-in-wide slide figure -> 144 dpi (1944 px); 11-in -> up to 180 dpi
+exportgraphics(fig, path, 'Resolution', 144);
+```
+
+144 dpi is still ~1.5× oversampled for a figure shown 1260 pt wide on a
+1920×1080 Keynote slide — no visible quality loss.
+
+## `\hbar` needs the latex interpreter
+
+The default `tex` interpreter has no `\hbar` — it emits SceneNode
+warnings and a missing glyph. Switch just that string to latex and wrap
+in `$...$`:
+
+```matlab
+text(x, y, '$\hbar\Omega$', 'Interpreter', 'latex', 'FontSize', 14);
+```
+
+Mixing interpreters within a figure is fine: keep ordinary labels on
+`tex`; only strings using latex-only macros (`\hbar`, `\mathcal`, ...)
+need `'Interpreter', 'latex'`.
 
 ## When to Use
 
