@@ -30,7 +30,9 @@ brew "duf"                    # Better df (disk usage)
 # =============================================================================
 # CLI Tools - Utilities
 # =============================================================================
-brew "duti"                   # Set default applications
+{{ if eq .chezmoi.os "darwin" -}}
+brew "duti"                   # Set default applications (macOS-only formula)
+{{ end -}}
 brew "tree"                   # Directory listing
 brew "curl"                   # HTTP client
 brew "wget"                   # HTTP client
@@ -86,6 +88,7 @@ brew "zsh-syntax-highlighting" # Fish-like syntax highlighting
 brew "zsh-autosuggestions"     # Fish-like autosuggestions
 brew "zsh-completions"         # Additional zsh completions
 
+{{ if eq .chezmoi.os "darwin" -}}
 # =============================================================================
 # macOS Casks - Core
 # =============================================================================
@@ -129,6 +132,7 @@ cask "font-meslo-lg-nerd-font"    # Meslo font for terminal
 # =============================================================================
 brew "mas"                    # Mac App Store CLI
 # mas "Xcode", id: 497799835
+{{- end }}
 
 {{ if .personal -}}
 # =============================================================================
