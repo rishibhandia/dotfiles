@@ -86,8 +86,8 @@ ll
 # List all files sorted by time
 lls
 
-# Find directories by name
-fd <name>
+# Find directories by name (find-based alias; the fd tool is faster: fd -t d)
+fdir <name>
 
 # Find files by name
 ff <name>

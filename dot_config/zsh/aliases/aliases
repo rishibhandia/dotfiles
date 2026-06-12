@@ -98,8 +98,9 @@ alias la='ls -A'
 # Lists entries in columns with file type indicators appended
 alias lc='ls -CF'
 
-# Lists only directories in long format
-alias lsd='ls -l | grep --color=never "^d"'
+# Lists only directories in long format (named ldir so the lsd binary,
+# installed via the Brewfile, stays usable)
+alias ldir='ls -l | grep --color=never "^d"'
 
 # Lists only hidden files in long format
 alias lsh='ls -dlA .?*'
@@ -136,8 +137,9 @@ alias .5='cd ../../../../..'
 # Copies a file securely.
 alias cpv='rsync -ah --info=progress2'
 
-# Finds directories.
-alias fd='find . -type d -name'
+# Finds directories (named fdir so the fd binary, installed via the
+# Brewfile, stays usable - fd itself does this better: fd -t d <pattern>)
+alias fdir='find . -type d -name'
 
 # Finds files.
 alias ff='find . -type f -name'
