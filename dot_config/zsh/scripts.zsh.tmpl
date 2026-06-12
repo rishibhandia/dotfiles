@@ -321,34 +321,13 @@ function history_session_search() {
     comm -23 <(history | cut -c ${offset}-) "${HISTFILE:-'~/.bash_history'}" | grep "$1"
 }
 
-# Creates a directory and changes to it.
-# Syntax: `mkcd <directory>`
-function mkcd() {
-    if [ -z "$1" ]; then
-        echo "Usage: mkcd <path>"
-        echo "Help: mkcd creates a directory if it doesn't exist, then changes to it."
-        return 0
-    fi
+# mkcd/take live further down in this file (single definition; an earlier
+# duplicate here contained an `|| exit` that could kill the interactive shell).
 
-    mkdir -p -- "$@" && cd -P -- "$_" || exit;
-}
-alias take=mkcd
-
-# Repeats a command a set number of times.
-# Syntax: `repeat <count> <command>`
-function repeat() {
-    if [ -z "$1" ] || [ "$#" -lt 2 ]; then
-        echo "Usage: repeat <count> <command> ..."
-        echo "Help: repeat runs a command x number of times."
-        return $#
-    fi
-
-    local i max
-    max=$1; shift;
-    for ((i=1; i <= max ; i++)); do
-        eval "$@";
-    done
-}
+# Repeats a command a set number of times via zsh's reserved word
+# (`repeat 5 echo hi`). A function named `repeat` is unreachable in zsh -
+# the reserved word always wins - so only the short alias is provided.
+# Syntax: `r <count> <command>`
 alias r=repeat
 
 # Math
@@ -439,6 +418,7 @@ fi
 # LLM functions
 #------------------------------------------------------------------------------
 function q {
+    command -v llm >/dev/null 2>&1 || { echo "Error: llm not found (brew install llm)"; return 1; }
     # String literal needs to be properly escaped in zsh
     url="$1"
     question="$2"
@@ -451,9 +431,10 @@ ${content}"
 }
 
 function qv {
+    command -v llm >/dev/null 2>&1 || { echo "Error: llm not found (brew install llm)"; return 1; }
     url="$1"
     question="$2"
-    
+
     if ! command -v yt-dlp >/dev/null 2>&1; then
         echo "yt-dlp is required but not found"
         return 1
