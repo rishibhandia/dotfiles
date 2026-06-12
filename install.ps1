@@ -106,7 +106,12 @@ function Install-Chezmoi {
         }
         "winget" {
             Write-Info "Installing chezmoi via winget..."
+            # EAP=Stop doesn't catch native-command failures; check the exit code
             winget install twpayne.chezmoi --accept-source-agreements --accept-package-agreements
+            if ($LASTEXITCODE -ne 0) {
+                Write-Err "winget failed to install chezmoi (exit $LASTEXITCODE). If this is a no-admin machine, try: winget install twpayne.chezmoi --scope user"
+                exit 1
+            }
             # Refresh PATH
             $env:PATH = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
             Write-Success "chezmoi installed via winget"
@@ -154,7 +159,12 @@ function Install-Git {
         }
         "winget" {
             Write-Info "Installing Git via winget..."
+            # EAP=Stop doesn't catch native-command failures; check the exit code
             winget install Git.Git --accept-source-agreements --accept-package-agreements
+            if ($LASTEXITCODE -ne 0) {
+                Write-Err "winget failed to install Git (exit $LASTEXITCODE). Machine-scope installs need admin; try an elevated shell or install Git manually from https://git-scm.com/download/win"
+                exit 1
+            }
             # Refresh PATH
             $env:PATH = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
             Write-Success "Git installed via winget"
