@@ -36,9 +36,13 @@ Write-Info "Adding Scoop buckets..."
 
 $buckets = @("extras", "nerd-fonts")
 
+# Two PS 5.1 traps here: (1) with EAP=Stop, redirecting a native command's
+# stderr (2>$null) turns stderr lines into terminating errors - run the call
+# with EAP=Continue; (2) modern scoop returns PSObjects from 'bucket list',
+# so string comparisons need Out-String first.
+$bucketList = & { $ErrorActionPreference = 'Continue'; scoop bucket list 2>$null | Out-String }
 foreach ($bucket in $buckets) {
-    $existingBuckets = scoop bucket list 2>$null | Select-String -Pattern "^$bucket$"
-    if ($existingBuckets) {
+    if ($bucketList -match "(?m)^\s*$bucket\b") {
         Write-Success "Bucket '$bucket' already added"
     } else {
         Write-Info "Adding bucket '$bucket'..."

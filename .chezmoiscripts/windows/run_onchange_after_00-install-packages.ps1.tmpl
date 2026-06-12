@@ -35,9 +35,13 @@ $requiredBuckets = @{
     "tirith" = "https://github.com/sheeki03/scoop-tirith"  # Tirith security tool
 }
 
+# scoop returns PSObjects from 'bucket list' (so -notcontains against names
+# always missed -> buckets were re-added every run) and stderr redirection
+# under EAP=Stop is a terminating-error trap in PS 5.1 - stringify once with
+# EAP=Continue and regex-match per bucket.
+$bucketList = & { $ErrorActionPreference = 'Continue'; scoop bucket list 2>$null | Out-String }
 foreach ($bucket in $requiredBuckets.Keys) {
-    $existingBuckets = scoop bucket list 2>$null
-    if ($existingBuckets -notcontains $bucket) {
+    if ($bucketList -notmatch "(?m)^\s*$bucket\b") {
         Write-Info "Adding Scoop bucket: $bucket"
         if ($requiredBuckets[$bucket]) {
             scoop bucket add $bucket $requiredBuckets[$bucket] 2>&1 | Out-Null
@@ -64,6 +68,10 @@ $totalPackages = ($packages | Measure-Object).Count
 $installed = 0
 $failed = 0
 
+# Snapshot the installed list once (PSObjects -> text); Select-String against
+# scoop's object output stringified to type names and never matched.
+$installedList = & { $ErrorActionPreference = 'Continue'; scoop list 2>$null | Out-String }
+
 foreach ($package in $packages) {
     if (-not $package) { continue }
 
@@ -77,8 +85,7 @@ foreach ($package in $packages) {
     }
 
     # Check if already installed
-    $installedApps = scoop list 2>$null | Select-String -Pattern "^\s*$packageName\s"
-    if ($installedApps) {
+    if ($installedList -match "(?m)^\s*$([regex]::Escape($packageName))\s") {
         Write-Success "$packageName already installed"
         $installed++
         continue

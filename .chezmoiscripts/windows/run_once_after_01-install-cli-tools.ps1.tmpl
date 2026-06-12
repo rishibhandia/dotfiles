@@ -121,9 +121,9 @@ if (Get-Command tirith -ErrorAction SilentlyContinue) {
 } elseif (Get-Command scoop -ErrorAction SilentlyContinue) {
     Write-Info "Installing Tirith via Scoop..."
     try {
-        # Add tirith bucket if not present
-        $buckets = scoop bucket list 2>$null
-        if ($buckets -notcontains "tirith") {
+        # Add tirith bucket if not present (Out-String: scoop returns PSObjects)
+        $buckets = & { $ErrorActionPreference = 'Continue'; scoop bucket list 2>$null | Out-String }
+        if ($buckets -notmatch '(?m)^\s*tirith\b') {
             scoop bucket add tirith https://github.com/sheeki03/scoop-tirith 2>&1 | Out-Null
         }
         scoop install tirith 2>&1 | Out-Null
