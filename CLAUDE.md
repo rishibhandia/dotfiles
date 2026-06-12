@@ -143,11 +143,11 @@ Scripts that run automatically during `chezmoi apply`:
 - `darwin/run_once_after_configure-macos.sh` - Configures macOS preferences
 - `run_once_after_02-install-adguardhome.sh.tmpl` - Installs AdGuard Home on the Mac mini (LAN DNS host) — gated to `rishi-macmini-2020`
 - `run_once_after_03-configure-mini-always-on.sh.tmpl` - `pmset` 24/7 settings for the Mac mini — gated to `rishi-macmini-2020`
-- `run_once_after_04-set-mini-dns-loopback.sh.tmpl` - Points the Mac mini's resolver at `127.0.0.1` once AGH is answering — gated to `rishi-macmini-2020`. Re-run after the AGH first-run wizard with: `chezmoi state delete-bucket --bucket=scriptState && chezmoi apply`.
-- `run_once_after_05-start-colima.sh.tmpl` - Runs Colima from its XDG location (`~/.config/colima`) with 4 CPU / 6 GiB and `/Volumes/Easystore` mounted **read-only** (so the Shoko container can read the anime library) — gated to `rishi-macmini-2020`. Replaces the old `brew services` approach with a chezmoi-managed LaunchAgent (`~/Library/LaunchAgents/com.rishi.colima.plist`, gated via `.chezmoiignore`) that pins `COLIMA_HOME` because Colima 0.10.x has flaky XDG auto-detection (`COLIMA_HOME` is also exported in `private_dot_zshenv.tmpl` for interactive shells). Idempotent: creates the VM only if missing, **never deletes** an existing VM (that would wipe Docker named volumes such as Shoko's DB). Recreating the VM (e.g. to change mounts/resources) is a deliberate manual step: `colima delete && rm -rf ~/.colima` then re-run.
-- `run_once_after_06-tailscale-serve-jellyfin.sh.tmpl` - Exposes Jellyfin over Tailscale Serve at `https://<mini>.<tailnet>.ts.net:8443` — gated to `rishi-macmini-2020`. Uses a dedicated HTTPS port instead of a path mount: Jellyfin double-prefixes its `BaseUrl` on redirects (e.g. `/jellyfin/System/Info/Public` → `/jellyfin/jellyfin/web/`), which browsers tolerate but native mobile apps don't. Requires the mini to already be logged into a tailnet; otherwise the script logs a notice and exits.
-- `run_once_after_07-install-shoko.sh.tmpl` - Runs **Shoko Server** as a Docker container (`ghcr.io/shokoanime/server`) on Colima — gated to `rishi-macmini-2020`. Shoko is the anime metadata/organization backend for Jellyfin's Shokofin plugin. Writes `~/.config/shoko/docker-compose.yml` then `docker compose up -d`. The anime drive is bind-mounted at its identical host path (`/Volumes/Easystore/Movies & Shows`, read-only) so Shokofin's host-side symlinks resolve without remapping; Shoko's own data lives in the `shoko-config` Docker named volume. API/UI on `127.0.0.1:8111` (localhost-only). Idempotent. See the "Mac Mini Shoko + Jellyfin Anime" section for the manual UI steps.
-- `run_once_after_08-jellyfin-keepalive.sh.tmpl` - Loads a LaunchAgent (`~/Library/LaunchAgents/com.rishi.jellyfin.plist`) that watchdogs Jellyfin and relaunches it if it goes down — crash, reboot, or the macOS app's in-app "Restart" (which otherwise stops the server without relaunching) — gated to `rishi-macmini-2020`. Drives the real `.app` via `open` to keep its macOS file-access (TCC) permission to the external media drive.
+- `run_after_04-set-mini-dns-loopback.sh.tmpl` - Points the Mac mini's resolver at `127.0.0.1` once AGH is answering — gated to `rishi-macmini-2020`. Runs on every apply and converges: after the AGH first-run wizard, just `chezmoi apply`. When already converged it changes nothing and never prompts for sudo.
+- `run_after_05-start-colima.sh.tmpl` - Runs Colima from its XDG location (`~/.config/colima`) with 4 CPU / 6 GiB and `/Volumes/Easystore` mounted **read-only** (so the Shoko container can read the anime library) — gated to `rishi-macmini-2020`. Replaces the old `brew services` approach with a chezmoi-managed LaunchAgent (`~/Library/LaunchAgents/com.rishi.colima.plist`, gated via `.chezmoiignore`) that pins `COLIMA_HOME` because Colima 0.10.x has flaky XDG auto-detection (`COLIMA_HOME` is also exported in `private_dot_zshenv.tmpl` for interactive shells). Runs on every apply (converges once colima is installed and the drive is mounted); creates the VM only if missing, **never deletes** an existing VM (that would wipe Docker named volumes such as Shoko's DB). Recreating the VM (e.g. to change mounts/resources) is a deliberate manual step: `colima delete && rm -rf ~/.colima` then re-run.
+- `run_after_06-tailscale-serve-jellyfin.sh.tmpl` - Exposes Jellyfin over Tailscale Serve at `https://<mini>.<tailnet>.ts.net:8443` — gated to `rishi-macmini-2020`. Uses a dedicated HTTPS port instead of a path mount: Jellyfin double-prefixes its `BaseUrl` on redirects (e.g. `/jellyfin/System/Info/Public` → `/jellyfin/jellyfin/web/`), which browsers tolerate but native mobile apps don't. Requires the mini to already be logged into a tailnet; otherwise the script logs a notice and retries on the next apply.
+- `run_after_07-install-shoko.sh.tmpl` - Runs **Shoko Server** as a Docker container (`ghcr.io/shokoanime/server`) on Colima — gated to `rishi-macmini-2020`. Shoko is the anime metadata/organization backend for Jellyfin's Shokofin plugin. Writes `~/.config/shoko/docker-compose.yml` then `docker compose up -d`. The anime drive is bind-mounted at its identical host path (`/Volumes/Easystore/Movies & Shows`, read-only) so Shokofin's host-side symlinks resolve without remapping; Shoko's own data lives in the `shoko-config` Docker named volume. API/UI on `127.0.0.1:8111` (localhost-only). Runs on every apply with a converged fast-path (compose unchanged + Shoko answering); also wires `~/.docker/config.json`'s `cliPluginsExtraDirs` so the brew docker CLI finds the Compose v2 plugin. See the "Mac Mini Shoko + Jellyfin Anime" section for the manual UI steps.
+- `run_after_08-jellyfin-keepalive.sh.tmpl` - Loads a LaunchAgent (`~/Library/LaunchAgents/com.rishi.jellyfin.plist`) that watchdogs Jellyfin and relaunches it if it goes down — crash, reboot, or the macOS app's in-app "Restart" (which otherwise stops the server without relaunching) — gated to `rishi-macmini-2020`. Drives the real `.app` via `open` to keep its macOS file-access (TCC) permission to the external media drive.
 
 ### Windows Portable Mode (`.chezmoiexternal.toml.tmpl`)
 Fallback for Windows machines where Scoop is unavailable (`.portable = true`). Downloads pre-built binaries directly from GitHub releases to `~/.local/bin`, which is added to PATH in the PowerShell profile. Covers: rg, fd, bat, fzf, zoxide, starship, lsd, jq, yq, gh, duf, fastfetch, ruff. Note: nvim, navi, and tirith are NOT included in portable mode.
@@ -205,12 +205,12 @@ Current learned files:
 
 ## Mac Mini AdGuard Home Setup
 
-The Mac mini (`rishi-macmini-2020`) hosts LAN-wide DNS via AdGuard Home. Most setup is automated by chezmoi's `run_once_after_0[2-4]` scripts; the items below are the bits that genuinely can't live in chezmoi.
+The Mac mini (`rishi-macmini-2020`) hosts LAN-wide DNS via AdGuard Home. Most setup is automated by chezmoi scripts 02-04 (02/03 are `run_once`; 04 is `run_` and converges on every apply); the items below are the bits that genuinely can't live in chezmoi.
 
 ### What's automated by chezmoi
 - **Install** AGH binary into `/Applications/AdGuardHome` (`run_once_after_02`)
 - **Always-on** `pmset` settings so the mini doesn't sleep (`run_once_after_03`)
-- **DNS loopback** — point the mini's resolver at `127.0.0.1` once AGH answers (`run_once_after_04`)
+- **DNS loopback** — point the mini's resolver at `127.0.0.1` once AGH answers (`run_after_04`, converges on every apply)
 - **Seed restore** — if `~/.local/share/adguardhome-seed/AdGuardHome.yaml` is present (decrypted from the age-encrypted source), `run_once_after_02` copies it to `/Applications/AdGuardHome/` so AGH boots fully configured (no first-run wizard)
 
 ### Manual checklist (one-time per machine / per Apple ID / per device)
@@ -287,7 +287,7 @@ dots git push
 ```
 1. Bootstrap dotfiles (curl install.sh)
 2. chezmoi init  → prompts; one prompt fetches the age key from 1Password
-3. chezmoi apply → installs age, decrypts seed, runs run_once_after_0[2-4]:
+3. chezmoi apply → installs age, decrypts seed, runs scripts 02-04:
                    - 02: installs AGH, copies seed to /Applications, restarts service
                    - 03: pmset always-on
                    - 04: AGH is already answering (because seeded), DNS flips to 127.0.0.1
@@ -303,13 +303,13 @@ The Mac mini runs **Shoko Server** (Docker, via Colima) as the metadata/organiza
 
 ### Architecture decisions
 - **Docker, not native:** Shoko doesn't officially support native Apple Silicon (missing-library risk) and has no brew formula; the official image runs fine on Colima.
-- **Identical-path mount:** Jellyfin runs natively on the host and Shokofin builds a symlink VFS pointing at the paths Shoko reports. So the media is bind-mounted into the container at its *real host path* (`/Volumes/Easystore/Movies & Shows`, read-only), and `/Volumes/Easystore` is mounted into the Colima VM by `run_once_after_05`. Shokofin's host-side symlinks then resolve with zero path remapping — no path-substitution config needed.
+- **Identical-path mount:** Jellyfin runs natively on the host and Shokofin builds a symlink VFS pointing at the paths Shoko reports. So the media is bind-mounted into the container at its *real host path* (`/Volumes/Easystore/Movies & Shows`, read-only), and `/Volumes/Easystore` is mounted into the Colima VM by `run_after_05`. Shokofin's host-side symlinks then resolve with zero path remapping — no path-substitution config needed.
 - **Persistence:** Shoko's config/DB lives in the `shoko-config` Docker named volume (mounting `/home/shoko/.shoko` wrong is a known data-loss footgun).
 - **Networking:** API/UI bound to `127.0.0.1:8111` (localhost-only). Reach it on the mini directly, or `ssh -L 8111:127.0.0.1:8111 <mini>` from elsewhere.
 
 ### What's automated by chezmoi
-- Colima VM with the Easystore mount + resources (`run_once_after_05`)
-- Shoko container install + start (`run_once_after_07`)
+- Colima VM with the Easystore mount + resources (`run_after_05`)
+- Shoko container install + start (`run_after_07`)
 
 ### Manual one-time steps (Jellyfin/Shoko UI — not chezmoi-able)
 

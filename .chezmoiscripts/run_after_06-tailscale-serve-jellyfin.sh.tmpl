@@ -4,7 +4,10 @@
 # Uses a dedicated HTTPS port (not a path mount) so Jellyfin's BaseUrl can
 # stay at the default empty value; path mounts trigger double-prefixing on
 # Jellyfin redirects which breaks native mobile apps.
-# Idempotent: tailscale serve overwrites the existing config for the same port.
+# Runs on EVERY apply (run_, not run_once) so a skipped precondition (CLI
+# missing, not logged in) retries next apply instead of being recorded done
+# forever. tailscale serve overwrites the existing config for the same port,
+# so re-running when converged is a cheap no-op.
 # No-op on every other machine.
 
 set -e
@@ -18,16 +21,14 @@ if [ -z "$TAILSCALE" ] && [ -x "/Applications/Tailscale.app/Contents/MacOS/Tails
     TAILSCALE="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
 fi
 if [ -z "$TAILSCALE" ]; then
-    echo "tailscale CLI not found (checked PATH and /Applications/Tailscale.app); skipping" >&2
+    echo "tailscale CLI not found (checked PATH and /Applications/Tailscale.app); retrying next apply" >&2
     exit 0
 fi
 
-# Skip if not logged into a tailnet (fresh machine before manual login).
-# NOTE: run_once records this script as done even on these graceful skips;
-# after logging in, re-run with:
-#   chezmoi state delete-bucket --bucket=scriptState && chezmoi apply
+# Skip if not logged into a tailnet (fresh machine before manual login);
+# retried automatically on the next chezmoi apply.
 if ! "$TAILSCALE" status >/dev/null 2>&1; then
-    echo "tailscale not logged in; skipping Jellyfin serve setup" >&2
+    echo "tailscale not logged in; skipping Jellyfin serve setup (retries next apply)" >&2
     exit 0
 fi
 

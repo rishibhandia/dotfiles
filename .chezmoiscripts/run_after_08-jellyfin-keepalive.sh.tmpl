@@ -3,7 +3,10 @@
 # Load the Jellyfin keep-alive LaunchAgent on the always-on Mac mini. The agent
 # (chezmoi-managed plist) watchdogs Jellyfin and relaunches it if it goes down --
 # including after the macOS app's in-app "Restart", which otherwise stops the
-# server without bringing it back. No-op on every other machine.
+# server without bringing it back. Runs on EVERY apply (run_, not run_once)
+# and loads the agent only when it isn't loaded, so a converged apply doesn't
+# bounce the watchdog. After editing the plist, bounce it manually:
+# launchctl unload && launchctl load. No-op on every other machine.
 
 set -e
 
@@ -12,8 +15,7 @@ PLIST="$HOME/Library/LaunchAgents/com.rishi.jellyfin.plist"
 
 mkdir -p "$XDG_STATE_HOME"
 
-if [ -f "$PLIST" ]; then
-    launchctl unload "$PLIST" >/dev/null 2>&1 || true
+if [ -f "$PLIST" ] && ! launchctl list 2>/dev/null | grep -q "com.rishi.jellyfin"; then
     launchctl load "$PLIST" >/dev/null 2>&1 || true
 fi
 {{ end -}}
