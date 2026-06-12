@@ -1,7 +1,13 @@
 {{- if eq .chezmoi.os "windows" -}}
 #!/usr/bin/env pwsh
-# Configure Windows Terminal with Catppuccin Macchiato theme
-# Hash: {{ include "dot_config/windows-terminal/catppuccin-macchiato.json" | sha256sum }}
+# Configure Windows Terminal with Catppuccin Macchiato theme.
+# The scheme is embedded below from
+# dot_config/windows-terminal/catppuccin-macchiato.json at template render
+# time, so the tracked JSON is the single source of truth AND its content
+# participates in this run_onchange script's hash.
+# NOTE: rewriting settings.json via ConvertTo-Json drops comments the user
+# may have added there (Windows Terminal tolerates this; hand comments don't
+# survive any programmatic edit of that file).
 
 $ErrorActionPreference = "Stop"
 
@@ -15,33 +21,19 @@ if (-not (Test-Path $WTSettingsPath)) {
 
 Write-Host "Configuring Windows Terminal..." -ForegroundColor Cyan
 
-# Read current settings
-$settings = Get-Content $WTSettingsPath -Raw | ConvertFrom-Json
+# WT settings are JSONC: full-line // comments and trailing commas, both of
+# which Windows PowerShell 5.1's ConvertFrom-Json rejects (this script runs
+# under 5.1 - chezmoi's default .ps1 interpreter). Strip them conservatively
+# (only whole-line comments, so URLs inside strings are safe).
+$raw = Get-Content $WTSettingsPath -Raw
+$jsonText = ($raw -split "`n" | Where-Object { $_ -notmatch '^\s*//' }) -join "`n"
+$jsonText = $jsonText -replace ',(\s*[}\]])', '$1'
+$settings = $jsonText | ConvertFrom-Json
 
-# Catppuccin Macchiato color scheme
-$catppuccinScheme = @{
-    name            = "Catppuccin Macchiato"
-    cursorColor     = "#F4DBD6"
-    selectionBackground = "#3A3E53"
-    background      = "#24273A"
-    foreground      = "#CAD3F5"
-    black           = "#494D64"
-    red             = "#ED8796"
-    green           = "#A6DA95"
-    yellow          = "#EED49F"
-    blue            = "#8AADF4"
-    purple          = "#F5BDE6"
-    cyan            = "#8BD5CA"
-    white           = "#A5ADCB"
-    brightBlack     = "#5B6078"
-    brightRed       = "#ED8796"
-    brightGreen     = "#A6DA95"
-    brightYellow    = "#EED49F"
-    brightBlue      = "#8AADF4"
-    brightPurple    = "#F5BDE6"
-    brightCyan      = "#8BD5CA"
-    brightWhite     = "#B8C0E0"
-}
+# Catppuccin Macchiato color scheme (embedded from the tracked JSON)
+$catppuccinScheme = @'
+{{ include "dot_config/windows-terminal/catppuccin-macchiato.json" -}}
+'@ | ConvertFrom-Json
 
 # Ensure schemes array exists (use PSObject.Properties to check if property exists)
 if (-not $settings.PSObject.Properties['schemes']) {
