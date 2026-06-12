@@ -6,6 +6,12 @@
 # PSReadLine Configuration (Catppuccin Macchiato theme)
 # =============================================================================
 if (Get-Module -ListAvailable -Name PSReadLine) {
+    # Stock Windows PowerShell 5.1 ships PSReadLine 2.0; prediction options
+    # (and their color keys) need 2.1+/2.2+ and otherwise error on every
+    # shell start. Gate them on the actually-loaded module version.
+    Import-Module PSReadLine -ErrorAction SilentlyContinue
+    $psrlVersion = (Get-Module PSReadLine).Version
+    if (-not $psrlVersion) { $psrlVersion = [version]'2.0.0' }
     # Catppuccin Macchiato palette
     $Macchiato = @{
         Rosewater = '#F4DBD6'
@@ -36,16 +42,14 @@ if (Get-Module -ListAvailable -Name PSReadLine) {
         Crust     = '#181926'
     }
 
-    Set-PSReadLineOption -Colors @{
+    $psrlColors = @{
         Command            = $Macchiato.Blue
         Comment            = $Macchiato.Overlay0
         ContinuationPrompt = $Macchiato.Teal
         Default            = $Macchiato.Text
         Emphasis           = $Macchiato.Red
         Error              = $Macchiato.Red
-        InlinePrediction   = $Macchiato.Overlay0
         Keyword            = $Macchiato.Mauve
-        ListPrediction     = $Macchiato.Mauve
         Member             = $Macchiato.Rosewater
         Number             = $Macchiato.Peach
         Operator           = $Macchiato.Sky
@@ -55,12 +59,23 @@ if (Get-Module -ListAvailable -Name PSReadLine) {
         Type               = $Macchiato.Yellow
         Variable           = $Macchiato.Lavender
     }
+    if ($psrlVersion -ge [version]'2.1.0') {
+        $psrlColors['InlinePrediction'] = $Macchiato.Overlay0
+    }
+    if ($psrlVersion -ge [version]'2.2.0') {
+        $psrlColors['ListPrediction'] = $Macchiato.Mauve
+    }
+    Set-PSReadLineOption -Colors $psrlColors
 
     # Better editing experience
     Set-PSReadLineOption -EditMode Emacs
     Set-PSReadLineOption -BellStyle None
-    Set-PSReadLineOption -PredictionSource History
-    Set-PSReadLineOption -PredictionViewStyle ListView
+    if ($psrlVersion -ge [version]'2.1.0') {
+        Set-PSReadLineOption -PredictionSource History
+    }
+    if ($psrlVersion -ge [version]'2.2.0') {
+        Set-PSReadLineOption -PredictionViewStyle ListView
+    }
 }
 
 # =============================================================================
