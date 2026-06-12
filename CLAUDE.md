@@ -109,6 +109,9 @@ This repo follows XDG Base Directory spec:
 - psmux auto-launches on PowerShell terminal open (attaches to `main` session or creates one); skipped inside existing sessions, VS Code, and non-interactive contexts
 - **psmux installation**: Via Scoop when available, otherwise portable binary from GitHub releases to `~/.local/bin/psmux/` (installed by `run_once_after_01-install-cli-tools.ps1.tmpl`)
 
+### Navi Cheatsheets
+Cheats live in `dot_local/share/navi/cheats/` and sync to `~/.local/share/navi/cheats` on every OS. navi's *built-in* default cheat path varies by platform (`directories` crate: `%APPDATA%`-based on Windows, Application Support on some macOS builds), so both shells export `NAVI_PATH` pointing at the managed dir — navi's highest-precedence setting. The zsh widget loads in `.zshrc`, the PowerShell widget in `profile.ps1` (both guarded on navi existing; navi is not installed in Windows portable mode).
+
 ### Security Tools
 - **tirith** - Terminal security tool that guards against URL/ANSI injection attacks
   - macOS: Installed via Homebrew tap as `sheeki03/tap/tirith` (see "Tap-based formulae" rule above)
@@ -150,7 +153,7 @@ Scripts that run automatically during `chezmoi apply`:
 - `run_after_08-jellyfin-keepalive.sh.tmpl` - Loads a LaunchAgent (`~/Library/LaunchAgents/com.rishi.jellyfin.plist`) that watchdogs Jellyfin and relaunches it if it goes down — crash, reboot, or the macOS app's in-app "Restart" (which otherwise stops the server without relaunching) — gated to `rishi-macmini-2020`. Drives the real `.app` via `open` to keep its macOS file-access (TCC) permission to the external media drive.
 
 ### Windows Portable Mode (`.chezmoiexternal.toml.tmpl`)
-Fallback for Windows machines where Scoop is unavailable (`.portable = true`). Downloads pre-built binaries directly from GitHub releases to `~/.local/bin`, which is added to PATH in the PowerShell profile. Covers: rg, fd, bat, fzf, zoxide, starship, lsd, jq, yq, gh, duf, fastfetch, ruff. Note: nvim, navi, and tirith are NOT included in portable mode.
+Fallback for Windows machines where Scoop is unavailable (`.portable = true`). Downloads pre-built binaries directly from GitHub releases to `~/.local/bin`, which is added to PATH in the PowerShell profile. Covers: rg, fd, bat, fzf, zoxide, starship, lsd, jq, yq, gh, duf, fastfetch, ruff — plus the Hack Nerd Font (portable mode only; Scoop's `nerd-fonts/Hack-NF` owns fonts otherwise, and installing both ways made them fight over the same HKCU registry names). Note: nvim, navi, and tirith are NOT included in portable mode.
 
 **uv / uvx exception:** Used to be in the list above, but `uv.exe` gets file-locked on Windows during `chezmoi apply` (commit `0a8b52c`). `.chezmoiignore` now blocks `.local/bin/uv.exe` and `.local/bin/uvx.exe` on all Windows targets. Install paths now: Scoop (`main/uv`) on non-portable Windows; the official Astral installer (`irm https://astral.sh/uv/install.ps1 | iex`) run from `windows/run_once_after_01-install-cli-tools.ps1.tmpl` on portable Windows. The Astral installer manages its own replacement logic, so it doesn't trigger the file-lock that prompted the chezmoi-external removal.
 
@@ -166,15 +169,15 @@ Fallback for Windows machines where Scoop is unavailable (`.portable = true`). D
 **Windows package manager policy:** Use Scoop exclusively. Do not use npm, cargo, winget, or other package managers as alternatives for CLI tools.
 
 ### Claude Code Skills
-Skills are synced via chezmoi to `~/.claude/skills/`. Included skills:
-- **pdf** - PDF manipulation and form extraction
-- **pdf-chunk** - Handle large PDFs without filling context (selective page extraction)
-- **xlsx** - Excel spreadsheet creation
-- **pptx** - PowerPoint presentations
-- **docx** - Word document creation
-- **skill-creator** - Create new custom skills
-- **theme-factory** - Generate color themes
-- **doc-coauthoring** - Document collaboration
+Skills are synced via chezmoi to `~/.claude/skills/`. Included skills, by category:
+
+**Documents & files:** `pdf`, `pdf-chunk` (large PDFs without filling context), `xlsx`, `pptx`, `docx`, `doc-coauthoring`, `theme-factory`
+
+**Development workflow:** `plan`, `tdd`, `code-review`, `build-fix`, `verify`, `checkpoint`, `e2e`, `eval`, `test-coverage`, `refactor-clean`, `orchestrate`, `update-codemaps`, `update-docs`, `learn`, `session-wrap`, `skill-creator`
+
+**Research & science:** `academic-review` (papers/proposals review), `matlab` (R2025a patterns + the personal `+thz` package), `matlab-runner` (headless script execution), `zotero` (local-library citation lookup; **personal machines only**)
+
+**macOS app integrations (darwin-only via `.chezmoiignore`):** `things` (Things 3), `fantastical` (calendar), `keynote` (presentations; **also personal-only**)
 
 **Adding more skills from the marketplace:**
 ```
@@ -334,6 +337,15 @@ Run tests to verify setup:
 ```bash
 dots test                    # Via dots command
 bash scripts/test.sh         # Direct execution
+DOTFILES_CI=1 bash scripts/test.sh   # CI mode: skips checks that assume a fully bootstrapped machine
 ```
 
-CI runs on GitHub Actions for macOS, Ubuntu, and Windows on every push.
+CI (GitHub Actions, on push/PR to `main`) runs on macOS, Ubuntu, and Windows:
+each platform does an unmasked `chezmoi init → diff → apply
+--exclude=scripts,externals → verify` (always with explicit `--source`; init
+does not persist it) plus `test.sh` in CI mode. The lint job shellchecks all
+`.sh` files at warning severity (blocking) and the rendered `.sh.tmpl`
+scripts at error severity; a templates job renders every `.tmpl` with the
+non-personal CI profile, so an ungated 1Password call fails the build.
+`GITHUB_TOKEN` is exported workflow-wide for chezmoi's `gitHub*` template
+functions.
