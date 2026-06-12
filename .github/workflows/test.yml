@@ -32,9 +32,9 @@ jobs:
       - name: Initialize chezmoi
         run: chezmoi init --source="${{ github.workspace }}" --no-tty
 
-      - name: Lint shell scripts (blocking at error severity)
+      - name: Lint shell scripts (blocking at warning severity)
         run: |
-          find . -name "*.sh" -not -path "./.git/*" -print0 | xargs -0 shellcheck -S error
+          find . -name "*.sh" -not -path "./.git/*" -print0 | xargs -0 shellcheck -S warning
 
       - name: Lint rendered shell script templates
         run: |
@@ -53,11 +53,6 @@ jobs:
             fi
           done < <(find . -name "*.sh.tmpl" -not -path "./.git/*" | sort)
           exit "$fail"
-
-      - name: Shell script warnings (advisory)
-        run: |
-          find . -name "*.sh" -not -path "./.git/*" -print0 | xargs -0 shellcheck -S warning \
-            || echo "::warning::shellcheck reported warnings (non-blocking)"
 
       - name: Lint with shfmt
         uses: luizm/action-sh-checker@v0.10.0
