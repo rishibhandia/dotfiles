@@ -1,4 +1,6 @@
 #!/bin/sh
+# shellcheck disable=SC3043  # `local` is not POSIX but is supported by every
+# shell this script targets (dash on Debian/Ubuntu, ash/busybox, bash-as-sh)
 # Dotfiles bootstrap script
 # Usage:
 #   macOS/Linux: sh -c "$(curl -fsSL https://raw.githubusercontent.com/rishibhandia/dotfiles/main/install.sh)"
@@ -113,7 +115,7 @@ install_linux_deps() {
         return 0
     fi
 
-    local distro=$(detect_linux_distro)
+    local distro; distro="$(detect_linux_distro)"
     info "Detected Linux distribution: $distro"
 
     case "$distro" in
@@ -208,7 +210,7 @@ install_homebrew() {
         return 0
     fi
 
-    local os=$(detect_os)
+    local os; os="$(detect_os)"
     if [ "$os" != "darwin" ] && [ "$os" != "linux" ]; then
         debug "Homebrew not supported on $os"
         return 0
@@ -287,7 +289,7 @@ init_dotfiles() {
 
 # Post-installation message
 print_next_steps() {
-    local os=$(detect_os)
+    local os; os="$(detect_os)"
 
     echo ""
     echo "=============================================="
@@ -404,7 +406,7 @@ set_zsh_default() {
         return 0
     fi
 
-    local zsh_path=$(command -v zsh)
+    local zsh_path; zsh_path="$(command -v zsh)"
 
     # Add zsh to /etc/shells if not present
     if ! grep -q "$zsh_path" /etc/shells 2>/dev/null; then
@@ -429,8 +431,8 @@ main() {
     echo "=============================================="
     echo ""
 
-    local os=$(detect_os)
-    local arch=$(detect_arch)
+    local os; os="$(detect_os)"
+    local arch; arch="$(detect_arch)"
     info "Detected OS: $os, Architecture: $arch"
 
     # Check for Windows - redirect to PowerShell script

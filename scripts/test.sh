@@ -403,7 +403,6 @@ test_wsl_specific() {
     section "WSL Specific"
 
     # Check WSL version
-    local wsl_version
     if [[ -f /proc/version ]]; then
         if grep -qi "WSL2" /proc/version 2>/dev/null; then
             pass "Running WSL2"
