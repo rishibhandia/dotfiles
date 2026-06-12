@@ -3,6 +3,14 @@
 # Format: user@host dir [git_branch ●●●] [ctx:N%] [Model] [rl:N%]
 
 input=$(cat)
+
+# jq is installed by the Brewfile; if it isn't there yet, degrade gracefully
+# instead of erroring on every statusline refresh.
+if ! command -v jq &>/dev/null; then
+  printf '%s@%s' "$(whoami)" "$(hostname -s 2>/dev/null || hostname)"
+  exit 0
+fi
+
 cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd')
 
 # --- Context usage (color-coded) ---

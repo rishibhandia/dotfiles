@@ -1,9 +1,13 @@
 #!/usr/bin/env pwsh
 # Claude Code statusline for Windows
-# Format: user@host dir [git_branch ●●●] [ctx:N%] [Model] [rl:N%]
+# Format: user@host dir [git_branch ***] [ctx:N%] [Model] [rl:N%]
+# Compatible with Windows PowerShell 5.1 (no ??, ASCII-only) so it works on
+# portable machines where pwsh 7 isn't installed.
+
+function Coalesce($a, $b) { if ($null -ne $a -and $a -ne '') { $a } else { $b } }
 
 try {
-    $data = $Input | Out-String | ConvertFrom-Json
+    $data = [Console]::In.ReadToEnd() | ConvertFrom-Json
 } catch {
     # If piped data can't be parsed, show minimal fallback
     Write-Host -NoNewline "$env:USERNAME@$env:COMPUTERNAME"
@@ -19,10 +23,10 @@ $Cyan    = "$ESC[36m"
 $White   = "$ESC[37m"
 $Reset   = "$ESC[0m"
 
-$cwd = $data.workspace.current_dir ?? $data.cwd
+$cwd = Coalesce $data.workspace.current_dir $data.cwd
 
 if ([string]::IsNullOrEmpty($cwd)) {
-    # No workspace data — show minimal fallback
+    # No workspace data - show minimal fallback
     Write-Host -NoNewline "$env:USERNAME@$env:COMPUTERNAME"
     exit 0
 }
@@ -32,7 +36,7 @@ $contextInfo = ""
 $usage = $data.context_window.current_usage
 $size  = $data.context_window.context_window_size
 if ($null -ne $usage -and $null -ne $size -and $size -gt 0) {
-  $current = ($usage.input_tokens ?? 0) + ($usage.cache_creation_input_tokens ?? 0) + ($usage.cache_read_input_tokens ?? 0)
+  $current = (Coalesce $usage.input_tokens 0) + (Coalesce $usage.cache_creation_input_tokens 0) + (Coalesce $usage.cache_read_input_tokens 0)
   $pct = [math]::Floor($current * 100 / $size)
   $color = if ($pct -lt 50) { $Green } elseif ($pct -lt 80) { $Yellow } else { $Red }
   $contextInfo = " $color[ctx:$pct%]"
@@ -40,7 +44,7 @@ if ($null -ne $usage -and $null -ne $size -and $size -gt 0) {
 
 # --- Model ---
 $modelInfo = ""
-$model = $data.model.display_name ?? $data.model.id
+$model = Coalesce $data.model.display_name $data.model.id
 if (-not [string]::IsNullOrEmpty($model)) {
   $modelInfo = " $Cyan[$model]"
 }
@@ -71,9 +75,9 @@ try {
     $gitStatus = git --no-optional-locks status --porcelain 2>$null
     $staged = ""; $unstaged = ""; $untracked = ""
     foreach ($line in ($gitStatus -split "`n")) {
-      if ($line -match '^[MADRCU]') { $staged   = "$Green●" }
-      if ($line -match '^.[MD]')    { $unstaged  = "$Yellow●" }
-      if ($line -match '^\?\?')     { $untracked = "$Red●" }
+      if ($line -match '^[MADRCU]') { $staged   = "$Green*" }
+      if ($line -match '^.[MD]')    { $unstaged  = "$Yellow*" }
+      if ($line -match '^\?\?')     { $untracked = "$Red*" }
     }
     $gitInfo = " [$Green$branch$staged$unstaged$untracked$Blue]"
   }
