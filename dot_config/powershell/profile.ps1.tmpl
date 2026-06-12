@@ -112,6 +112,14 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     Invoke-Expression (& zoxide init powershell | Out-String)
 }
 
+# Initialize navi (if available). NAVI_PATH points at the chezmoi-managed
+# cheats: navi's platform default on Windows is %APPDATA%-based, so without
+# this the synced cheats are invisible. Highest-precedence setting per navi docs.
+if (Get-Command navi -ErrorAction SilentlyContinue) {
+    $env:NAVI_PATH = Join-Path $env:USERPROFILE ".local\share\navi\cheats"
+    Invoke-Expression (& navi widget powershell | Out-String)
+}
+
 # Initialize tirith (if available)
 if (Get-Command tirith -ErrorAction SilentlyContinue) {
     Invoke-Expression (& tirith init powershell | Out-String)

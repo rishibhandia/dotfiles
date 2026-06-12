@@ -45,6 +45,9 @@ setopt EXTENDED_HISTORY
 # Various Applications
 export SCREENSHOT="$HOME/Pictures/screenshots"
 export VIMCONFIG="$XDG_CONFIG_HOME/nvim"
+# Pin navi to the chezmoi-managed cheats dir (its built-in default varies by
+# platform/version: XDG on Linux, Application Support on some macOS builds)
+export NAVI_PATH="$XDG_DATA_HOME/navi/cheats"
 
 # Homebrew
 {{- if eq .chezmoi.os "darwin" }}
