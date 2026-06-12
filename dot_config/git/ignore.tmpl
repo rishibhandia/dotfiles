@@ -47,7 +47,10 @@ Desktop.ini
 
 # Swap
 [._]*.s[a-v][a-z]
-!*.svg  # comment out if you don't need vector files
+# Re-include vector files caught by the swap pattern above
+# (gitignore has no inline comments - a trailing comment becomes part of
+# the pattern and the negation silently never matches)
+!*.svg
 [._]*.sw[a-p]
 [._]s[a-rt-v][a-z]
 [._]ss[a-gi-z]
