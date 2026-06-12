@@ -12,7 +12,7 @@
   "buffer_font_size": 16,
   "theme": {
     "mode": "system",
-    "light": "Catppuccin Macchiato",
-    "dark": "One Dark"
+    "light": "Catppuccin Latte",
+    "dark": "Catppuccin Macchiato"
   }
 }
