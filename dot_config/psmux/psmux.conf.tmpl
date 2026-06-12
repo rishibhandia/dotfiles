@@ -1,7 +1,13 @@
 # psmux configuration (Windows tmux alternative)
 # Shared settings are synced with tmux via .chezmoitemplates/tmux-shared
 
-# Use PowerShell 7 so the user profile (starship, PSReadLine, etc.) loads
-set -g default-shell "C:/Program Files/PowerShell/7/pwsh.exe"
+# Use PowerShell 7 so the user profile (starship, PSReadLine, etc.) loads.
+# This repo installs pwsh via Scoop, not the MSI, so point at the Scoop shim;
+# portable machines have no pwsh at all and fall back to Windows PowerShell.
+{{ if .portable -}}
+set -g default-shell "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"
+{{ else -}}
+set -g default-shell "{{ .chezmoi.homeDir | replace "\\" "/" }}/scoop/apps/pwsh/current/pwsh.exe"
+{{ end -}}
 
 {{ template "tmux-shared" . }}
