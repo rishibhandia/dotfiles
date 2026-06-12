@@ -2,7 +2,8 @@
 #
 #~/.config/zsh/aliases/aliases
 # =============================================================================
-# Shell aliases sourced by `~/.bashrc` and `~/.zshrc`.
+# Shell aliases sourced by zsh ($ZDOTDIR/.zshrc) only - this file uses
+# zsh-only syntax (${(%):-%N}, brace range loops) and is NOT bash-compatible.
 #
 # OSTYPE values used:
 #     - darwin: macOS

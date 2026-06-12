@@ -30,6 +30,8 @@ zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 
 # formatting and messages
 # http://www.masterzen.fr/2009/04/19/in-love-with-zsh-part-one/
+# $fg/$reset_color need the colors function loaded first
+autoload -U colors && colors
 zstyle ':completion:*' verbose yes
 zstyle ':completion:*:descriptions' format "$fg[yellow]%B--- %d%b"
 zstyle ':completion:*:messages' format '%d'
