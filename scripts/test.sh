@@ -165,6 +165,8 @@ test_dotfiles_structure() {
         local desc="${entry#*:}"
         if dir_exists "$dir"; then
             pass "$desc exists"
+        elif is_ci && [[ "$dir" == "$HOME/.local/share/chezmoi" ]]; then
+            skip "$desc (CI uses the checkout as --source, not the default dir)"
         else
             fail "$desc missing ($dir)"
         fi
@@ -282,6 +284,21 @@ test_shell_config() {
 
 test_git_config() {
     section "Git Configuration"
+
+    if is_ci; then
+        # What CI must assert is that chezmoi rendered identity into the
+        # applied config - read that file explicitly instead of relying on
+        # the runner's global git scopes (runners don't resolve the XDG
+        # global file the way a real login environment does).
+        local cfg="$HOME/.config/git/config"
+        if git config --file "$cfg" user.name >/dev/null 2>&1 \
+            && git config --file "$cfg" user.email >/dev/null 2>&1; then
+            pass "Applied git config defines user.name and user.email"
+        else
+            fail "Applied git config missing user identity ($cfg)"
+        fi
+        return
+    fi
 
     # Check git user
     local git_name
