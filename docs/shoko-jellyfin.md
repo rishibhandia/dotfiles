@@ -41,10 +41,34 @@ AniDB ──hash match──> Shoko Server (Docker/Colima, :8111)
 | `run_after_05-start-colima.sh.tmpl` | Colima VM with the Easystore mount + 4 CPU / 6 GiB + auto-start LaunchAgent |
 | `run_after_07-install-shoko.sh.tmpl` | Shoko container install + start (`docker compose up -d`) |
 | `run_after_08-jellyfin-keepalive.sh.tmpl` | Jellyfin keep-alive watchdog LaunchAgent |
+| `run_after_09-shoko-import-watch.sh.tmpl` | Loads the fswatch auto-import watcher (triggers Shoko's incremental import when new downloads land — see "Auto-import" below) |
 
 Everything below (Shoko first-run wizard, Shokofin install/config, the Jellyfin library) is
 **stateful UI/DB config that is deliberately NOT chezmoi-managed** — it lives in Jellyfin's
 database and Shoko's volume. This file is the runbook for reproducing it by hand.
+
+### Auto-import of new downloads (fswatch watcher)
+
+Shoko's built-in import-folder watcher is **deaf in this setup**: the media drive reaches the
+Shoko container through Colima's virtiofs mount, which doesn't forward filesystem-change events,
+so Shoko never notices new files (a fresh download stays invisible until something triggers an
+import). The fix is a **host-side** watcher (macOS FSEvents work on the host), managed by
+`run_after_09` + `Library/LaunchAgents/com.rishi.shoko-import.plist` (needs `brew "fswatch"`):
+
+- It watches `/Volumes/Easystore/Movies & Shows` recursively and, after a 60 s settle, calls
+  Shoko's **`/api/v3/Action/RunImport`** — which is **incremental**: only genuinely-new files get
+  imported. Files you've marked *Ignored*, the `._`-excluded sidecars, and unmatched titles
+  (e.g. Avatar: TLA, which isn't in AniDB) are left untouched. New series then flow into Jellyfin
+  automatically via Shokofin's SignalR connection.
+- **One-time secret (kept off this public repo):** the watcher reads the Shoko API key from
+  `~/.config/shoko/apikey` (mode 600). Create it once per machine:
+  ```bash
+  mkdir -p ~/.config/shoko && printf '%s' '<shoko-api-key>' > ~/.config/shoko/apikey && chmod 600 ~/.config/shoko/apikey
+  ```
+- Manual trigger any time:
+  `curl -H "apikey: $(cat ~/.config/shoko/apikey)" http://127.0.0.1:8111/api/v3/Action/RunImport`
+- Logs at `~/.local/state/shoko-import.{out,err}.log`. After editing the plist, bounce it:
+  `launchctl unload ~/Library/LaunchAgents/com.rishi.shoko-import.plist && launchctl load ~/Library/LaunchAgents/com.rishi.shoko-import.plist`
 
 ---
 

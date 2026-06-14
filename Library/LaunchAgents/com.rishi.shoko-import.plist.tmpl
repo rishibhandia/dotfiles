@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Auto-import new downloads into Shoko on the always-on Mac mini. Shoko runs in
+  the Colima VM and the media drive reaches it over a virtiofs mount, which does
+  NOT forward filesystem-change events into the container -- so Shoko's own
+  import-folder watcher never fires. This host-side watcher (where macOS FSEvents
+  DO work) watches the drive recursively and, after a 60s settle, calls Shoko's
+  incremental RunImport (new files only; ignored/unrecognized files untouched).
+  API key is read at runtime from ~/.config/shoko/apikey (kept off the public repo).
+  Managed by chezmoi; gated to the mini via .chezmoiignore.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.rishi.shoko-import</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>/opt/homebrew/bin/fswatch -o -r --latency 30 "/Volumes/Easystore/Movies &amp; Shows" | while read -r _; do sleep 60; KEY=$(cat "$HOME/.config/shoko/apikey" 2>/dev/null); [ -n "$KEY" ] &amp;&amp; /usr/bin/curl -fsS -m 60 -H "apikey: $KEY" "http://127.0.0.1:8111/api/v3/Action/RunImport" >/dev/null 2>&amp;1; done</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/shoko-import.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/shoko-import.err.log</string>
+</dict>
+</plist>

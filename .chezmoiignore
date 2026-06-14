@@ -73,6 +73,7 @@ AppData
 .local/share/adguardhome-seed
 Library/LaunchAgents/com.rishi.colima.plist
 Library/LaunchAgents/com.rishi.jellyfin.plist
+Library/LaunchAgents/com.rishi.shoko-import.plist
 {{ end }}
 
 # =============================================================================

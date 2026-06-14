@@ -1,0 +1,32 @@
+{{ if and (eq .chezmoi.os "darwin") (eq .hostname "rishi-macmini-2020") -}}
+#!/bin/bash
+# Load the Shoko auto-import watcher LaunchAgent on the always-on Mac mini. Shoko's
+# own import-folder watcher can't see new files -- the media drive reaches the
+# Colima VM over a virtiofs mount, which doesn't forward filesystem-change events
+# into the container. So this host-side fswatch agent (macOS FSEvents work here)
+# triggers Shoko's incremental RunImport whenever downloads land. Runs on EVERY
+# apply; loads the agent only when it isn't already loaded so a converged apply
+# doesn't bounce it. After editing the plist, bounce it manually:
+# launchctl unload && launchctl load. No-op on every other machine.
+#
+# Requires ~/.config/shoko/apikey (mode 600) -- kept OFF the public repo, so it's
+# a one-time local step (see docs/shoko-jellyfin.md). Warns if missing.
+
+set -e
+
+: "${XDG_STATE_HOME:=$HOME/.local/state}"
+PLIST="$HOME/Library/LaunchAgents/com.rishi.shoko-import.plist"
+APIKEY="$HOME/.config/shoko/apikey"
+
+mkdir -p "$XDG_STATE_HOME"
+
+if [ ! -s "$APIKEY" ]; then
+    echo "NOTE: $APIKEY is missing -- the Shoko auto-import watcher can't authenticate without it."
+    echo "      Create it once with your Shoko API key:"
+    echo "        mkdir -p ~/.config/shoko && printf '%s' '<shoko-api-key>' > ~/.config/shoko/apikey && chmod 600 ~/.config/shoko/apikey"
+fi
+
+if [ -f "$PLIST" ] && ! launchctl list 2>/dev/null | grep -q "com.rishi.shoko-import"; then
+    launchctl load "$PLIST" >/dev/null 2>&1 || true
+fi
+{{ end -}}
