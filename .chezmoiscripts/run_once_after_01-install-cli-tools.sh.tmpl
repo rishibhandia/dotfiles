@@ -18,19 +18,53 @@ warn() { printf "${YELLOW}[WARN]${NC} %s\n" "$1"; }
 # -----------------------------------------------------------------------------
 # Claude Code (Anthropic's AI coding assistant)
 # https://claude.ai/code
+# A migrated binary keeps its original CPU arch: after a cross-arch restore
+# (Intel -> Apple Silicon via Migration Assistant) the x86_64 build runs under
+# Rosetta, which lacks AVX, so Claude's Bun runtime warns and may crash. Detect
+# an arch mismatch and force a clean native reinstall.
 # -----------------------------------------------------------------------------
-if command -v claude &>/dev/null; then
-    success "Claude Code already installed"
+# True hardware arch — sysctl is reliable even when the shell is under Rosetta.
+if [ "$(uname -s)" = "Darwin" ] && [ "$(sysctl -n hw.optional.arm64 2>/dev/null)" = "1" ]; then
+    HW_ARCH="arm64"
 else
-    info "Installing Claude Code..."
+    HW_ARCH="$(uname -m)"
+fi
+
+install_claude() {
+    info "Installing Claude Code (native ${HW_ARCH})..."
     # Trust: Anthropic (https://claude.ai/install.sh). Vendor-controlled URL,
     # no integrity check — accepted because the alternative is manual install
     # of a moving-target binary on every fresh-machine bootstrap.
-    if curl -fsSL https://claude.ai/install.sh | sh; then
-        success "Claude Code installed"
+    if [ "$(uname -s)" = "Darwin" ]; then
+        # arch -<hw> forces the native slice even if this shell is translated.
+        if arch -"${HW_ARCH}" bash -c "$(curl -fsSL https://claude.ai/install.sh)"; then
+            success "Claude Code installed (${HW_ARCH})"
+        else
+            warn "Claude Code installation failed"
+        fi
     else
-        warn "Claude Code installation failed"
+        if curl -fsSL https://claude.ai/install.sh | sh; then
+            success "Claude Code installed"
+        else
+            warn "Claude Code installation failed"
+        fi
     fi
+}
+
+if command -v claude &>/dev/null; then
+    # In this non-interactive bash script the caffeinate alias isn't present,
+    # so command -v resolves the real binary path.
+    CLAUDE_BIN="$(command -v claude 2>/dev/null || echo "$HOME/.local/bin/claude")"
+    BIN_ARCH="$(file -L "$CLAUDE_BIN" 2>/dev/null | grep -oE 'arm64|x86_64' | head -1)"
+    if [ -n "$BIN_ARCH" ] && [ "$BIN_ARCH" != "$HW_ARCH" ]; then
+        warn "Claude Code is ${BIN_ARCH} but this Mac is ${HW_ARCH}; forcing native reinstall"
+        rm -rf "$HOME/.local/share/claude/versions" "$HOME/.local/bin/claude" 2>/dev/null || true
+        install_claude
+    else
+        success "Claude Code already installed (${BIN_ARCH:-arch ok})"
+    fi
+else
+    install_claude
 fi
 
 # -----------------------------------------------------------------------------
@@ -81,15 +115,15 @@ fi
 # writes ~/.claude.json.
 # -----------------------------------------------------------------------------
 if command -v claude &>/dev/null && command -v tirith &>/dev/null; then
-    if claude mcp list 2>/dev/null | grep -q '^tirith'; then
-        success "tirith MCP server already registered"
+    # Register idempotently. We deliberately avoid `claude mcp list` here: its
+    # per-server health check can hang (e.g. a misbuilt/Rosetta claude), which
+    # previously stalled the entire apply. `claude mcp add` only writes config;
+    # a duplicate add returns non-zero, which we treat as "already registered".
+    info "Registering tirith MCP server with Claude Code (user scope)..."
+    if claude mcp add --scope user tirith -- tirith mcp-server >/dev/null 2>&1; then
+        success "tirith MCP server registered"
     else
-        info "Registering tirith MCP server with Claude Code (user scope)..."
-        if claude mcp add --scope user tirith -- tirith mcp-server >/dev/null 2>&1; then
-            success "tirith MCP server registered"
-        else
-            warn "tirith MCP registration failed (run: claude mcp add --scope user tirith -- tirith mcp-server)"
-        fi
+        info "tirith MCP server already registered (or add skipped)"
     fi
 else
     warn "claude or tirith not found, skipping tirith MCP registration"
