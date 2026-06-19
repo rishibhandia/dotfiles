@@ -66,12 +66,7 @@ brew "ruff"                   # Fast Python linter
 brew "shellcheck"             # Shell script linter
 brew "shfmt"                  # Shell script formatter
 
-# =============================================================================
-# Containers (Colima + Docker CLI, replaces Docker Desktop)
-# =============================================================================
-brew "colima"                 # Container runtime (Linux VM via Lima, FOSS)
-brew "docker"                 # Docker CLI (daemon provided by Colima)
-brew "docker-compose"         # Compose v2 plugin
+# Containers (Colima + Docker) moved into the Mac-mini-only block below.
 
 # =============================================================================
 # AI/LLM Tools
@@ -112,12 +107,10 @@ cask "zotero"                 # Reference manager (browser connector: install fr
 # =============================================================================
 cask "1password"              # Password manager
 cask "1password-cli"          # 1Password CLI
-cask "github"                 # GitHub Desktop
 cask "logseq"                 # Note taking / PKM
 brew "mpv"                    # Video player
 cask "tailscale-app"          # VPN/mesh network (security risk on corp networks)
 cask "ollama-app"             # Local LLM runtime
-cask "signal"                 # Secure messaging
 {{ end -}}
 
 # =============================================================================
@@ -127,10 +120,7 @@ cask "font-hack-nerd-font"        # Hack font with icons
 cask "font-meslo-lg-nerd-font"    # Meslo font for terminal
 
 # =============================================================================
-# Mac App Store (requires: brew install mas)
-# =============================================================================
-brew "mas"                    # Mac App Store CLI
-# mas "Xcode", id: 497799835
+# (Mac App Store / mas removed — broken on modern macOS, no App Store apps declared)
 {{- end }}
 
 {{ if .personal -}}
@@ -146,6 +136,10 @@ brew "run-llama/liteparse/llamaindex-liteparse"   # Local PDF parser (LlamaIndex
 # Mac mini only - always-on LAN services
 # =============================================================================
 cask "jellyfin"               # Self-hosted media server (LAN-wide)
-# Shoko Server (anime metadata backend for Jellyfin/Shokofin) runs as a Docker
-# container via Colima, not a brew package -- see run_once_after_07-install-shoko.
+# Containers — Colima + Docker CLI (replaces Docker Desktop). Hosts the Shoko
+# metadata backend for Jellyfin/Shokofin as a Docker container via Colima
+# (see run_after_07-install-shoko). Mac-mini-only; not needed on laptops.
+brew "colima"                 # Container runtime (Linux VM via Lima, FOSS)
+brew "docker"                 # Docker CLI (daemon provided by Colima)
+brew "docker-compose"         # Compose v2 plugin
 {{- end }}
