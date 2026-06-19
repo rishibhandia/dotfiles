@@ -61,7 +61,7 @@ chezmoi init    # Re-run templates after config changes
 
 ### Template System
 The main configuration template `.chezmoi.toml.tmpl` defines:
-- **Machine detection**: Identifies specific machines (MacBook Pro 2019, Mac Mini 2020, Ubuntu) by hostname
+- **Machine detection**: Identifies specific machines by a stable signal — MacBook Pro 14" M5 Max (`Mac17,7`) → `rishi-mbp-2025` via hardware model; MacBook Pro 2019 and Mac Mini 2020 via ComputerName; Ubuntu via hostname
 - **Feature flags**: `ephemeral`, `work`, `headless`, `personal` for conditional configuration
 - **1Password integration**: API keys and secrets retrieved via `onepassword` template function
 

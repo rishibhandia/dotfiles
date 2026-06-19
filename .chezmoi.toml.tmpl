@@ -24,11 +24,16 @@
 {{-   $ephemeral = true -}}
 {{-   $headless = true -}}
 {{- end -}}
-{{/* work around unreliable hostname on darwin */}}
+{{/* work around unreliable hostname on darwin: prefer the stable hardware
+     model (immune to DHCP hostname noise and ComputerName edits), then fall
+     back to ComputerName for machines named before this approach */}}
 {{- $hostname := .chezmoi.hostname -}}
 {{- if eq .chezmoi.os "darwin" -}}
 {{-   $computerName := output "scutil" "--get" "ComputerName" | trim -}}
-{{-   if contains "MacBook Pro 2019" $computerName -}}
+{{-   $model := output "sysctl" "-n" "hw.model" | trim -}}
+{{-   if eq $model "Mac17,7" -}}
+{{-     $hostname = "rishi-mbp-2025" -}}{{/* MacBook Pro 14" M5 Max */}}
+{{-   else if contains "MacBook Pro 2019" $computerName -}}
 {{-     $hostname = "rishi-mbp-2019" -}}
 {{-   else if contains "Mac Mini 2020" $computerName -}}
 {{-     $hostname = "rishi-macmini-2020" -}}
@@ -48,6 +53,8 @@
 {{-   if eq $hostname "rishi-macmini-2020" -}}
 {{-     $personal = true -}}
 {{-   else if eq $hostname "rishi-mbp-2019" -}}
+{{-     $personal = true -}}
+{{-   else if eq $hostname "rishi-mbp-2025" -}}
 {{-     $personal = true -}}
 {{-   else if eq $hostname "ubuntu" -}}
 {{-     $headless = true -}}
