@@ -1,4 +1,0 @@
-# Starship prompt configuration
-# Minimal config - uses starship defaults with timeout adjustment
-
-command_timeout = 1000

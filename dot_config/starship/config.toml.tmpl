@@ -1,0 +1,15 @@
+# Starship prompt configuration
+# Minimal config - uses starship defaults with timeout adjustment
+
+command_timeout = 1000
+{{ if eq .hostname "rishi-mbp-2025" }}
+# Lambda (M5 Max MacBook Pro, chezmoi id rishi-mbp-2025): prompt mark "λ ❯".
+# λ (U+03BB) is the machine's monogram and a nod to wavelength/light — the
+# optical side of its light-driven-materials work. Constant λ mark, then the
+# status-colored chevron. λ lives in the terminal font (unlike SMP alchemical
+# glyphs, which macOS renders via a mismatched fallback); East-Asian-Width
+# Ambiguous => 1 cell in this en_US.UTF-8 locale.
+[character]
+success_symbol = "λ [❯](bold green)"
+error_symbol = "λ [❯](bold red)"
+{{ end -}}
