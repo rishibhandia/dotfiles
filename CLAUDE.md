@@ -89,6 +89,7 @@ This repo follows XDG Base Directory spec:
 - `q()` / `qv()` - Ask questions about web pages or YouTube videos via LLM
 - `sheet2csv()` - Extract spreadsheet data from images using Gemini AI
 - `pdf2text()` - Extract text from PDFs using Gemini AI
+- `bbstatus()` - Backblaze Personal Backup status (activity, remaining files/GB, last completed). Reads the app's state files under `/Library/Backblaze.bzpkg/bzdata` since the product ships no CLI. Gated to **darwin + personal** (zsh-only; Windows uses PowerShell + a different path)
 
 ### Neovim Configuration (`dot_config/nvim/init.vim`)
 - **Plugin manager**: vim-plug — auto-installs on first launch if missing

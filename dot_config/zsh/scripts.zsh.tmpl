@@ -1252,3 +1252,50 @@ agh() {
     esac
 }
 {{- end }}
+
+{{ if and (eq .chezmoi.os "darwin") .personal -}}
+# =============================================================================
+# bbstatus — Backblaze Personal Backup status (it ships no official CLI)
+# Reads the state files the app writes under /Library/Backblaze.bzpkg/bzdata
+# (world-readable, no sudo). Unsupported/heuristic: a future Backblaze build
+# could rename these fields. Shows activity, remaining files/GB, last completed.
+# =============================================================================
+bbstatus() {
+    local base=/Library/Backblaze.bzpkg/bzdata
+    local reports="$base/bzreports"
+    if [[ ! -d "$base" ]]; then
+        echo "Backblaze Personal Backup not installed (no $base)"
+        return 1
+    fi
+
+    local state
+    if pgrep -f 'bztransmit.*-threadpush' >/dev/null 2>&1; then
+        state="uploading"
+    elif pgrep -f 'bztransmit.*-completesync' >/dev/null 2>&1; then
+        state="syncing (reconciling backup state)"
+    elif pgrep -x bzserv >/dev/null 2>&1; then
+        state="idle (service running)"
+    else
+        state="not running"
+    fi
+
+    local rfile="$reports/bzstat_remainingbackup.xml"
+    local files bytes gb
+    files=$(grep -oE 'remainingnumfilesforbackup="[0-9]*"' "$rfile" 2>/dev/null | grep -oE '[0-9]+')
+    bytes=$(grep -oE 'remainingnumbytesforbackup="[0-9]*"' "$rfile" 2>/dev/null | grep -oE '[0-9]+')
+    gb=$(awk -v b="${bytes:-0}" 'BEGIN { printf "%.1f", b/1073741824 }')
+
+    local lfile="$reports/bzstat_lastbackupcompleted.xml"
+    local lastms last
+    lastms=$(grep -oE 'gmt_millis="[0-9]*"' "$lfile" 2>/dev/null | grep -oE '[0-9]+')
+    if [[ -n "$lastms" ]]; then
+        last=$(date -r $(( lastms / 1000 )) '+%Y-%m-%d %H:%M' 2>/dev/null)
+    else
+        last="unknown"
+    fi
+
+    printf 'Backblaze: %s\n' "$state"
+    printf '  remaining : %s files / %s GB\n' "${files:-?}" "$gb"
+    printf '  last done : %s\n' "$last"
+}
+{{- end }}
