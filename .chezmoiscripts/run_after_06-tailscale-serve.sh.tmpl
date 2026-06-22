@@ -1,0 +1,39 @@
+{{ if and (eq .chezmoi.os "darwin") (eq .hostname "rishi-macmini-2020") -}}
+#!/bin/bash
+# Expose the mini's services over Tailscale Serve (tailnet-only HTTPS):
+#   :8443      -> Jellyfin         (http://localhost:8096)
+#   :8111      -> Shoko            (http://localhost:8111)
+#   /showtime  -> Showtime Finder  (http://localhost:5151)
+# Jellyfin gets a dedicated HTTPS port rather than a path mount because path
+# mounts trigger BaseUrl double-prefixing on Jellyfin's redirects, which breaks
+# native mobile apps; the Showtime Finder is fine on a path. Runs on EVERY apply
+# (run_, not run_once) so a skipped precondition (CLI missing, not logged in)
+# retries next apply. tailscale serve overwrites the config for the same
+# port/path, so re-running when converged is a cheap no-op. No-op elsewhere.
+
+set -e
+
+eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null || true
+
+# The tailscale-app cask does NOT symlink the CLI onto PATH; the app bundle
+# binary doubles as the CLI, so fall back to it.
+TAILSCALE="$(command -v tailscale || true)"
+if [ -z "$TAILSCALE" ] && [ -x "/Applications/Tailscale.app/Contents/MacOS/Tailscale" ]; then
+    TAILSCALE="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+fi
+if [ -z "$TAILSCALE" ]; then
+    echo "tailscale CLI not found (checked PATH and /Applications/Tailscale.app); retrying next apply" >&2
+    exit 0
+fi
+
+# Skip if not logged into a tailnet (fresh machine before manual login);
+# retried automatically on the next chezmoi apply.
+if ! "$TAILSCALE" status >/dev/null 2>&1; then
+    echo "tailscale not logged in; skipping serve setup (retries next apply)" >&2
+    exit 0
+fi
+
+"$TAILSCALE" serve --bg --https=8443 http://localhost:8096 >/dev/null
+"$TAILSCALE" serve --bg --https=8111 http://localhost:8111 >/dev/null
+"$TAILSCALE" serve --bg --https=443 --set-path=/showtime http://localhost:5151 >/dev/null
+{{ end -}}
