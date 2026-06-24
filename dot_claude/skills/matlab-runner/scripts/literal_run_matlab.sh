@@ -24,51 +24,48 @@ fi
 # Find MATLAB executable (checked in order of preference)
 # ---------------------------------------------------------------------------
 find_matlab() {
-  # 1. PATH — works on all platforms if matlab is symlinked or in PATH
+  local uname candidates last p
+  uname="$(uname -s)"
+
+  # 0. Explicit override wins: MATLAB_BIN (full path to the matlab binary) or
+  #    MATLAB_VERSION (release name, e.g. R2026a). Lets a caller force a version.
+  if [ -n "$MATLAB_BIN" ]; then
+    if [ -x "$MATLAB_BIN" ]; then echo "$MATLAB_BIN"; return; fi
+    echo "Warning: MATLAB_BIN=$MATLAB_BIN is not executable; ignoring." >&2
+  fi
+  if [ -n "$MATLAB_VERSION" ]; then
+    case "$uname" in
+      Darwin) p="/Applications/MATLAB_${MATLAB_VERSION}.app/bin/matlab" ;;
+      Linux)  p="/usr/local/MATLAB/${MATLAB_VERSION}/bin/matlab"; [ -x "$p" ] || p="/opt/MATLAB/${MATLAB_VERSION}/bin/matlab" ;;
+      MINGW*|MSYS*|CYGWIN*) p="/c/Program Files/MATLAB/${MATLAB_VERSION}/bin/matlab.exe" ;;
+    esac
+    if [ -n "$p" ] && [ -x "$p" ]; then echo "$p"; return; fi
+    echo "Warning: MATLAB_VERSION=$MATLAB_VERSION not found; falling back to newest install." >&2
+  fi
+
+  # 1. Prefer the NEWEST installed versioned MATLAB (sort -V | tail -1). This avoids
+  #    defaulting to an older/broken install when several are present — e.g. an R2024b
+  #    that errors "No MATLAB bin directory for this machine architecture (ARCH = maca64)"
+  #    sitting alongside a working R2026a.
+  case "$uname" in
+    Darwin)
+      candidates=$(ls -d /Applications/MATLAB_*.app/bin/matlab 2>/dev/null | sort -V) ;;
+    Linux)
+      candidates=$(ls -d /usr/local/MATLAB/*/bin/matlab /opt/MATLAB/*/bin/matlab 2>/dev/null | sort -V) ;;
+    MINGW*|MSYS*|CYGWIN*)
+      candidates=$(ls -d "/c/Program Files/MATLAB/"*/bin/matlab.exe 2>/dev/null | sort -V) ;;
+  esac
+  last="$(echo "$candidates" | tail -1)"
+  if [ -n "$last" ] && [ -x "$last" ]; then
+    echo "$last"
+    return
+  fi
+
+  # 2. Fallback: matlab on PATH, only if no versioned install was found.
   if command -v matlab &>/dev/null; then
     command -v matlab
     return
   fi
-
-  local uname
-  uname="$(uname -s)"
-
-  # 2. macOS: /Applications/MATLAB_R20XXx.app/bin/matlab
-  if [ "$uname" = "Darwin" ]; then
-    local candidates
-    candidates=$(ls -d /Applications/MATLAB_*.app/bin/matlab 2>/dev/null | sort -V)
-    local last
-    last=$(echo "$candidates" | tail -1)
-    if [ -n "$last" ] && [ -x "$last" ]; then
-      echo "$last"
-      return
-    fi
-  fi
-
-  # 3. Linux: /usr/local/MATLAB/R*/bin/matlab or /opt/MATLAB/R*/bin/matlab
-  if [ "$uname" = "Linux" ]; then
-    local candidates
-    candidates=$(ls -d /usr/local/MATLAB/*/bin/matlab /opt/MATLAB/*/bin/matlab 2>/dev/null | sort -V)
-    local last
-    last=$(echo "$candidates" | tail -1)
-    if [ -n "$last" ] && [ -x "$last" ]; then
-      echo "$last"
-      return
-    fi
-  fi
-
-  # 4. Windows (Git Bash / MSYS2 / Cygwin): /c/Program Files/MATLAB/R*/bin/matlab.exe
-  case "$uname" in MINGW*|MSYS*|CYGWIN*)
-    local candidates
-    candidates=$(ls -d "/c/Program Files/MATLAB/"*/bin/matlab.exe 2>/dev/null | sort -V)
-    local last
-    last=$(echo "$candidates" | tail -1)
-    if [ -n "$last" ] && [ -x "$last" ]; then
-      echo "$last"
-      return
-    fi
-    ;;
-  esac
 }
 
 MATLAB_EXE="$(find_matlab)"

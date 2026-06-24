@@ -9,20 +9,30 @@ Run MATLAB scripts headlessly via `matlab -batch`, capture all output, and read 
 
 ## MATLAB Executable
 
-The runner script auto-detects MATLAB in this order:
+The runner script chooses the **newest installed MATLAB by default**, unless a
+version is explicitly specified. Resolution order:
 
-1. `matlab` in PATH (works on all platforms if configured)
-2. **macOS**: `/Applications/MATLAB_R20XXx.app/bin/matlab`
-3. **Linux**: `/usr/local/MATLAB/R20XXx/bin/matlab` or `/opt/MATLAB/R20XXx/bin/matlab`
-4. **Windows (Git Bash)**: `/c/Program Files/MATLAB/R20XXx/bin/matlab.exe`
+1. **Explicit override** (wins if set):
+   - `MATLAB_BIN` — full path to the `matlab` binary, or
+   - `MATLAB_VERSION` — release name, e.g. `R2026a`
+2. **Newest installed versioned release** (`ls ... | sort -V | tail -1`):
+   - **macOS**: `/Applications/MATLAB_R*.app/bin/matlab`
+   - **Linux**: `/usr/local/MATLAB/R*/bin/matlab` or `/opt/MATLAB/R*/bin/matlab`
+   - **Windows (Git Bash)**: `/c/Program Files/MATLAB/R*/bin/matlab.exe`
+3. **`matlab` on PATH** (fallback, only if no versioned install is found)
 
-Common installed paths by platform:
+Choosing the newest avoids defaulting to an older or broken install when several
+are present (e.g. a broken `R2024b` that errors "No MATLAB bin directory for this
+machine architecture (ARCH = maca64)" sitting next to a working `R2026a`).
 
-| Platform | Default location |
-|----------|-----------------|
-| macOS | `/Applications/MATLAB_R2025a.app/bin/matlab` |
-| Linux | `/usr/local/MATLAB/R2025a/bin/matlab` |
-| Windows | `C:\Program Files\MATLAB\R2025a\bin\matlab.exe` |
+```bash
+# default: newest installed version
+bash run_matlab.sh myScript.m
+
+# force a specific version
+MATLAB_VERSION=R2025a bash run_matlab.sh myScript.m
+MATLAB_BIN=/Applications/MATLAB_R2026a.app/bin/matlab bash run_matlab.sh myScript.m
+```
 
 ## Running a Script
 
@@ -76,6 +86,7 @@ Then use the Read tool on each PNG path to view the figure.
 | Exit code 1, no message | Script called `error()` | Check stderr for the error message and line number |
 | Figure not exported | Script errored before `exportgraphics` | Fix the upstream error first |
 | `matlab: command not found` | MATLAB not in PATH | Use the full path or run via the bundled script which auto-detects |
+| `No MATLAB bin directory for this machine architecture` | A broken/old install was selected | Runner now prefers the newest install; or set `MATLAB_BIN` / `MATLAB_VERSION` to a working one |
 
 ## Notes
 
