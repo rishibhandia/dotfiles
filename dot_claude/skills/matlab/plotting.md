@@ -194,6 +194,14 @@ Mixing interpreters within a figure is fine: keep ordinary labels on
 `tex`; only strings using latex-only macros (`\hbar`, `\mathcal`, ...)
 need `'Interpreter', 'latex'`.
 
+`\parallel` and `\perp` are also latex-only — the `tex` interpreter
+warns "not valid interpreter syntax" and drops them. Same fix: that
+string gets `'Interpreter', 'latex'` with e.g. `$\delta P \parallel P$`.
+
+Derivative primes in a single-quoted latex string need FOUR quotes per
+double-prime: MATLAB collapses `''` → `'`, so `F''''(P_s)` is what
+renders as `F''(P_s)`. e.g. `'$\omega_0^2 = F''''(P_s)\,/\,m_p$'`.
+
 ## When to Use
 
 Any plotting script in `~/Documents/Scientific Data/` or anywhere
