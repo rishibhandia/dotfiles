@@ -407,6 +407,47 @@ item of myString` errors with -1728 inside the tell block. Read the
 value inside the tell, do all string manipulation outside, then write
 back inside a second tell.
 
+**Address the deck by name when several are open — never `document 1`.**
+If more than one deck is open (easy to forget — the user often has 3–4),
+`document 1` is whichever Keynote fronted last, so a script that worked
+"yesterday" suddenly edits the wrong deck or throws -1728 / -1719 /
+-1700. Always target by file name:
+
+```applescript
+tell application "Keynote"
+    set d to document "NbOI2_CoherentPhonons_GroupMeeting.key"
+    tell slide 8 of d to «...»
+end tell
+```
+
+**Shapes cannot be copied.** `duplicate shape …` errors with "Shapes can
+not be copied". To clone a styled shape (e.g. a built equation box), you
+cannot copy the shape — `duplicate` the WHOLE slide instead, then swap
+its title / body / equation text / image in place. Match new-shape
+styling by reading `font`/`size` off the sibling you're imitating
+(`set background color of shape` also fails, so copy the look, not the
+object).
+
+**Pass special-character text as argv, not inline.** Straight quotes,
+backslashes, and LaTeX in body/notes/equation strings break inline
+`osascript -e` with -2741. Avoid all escaping by handing the text to a
+heredoc handler as arguments:
+
+```bash
+osascript - "$TITLE" "$BODY" "$NOTES" <<'APPLESCRIPT'
+on run argv
+    set {ttl, bdy, nts} to {item 1, item 2, item 3} of argv
+    tell application "Keynote"
+        set d to document "deck.key"
+        -- use ttl / bdy / nts ...
+    end tell
+end run
+APPLESCRIPT
+```
+
+Close the handler with `end run`, not a stray `end tell` — an extra
+`end tell` throws -2741 too.
+
 **Setting fonts** must target `object text`, and must hit text items,
 shapes, AND the default title/body items separately (wrap each in
 `try` — not every slide has every item):
