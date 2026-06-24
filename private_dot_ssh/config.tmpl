@@ -23,16 +23,21 @@ Host github.com
     Hostname ssh.github.com
     Port 443
     User git
-    IdentityFile ~/.ssh/personal_github
+    IdentityFile ~/.ssh/personal_github_ed25519
+    IdentitiesOnly yes
 
 # =============================================================================
 # Personal machines
 # =============================================================================
-Host Mac-mini.local
+# Mac mini, reachable three ways: Mac-mini.local (mDNS/LAN), mini (Tailscale
+# MagicDNS short name), and the tailnet IP. IdentitiesOnly + the pinned key make
+# ssh offer ONLY this identity, so the 1Password agent can't bury it past the
+# server's MaxAuthTries (default 6) and trip "Too many authentication failures"
+# as the vault accumulates keys. personal_id_ed25519.pub must exist on disk for
+# ssh to select the matching agent key.
+Host Mac-mini.local mini 100.117.214.99
     IdentityFile ~/.ssh/personal_id_ed25519
-
-Host 100.117.214.99
-    IdentityFile ~/.ssh/personal_id_ed25519
+    IdentitiesOnly yes
 
 # =============================================================================
 # MARCC (JHU HPC)
