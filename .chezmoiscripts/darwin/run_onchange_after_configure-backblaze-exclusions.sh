@@ -62,8 +62,8 @@ cat > "$BLOCK_TMP" <<'BLOCK'
 <excludefname_rule bzmergeblock="003" plat="mac" osVers="*"  ruleIsOptional="t" skipFirstCharThenStartsWith="users/" contains_1="/pictures/photos library.photoslibrary/private/com.apple.photoanalysisd/" contains_2="*" doesNotContain="*" endsWith="*" hasFileExtension="*" />
 <excludefname_rule bzmergeblock="003" plat="mac" osVers="*"  ruleIsOptional="t" skipFirstCharThenStartsWith="users/" contains_1="/pictures/photos library.photoslibrary/database/search/" contains_2="*" doesNotContain="*" endsWith="*" hasFileExtension="*" />
 
-<!-- Zotero's redundant auto-backup copy (the live zotero.sqlite is still backed up) -->
-<excludefname_rule bzmergeblock="003" plat="mac" osVers="*"  ruleIsOptional="t" skipFirstCharThenStartsWith="users/" contains_1="/zotero/zotero.sqlite.bak" contains_2="*" doesNotContain="*" endsWith="*" hasFileExtension="*" />
+<!-- Zotero's redundant backup rotations (.bak, .1.bak, ...); live zotero.sqlite (+ -wal/-shm/-journal) still backed up -->
+<excludefname_rule bzmergeblock="003" plat="mac" osVers="*"  ruleIsOptional="t" skipFirstCharThenStartsWith="users/" contains_1="/zotero/zotero.sqlite." contains_2="*" doesNotContain="*" endsWith="*" hasFileExtension="*" />
 
 <!-- uv Python package cache (fully reproducible from lockfiles) -->
 <excludefname_rule bzmergeblock="003" plat="mac" osVers="*"  ruleIsOptional="t" skipFirstCharThenStartsWith="users/" contains_1="/.cache/uv/" contains_2="*" doesNotContain="*" endsWith="*" hasFileExtension="*" />
@@ -142,8 +142,8 @@ pass — several of them 2–4× per day.
 
 - **Photos analysis & search caches** (`com.apple.mediaanalysisd`,
   `com.apple.photoanalysisd`, `database/search`) — macOS rebuilds them.
-- **`zotero.sqlite.bak`** — Zotero's redundant copy; live `zotero.sqlite` is still
-  backed up.
+- **`zotero.sqlite.*.bak`** — Zotero's redundant backup rotations; live
+  `zotero.sqlite` (+ `-wal`/`-shm`) is still backed up.
 - **`~/.cache/uv`** — reproducible from lockfiles.
 - **CrossOver `Bottles`** — Windows game prefixes (executable software).
 - **Discord `Cache`/`Code Cache`/`GPUCache`** — re-downloaded automatically.
