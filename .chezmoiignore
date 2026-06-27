@@ -7,6 +7,7 @@
 {{ if ne .chezmoi.os "darwin" }}
 .chezmoiscripts/darwin/configure-macos.sh
 .chezmoiscripts/darwin/set-default-terminal.sh
+.chezmoiscripts/darwin/configure-backblaze-exclusions.sh
 {{ end }}
 
 # Windows-only scripts
