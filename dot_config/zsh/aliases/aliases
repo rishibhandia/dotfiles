@@ -539,4 +539,21 @@ else
     alias weather='wget -qO- --compression=auto --timeout=10 "https://wttr.in/?format=%l:+(%C)+%c++%t+\[%h,+%w\]"'
 fi
 
+# =============================================================================
+# Remote sessions — open a titled Ghostty window running mosh + persistent tmux
+# (macOS + Ghostty only). mosh survives sleep/wifi changes; tmux survives mosh
+# drops; --title pins the window name so you can tell connections apart.
+# =============================================================================
+if [[ "$OSTYPE" == darwin* ]] && [[ -d /Applications/Ghostty.app ]]; then
+
+    # mwin <sshhost> [session] — new Ghostty window (titled <host>): mosh in, attach/create tmux
+    # e.g. `mwin mini`  ->  window titled "mini", attached to tmux session "main"
+    mwin() {
+        local host=${1:?usage: mwin <sshhost> [session]} sess=${2:-main}
+        open -na Ghostty.app --args --title="$host" \
+            -e zsh -lc "mosh $host -- tmux new-session -A -s $sess"
+    }
+
+fi
+
 
