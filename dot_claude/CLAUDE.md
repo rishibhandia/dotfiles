@@ -61,6 +61,20 @@ if (!apiKey) {
 }
 ```
 
+**Secrets in Claude's Context (CRITICAL):** NEVER let secret values — private keys,
+passphrases, API tokens, passwords — appear in command output Claude reads. Anything
+that enters Claude's context leaves the machine.
+
+- Move secrets file-to-file or through pipelines whose output is never printed
+  (e.g. `op ... | ssh-add` via `SSH_ASKPASS`, `op read ... > .env`)
+- Verify secrets indirectly: compare fingerprints, print only MATCH/MISMATCH,
+  inspect JSON as field labels + has-value booleans — never values
+- Public keys and fingerprints are fine to display
+- If a secret must be entered interactively, hand the user a `! <command>` to run
+  themselves instead of handling it
+- If a secret does leak into context, treat it as exposed: say so immediately and
+  rotate/regenerate it
+
 **Security Response Protocol:** If security issue found:
 1. STOP immediately
 2. Use **security-reviewer** agent
