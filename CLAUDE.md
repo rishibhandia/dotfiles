@@ -220,8 +220,11 @@ The Mac mini (`rishi-macmini-2020`) hosts LAN-wide DNS via AdGuard Home. Most se
 ### Manual checklist (one-time per machine / per Apple ID / per device)
 
 **Router (Linksys MR7500, lives on the device, not chezmoi-able)**
-- [ ] DHCP Reservation pinning the mini's MAC → `192.168.1.185` — Connectivity → Local Network → DHCP Reservations
+- [ ] DHCP Reservation pinning the mini's MAC → `192.168.1.185` — Connectivity → Local Network → DHCP Reservations. **Pin the interface the mini actually uses** (wired `en0` = `14:98:77:49:6b:6d`, or Wi-Fi `en1` hardware MAC = `14:98:77:60:dc:a9`). If on Wi-Fi, **Private Wi-Fi Address must be OFF** for the home network first (see next item), otherwise the mini presents a randomized MAC that won't match the reservation.
 - [ ] Static DNS 1 = `192.168.1.185`, DNS 2 + 3 empty — same screen, DHCP Server section. Use the *web UI* at `http://192.168.1.1`; the Linksys app hides this field on Hydra firmware
+
+**On the mini — if connected via Wi-Fi rather than Ethernet**
+- [ ] Private Wi-Fi Address OFF for the home network — System Settings → Wi-Fi → Details… → Private Wi-Fi Address → Off. macOS defaults this ON, which randomizes the MAC per-network and breaks the `.185` DHCP reservation. Wired Ethernet (`en0`) is never randomized and is preferred for an always-on DNS host.
 
 **Per-Apple-ID** — apply to the iCloud account, not to chezmoi
 - [ ] iCloud Private Relay off — Settings → [your name] → iCloud → Private Relay → Off. (Otherwise Safari bypasses local DNS for HTTPS.)
@@ -232,6 +235,31 @@ The Mac mini (`rishi-macmini-2020`) hosts LAN-wide DNS via AdGuard Home. Most se
 - [ ] Edge: similar to Chrome — Settings → Privacy → "Use secure DNS" → Off
 
 **Per-device on the LAN** — usually nothing required (DHCP hands DNS out to clients), but force a lease renewal after the router DHCP change so devices pick up the new DNS server right away.
+
+### Troubleshooting: "LAN devices aren't being filtered"
+
+Almost always a **reachability/addressing** problem, not AGH itself. AGH can be perfectly healthy (filtering correctly when queried directly) while clients get no filtering — because they're pointed at `192.168.1.185` and the mini has drifted off that IP.
+
+**Diagnose in order (stop at the first failure):**
+
+```bash
+# 1. Is AGH running and filtering AT ALL? (query the loopback directly)
+dig +short @127.0.0.1 doubleclick.net          # expect 0.0.0.0 → engine is fine
+ps aux | grep '[A]dGuardHome'                   # expect the -s run process
+
+# 2. Is the mini actually AT .185? (this is the usual culprit)
+ipconfig getifaddr en0                          # wired — expect 192.168.1.185
+ipconfig getifaddr en1                          # Wi-Fi — expect 192.168.1.185
+dig +short +time=2 +tries=1 @192.168.1.185 doubleclick.net   # 0.0.0.0 = reachable+filtering; timeout = mini not at .185
+
+# 3. Is the active interface presenting a randomized MAC?
+ifconfig en1 | grep ether                       # if it's NOT 14:98:77:60:dc:a9, Private Wi-Fi Address is ON
+networksetup -listallhardwareports              # maps en0/en1 → hardware MAC
+```
+
+**Root cause seen before (2026-06):** built-in Ethernet (`en0`) was unplugged → mini fell back to **Wi-Fi (`en1`) with Private Wi-Fi Address ON** → presented a randomized MAC (`b6:b6:…`) → router didn't match the reservation → mini got a *dynamic* lease (`192.168.1.28`) → nothing at `.185` → every client's DNS queries timed out and fell back to unfiltered upstream. AGH was healthy the whole time.
+
+**Fix:** either plug in Ethernet (reclaims `.185` via the wired reservation), or turn Private Wi-Fi Address OFF and pin the Wi-Fi hardware MAC (`14:98:77:60:dc:a9`) to `.185`. Then renew leases / toggle Wi-Fi on affected clients so they stop using the cached dead resolver. Confirm via the AGH Query Log at `http://192.168.1.185:3000` populating as a client browses.
 
 ### Age encryption setup (one-time, mini only)
 
