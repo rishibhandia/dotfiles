@@ -8,6 +8,37 @@ Include ~/.colima/ssh_config
 {{- end }}
 
 # =============================================================================
+# GitHub
+# =============================================================================
+# NOTE: this section must stay ABOVE the 1Password "Host *" IdentityAgent
+# default — ssh keeps the FIRST value it sees per option, so the mini's
+# "IdentityAgent none" would be ignored if this block came after it.
+{{- if eq .hostname "rishi-macmini-2020" }}
+# Mac mini automation identity: dedicated on-disk key (backed up in 1Password
+# as an SSH-key item, but deliberately NOT served by its agent — see
+# ~/.config/1Password/ssh/agent.toml). "IdentityAgent none" + UseKeychain
+# means ssh never consults any agent for GitHub: it reads the key file and
+# pulls the passphrase from the macOS keychain, so unattended git can never
+# block on the 1Password agent. Apple's agent socket can't be pinned here
+# because its launchd path is randomized per boot.
+Host github.com
+    Hostname ssh.github.com
+    Port 443
+    User git
+    IdentityFile ~/.ssh/id_ed25519
+    IdentitiesOnly yes
+    UseKeychain yes
+    IdentityAgent none
+{{- else }}
+Host github.com
+    Hostname ssh.github.com
+    Port 443
+    User git
+    IdentityFile ~/.ssh/personal_github_ed25519
+    IdentitiesOnly yes
+{{- end }}
+
+# =============================================================================
 # 1Password SSH Agent
 # =============================================================================
 {{- if eq .chezmoi.os "darwin" }}
@@ -15,16 +46,6 @@ Include ~/.colima/ssh_config
 Host *
     IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 {{- end }}
-
-# =============================================================================
-# GitHub
-# =============================================================================
-Host github.com
-    Hostname ssh.github.com
-    Port 443
-    User git
-    IdentityFile ~/.ssh/personal_github_ed25519
-    IdentitiesOnly yes
 
 # =============================================================================
 # Personal machines

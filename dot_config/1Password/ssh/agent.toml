@@ -1,0 +1,18 @@
+# ~/.config/1Password/ssh/agent.toml
+# Managed by chezmoi
+#
+# Once this file exists, the 1Password SSH agent serves ONLY the keys listed
+# here (default without it: every SSH-key item in the Private vault). This
+# deliberately excludes "Mac Mini automation key" — that item is a backup
+# only; the live key lives on the mini's disk and is used via UseKeychain,
+# never through an agent.
+#
+# Any future key that SHOULD be offered by the agent must be added here.
+
+[[ssh-keys]]
+item = "personal_github"
+vault = "Private"
+
+[[ssh-keys]]
+item = "Personal SSH"
+vault = "Private"
