@@ -261,6 +261,46 @@ networksetup -listallhardwareports              # maps en0/en1 → hardware MAC
 
 **Fix:** either plug in Ethernet (reclaims `.185` via the wired reservation), or turn Private Wi-Fi Address OFF and pin the Wi-Fi hardware MAC (`14:98:77:60:dc:a9`) to `.185`. Then renew leases / toggle Wi-Fi on affected clients so they stop using the cached dead resolver. Confirm via the AGH Query Log at `http://192.168.1.185:3000` populating as a client browses.
 
+### DNS architecture: LAN vs roaming (the decided design)
+
+**Decision (2026-07):** do **not** route AGH over Tailscale. Keep the split below. Rationale
+below; this replaced an earlier plan to add AGH as a tailnet global nameserver, which
+Tailscale blocks anyway (see "Why not AGH over Tailscale").
+
+| Scope | Resolver | Notes |
+|---|---|---|
+| **LAN clients** | **AdGuard Home** on the mini (`192.168.1.185`), handed out by router DHCP | Self-hosted blocklists + unified query log. Set AGH's **upstream → NextDNS** so LAN also gets NextDNS filtering layered under AGH's own rules. |
+| **Roaming / tailnet** | Per-device **NextDNS profile** (preferred), *not* Tailscale's global override | Filter roaming devices at the device level so you can add per-SSID exceptions (e.g. disable on the corporate Wi-Fi). Keep Tailscale's **Override DNS servers OFF** — see the tradeoff below. |
+| **The mini itself** | AGH via MagicDNS fallback to `127.0.0.1` | Tailscale MagicDNS forwards non-`.ts.net` queries to the system default, which the loopback fix points at AGH. |
+
+Two independent "NextDNS" roles — don't conflate them: **AGH's upstream = NextDNS**
+(only affects queries that reach AGH, i.e. LAN) vs **Tailscale's global nameserver =
+NextDNS** (roaming devices hit NextDNS *directly*, bypassing the mini entirely). They can
+point at the same provider but are different layers.
+
+**Why not AGH over Tailscale (why this is the right call, not a limitation we settled for):**
+- **A self-hosted box can't be its own backup.** Whatever stays up when the mini is down must live *off* the mini — i.e. a cloud resolver. NextDNS already is that. Making AGH the roaming resolver would make all roaming DNS depend on the mini's uptime + tailnet reachability.
+- **Tailscale won't allow it alongside NextDNS anyway.** With a **DoH** global nameserver configured (NextDNS is DoH), the admin console forces any *additional* nameserver to be **restricted to a search domain** (Split DNS) — you cannot add a second *global* one. Tailscale also does no health-checked failover between resolvers. (This is the "Restrict to domain won't turn off" wall hit in the console.)
+
+**Why Tailscale "Override DNS servers" stays OFF (corporate-DNS tradeoff):** turning it ON
+forces *all* DNS on every tailnet device to the global nameserver while Tailscale is
+connected, **ignoring the local network's DNS**. That breaks resolution of
+local/corporate internal names — intranet hosts, printers, and shares behind a private
+DNS server (e.g. a private AD domain) return NXDOMAIN, so you can't reach them by name on
+a work network. (`.local`/AirPrint printers still work — macOS/iOS resolve those via mDNS,
+not the configured DNS server; it's *unicast* internal DNS that breaks.) The flip side:
+with Override OFF, the global nameserver is largely *not* enforced on networks that hand
+out their own DNS — which is why routing roaming filtering through Tailscale is a poor fit.
+Conclusion: leave Override OFF and do roaming ad-filtering with a **NextDNS device
+profile** instead (supports per-SSID/on-demand exceptions Tailscale's tailnet-wide toggle
+can't). To opt a single device out of Tailscale DNS entirely: `tailscale set --accept-dns=false`.
+
+**If you ever DO want self-hosted roaming DNS** (accepting the mini-uptime dependency): AGH can *serve* DoH itself. Enable AGH → Encryption with a TLS cert; Tailscale issues free `.ts.net` certs via `tailscale cert mini.dropbear-bitterling.ts.net`. AGH then serves DoH at `https://mini.dropbear-bitterling.ts.net/dns-query`, which can *replace* NextDNS as the single global DoH nameserver. Adds cert-renewal (~90 day) upkeep and still dies if the mini is down — hence not chosen.
+
+**Reference — mini's tailnet identity:** IP `100.117.214.99`, MagicDNS name `mini.dropbear-bitterling.ts.net`. AGH already listens on all interfaces (`bind_hosts: 0.0.0.0`; `dig @100.117.214.99 doubleclick.net` → `0.0.0.0`), so it's *reachable* over the tailnet — the design simply chooses not to point Tailscale's DNS at it.
+
+**Note on the AGH web UI:** the DNS settings page fields (Upstream / Bootstrap / Fallback / Private reverse DNS servers, EDNS, DNSSEC) are all *outbound*/validation settings, **not** the listen interface. `bind_hosts` (what AGH listens on) lives only in the install wizard and `/Applications/AdGuardHome/AdGuardHome.yaml`.
+
 ### Age encryption setup (one-time, mini only)
 
 Push-button rebuild requires the AGH config seed to live in git, encrypted with `age` so the public dotfiles repo doesn't expose secrets.
