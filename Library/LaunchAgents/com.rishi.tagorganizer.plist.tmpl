@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Weekly Pinboard tag organizer on the always-on Mac mini (replaces the
+  GitHub Actions schedule; the Actions workflow remains for manual runs).
+  Delegates to scripts/weekly_run.sh in the repo: git pull, run, back up the
+  DB to the GitHub release. Secrets come from the repo's .env (read by
+  python-dotenv), NOT from launchd's environment. Calls bash on the script
+  rather than `uv run` — uv's pre-flight stalls under launchd.
+  Managed by chezmoi; gated to the mini via .chezmoiignore.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.rishi.tagorganizer</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>{{ .chezmoi.homeDir }}/Code/tagOrganizer/scripts/weekly_run.sh</string>
+    </array>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key>
+        <integer>0</integer>
+        <key>Hour</key>
+        <integer>6</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    <key>WorkingDirectory</key>
+    <string>{{ .chezmoi.homeDir }}/Code/tagOrganizer</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>PYTHONUNBUFFERED</key>
+        <string>1</string>
+    </dict>
+    <key>RunAtLoad</key>
+    <false/>
+    <key>KeepAlive</key>
+    <false/>
+    <key>StandardOutPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/tagorganizer.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>{{ .chezmoi.homeDir }}/.local/state/tagorganizer.err.log</string>
+</dict>
+</plist>

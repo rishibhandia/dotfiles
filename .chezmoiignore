@@ -75,6 +75,7 @@ AppData
 Library/LaunchAgents/com.rishi.colima.plist
 Library/LaunchAgents/com.rishi.jellyfin.plist
 Library/LaunchAgents/com.rishi.shoko-import.plist
+Library/LaunchAgents/com.rishi.tagorganizer.plist
 {{ end }}
 
 # =============================================================================
