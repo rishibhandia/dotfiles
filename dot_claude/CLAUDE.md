@@ -397,8 +397,11 @@ Use `dots` command (chezmoi wrapper) to manage dotfiles from any directory:
 | `dots add FILE` | Add a new file to chezmoi |
 | `dots cd` | Go to dotfiles source directory |
 | `dots git ...` | Run git commands in dotfiles repo |
+| `dots ai ...` | AI parity: sync shared skills between Claude Code and Codex (`status`, `diff`, `sync --write`, `verify`) |
 
 Source directory: `~/.local/share/chezmoi`
+
+**AI parity note:** some `~/.claude/skills` (currently `matlab`, `matlab-runner`, `zotero`, `pdf-chunk`, `llm-pdf-processing`, `scientific-figures`) are **generated** from canonical sources under `ai-parity/shared/` in the dotfiles repo and kept in parity with Codex. Edit the canonical source there — not the deployed copies or the rendered `dot_claude`/`dot_agents` targets — then run `dots ai sync --write`. See `ai-parity/SPEC.md` in the dotfiles repo.
 
 ### Claude Code Settings
 
