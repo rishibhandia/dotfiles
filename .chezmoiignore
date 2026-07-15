@@ -107,6 +107,11 @@ docs/**
 ai-parity/**
 .githooks/**
 
+# Python bytecode caches created by running skill scripts/tests inside the
+# source repo — never deploy them (chezmoi doesn't read .gitignore).
+**/__pycache__
+**/__pycache__/**
+
 # Codex-owned runtime state must never be sourced from this repository.
 .codex/installation_id
 .codex/auth.json
