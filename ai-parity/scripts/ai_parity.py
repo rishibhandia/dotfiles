@@ -199,7 +199,11 @@ def hash_tree(path: Path) -> str:
         if item.is_symlink():
             raise ParityError(f"symlinks are not allowed in sources: {item}")
         if item.name == ".DS_Store" or "__pycache__" in item.parts or item.suffix == ".pyc":
-            raise ParityError(f"local runtime artifact found in source: {item}")
+            raise ParityError(
+                f"local runtime artifact found in source: {item}; "
+                "delete it and rerun (these are git-ignored, so `git status` will not "
+                "show them; e.g. `find . -name .DS_Store -delete` or remove __pycache__)"
+            )
         if item.is_file():
             digest.update(b"file\0" + rel + b"\0" + item.read_bytes() + b"\0")
     return digest.hexdigest()
@@ -618,15 +622,24 @@ class Parity:
 
     def _unknown_owned_files(self, expected: set[str]) -> list[str]:
         unknown = set()
+        expected_dirs = {
+            parent.as_posix()
+            for rel in expected for parent in PurePosixPath(rel).parents
+        }
         for owned in self.managed_roots:
             base = self.root / owned
             if not base.exists():
                 continue
             for path in base.rglob("*"):
+                rel = path.relative_to(self.root).as_posix()
                 if path.is_symlink() or path.is_file():
-                    rel = path.relative_to(self.root).as_posix()
                     if rel not in expected:
                         unknown.add(rel)
+                elif path.is_dir() and rel not in expected_dirs:
+                    # Stray directories (live-tool debris such as
+                    # dot_codex/tmp/...) are invisible to Git but become
+                    # managed target directories once chezmoi applies them.
+                    unknown.add(rel + "/")
         return sorted(unknown)
 
     def _protected_digest(self) -> str:
@@ -665,7 +678,8 @@ class Parity:
         for rel in sorted(old_paths - set(outputs)):
             problems.append(f"obsolete generated output: {rel}")
         for rel in self._unknown_owned_files(set(outputs)):
-            problems.append(f"unowned file under generated root: {rel}")
+            kind = "directory" if rel.endswith("/") else "file"
+            problems.append(f"unowned {kind} under generated root: {rel}")
         return problems
 
     def show_status(self) -> int:

@@ -117,6 +117,22 @@ class ParityIntegrationTests(unittest.TestCase):
         self.assertIn("unowned files", result.stderr)
         self.assertTrue(runtime_file.exists())
 
+    def test_unknown_owned_directory_fails_closed_and_is_never_deleted(self) -> None:
+        self.run_parity("sync", "--write")
+        stray = self.root / "dot_codex/tmp/arg0"
+        stray.mkdir(parents=True)
+        result = self.run_parity("verify", expected=1)
+        self.assertIn("unowned directory", result.stdout)
+        self.assertIn("dot_codex/tmp", result.stdout)
+        self.run_parity("sync", "--write", expected=2)
+        self.assertTrue(stray.is_dir())
+
+    def test_runtime_artifact_error_names_the_remedy(self) -> None:
+        artifact = self.root / "ai-parity/shared/skills/matlab/.DS_Store"
+        artifact.write_bytes(b"\x00")
+        result = self.run_parity("status", expected=2)
+        self.assertIn("delete", result.stderr)
+
     def test_state_cannot_authorize_deletion_outside_owned_roots(self) -> None:
         self.run_parity("sync", "--write")
         state_path = self.root / "ai-parity/generated-state.json"
