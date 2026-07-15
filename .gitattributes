@@ -5,3 +5,10 @@
 *.toml text eol=lf
 *.tmpl text eol=lf
 *.ps1 text eol=lf
+# Generated parity outputs include *.yaml and *.rules; without LF pinning a
+# Windows autocrlf checkout mutates their bytes and parity verify reports the
+# generated state as stale. Hook scripts must also stay LF for sh.
+*.yaml text eol=lf
+*.yml text eol=lf
+*.rules text eol=lf
+.githooks/* text eol=lf
