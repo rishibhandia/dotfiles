@@ -1494,12 +1494,26 @@ class Parity:
         else:
             codex_home = Path(os.environ.get("AI_PARITY_CODEX_HOME", str(Path.home() / ".codex")))
             database = codex_home / "memories_1.sqlite"
-            uri = f"file:{database.as_posix()}?mode=ro&immutable=1"
-            try:
-                with contextlib.closing(sqlite3.connect(uri, uri=True)) as connection:
-                    rows = connection.execute("SELECT thread_id, raw_memory FROM stage1_outputs ORDER BY source_updated_at, thread_id").fetchall()
-            except sqlite3.Error as exc:
-                raise ParityError(f"cannot read Codex memories: {exc}") from exc
+            if not database.is_file():
+                raise ParityError(f"missing Codex memory database: {database}")
+            # Copy before reading: the live database may be mid-write (WAL
+            # mode) while Codex runs, and an immutable read of the live file
+            # misses WAL-resident rows or errors. The copy is private to a
+            # temporary directory and removed afterwards; the live file is
+            # never opened.
+            with tempfile.TemporaryDirectory(prefix="ai-parity-memories-") as temporary:
+                snapshot_dir = Path(temporary)
+                snapshot = snapshot_dir / database.name
+                shutil.copy2(database, snapshot)
+                for suffix in ("-wal", "-shm"):
+                    sidecar = database.parent / (database.name + suffix)
+                    if sidecar.is_file():
+                        shutil.copy2(sidecar, snapshot_dir / sidecar.name)
+                try:
+                    with contextlib.closing(sqlite3.connect(snapshot)) as connection:
+                        rows = connection.execute("SELECT thread_id, raw_memory FROM stage1_outputs ORDER BY source_updated_at, thread_id").fetchall()
+                except sqlite3.Error as exc:
+                    raise ParityError(f"cannot read Codex memories: {exc}") from exc
             candidates.extend((f"codex:{thread_id}", raw) for thread_id, raw in rows)
         created = 0
         for origin, content in candidates:
@@ -1519,12 +1533,17 @@ class Parity:
         print(f"Created {created} local memory proposal(s); raw memories were not synchronized.")
         return 0
 
+    def _codex_cli(self, *arguments: str, capture: bool = False) -> subprocess.CompletedProcess:
+        try:
+            return subprocess.run(
+                ["codex", *arguments], cwd=self.root, text=True, capture_output=capture,
+            )
+        except FileNotFoundError as exc:
+            raise ParityError("codex CLI is not on PATH; install Codex before using docs commands") from exc
+
     def docs(self, action: str) -> int:
         expected_url = "https://developers.openai.com/mcp"
-        result = subprocess.run(
-            ["codex", "mcp", "get", "openaiDeveloperDocs", "--json"],
-            cwd=self.root, text=True, capture_output=True,
-        )
+        result = self._codex_cli("mcp", "get", "openaiDeveloperDocs", "--json", capture=True)
         configured = None
         if result.returncode == 0:
             try:
@@ -1553,9 +1572,7 @@ class Parity:
             if configured is not None and not exact:
                 raise ParityError("refusing to overwrite differently configured openaiDeveloperDocs")
             if configured is None:
-                added = subprocess.run([
-                    "codex", "mcp", "add", "openaiDeveloperDocs", "--url", expected_url,
-                ], cwd=self.root)
+                added = self._codex_cli("mcp", "add", "openaiDeveloperDocs", "--url", expected_url)
                 if added.returncode:
                     raise ParityError("codex mcp add failed")
             marker = {
@@ -1581,7 +1598,7 @@ class Parity:
                 self.schemas.validate(marker, "docs-marker", 1)
             if marker.get("url") != expected_url or not exact:
                 raise ParityError("refusing removal: MCP configuration no longer matches the owned installation")
-            removed = subprocess.run(["codex", "mcp", "remove", "openaiDeveloperDocs"], cwd=self.root)
+            removed = self._codex_cli("mcp", "remove", "openaiDeveloperDocs")
             if removed.returncode:
                 raise ParityError("codex mcp remove failed")
             self._unlink_file(self.docs_marker)

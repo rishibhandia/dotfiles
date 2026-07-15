@@ -32,13 +32,15 @@ class ParityIntegrationTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temporary.cleanup()
 
-    def run_parity(self, *arguments: str, expected: int = 0) -> subprocess.CompletedProcess:
+    def run_parity(
+        self, *arguments: str, expected: int = 0, env: dict[str, str] | None = None,
+    ) -> subprocess.CompletedProcess:
         result = subprocess.run(
             [sys.executable, str(self.script), "--snapshot", *arguments],
             cwd=self.root,
             text=True,
             capture_output=True,
-            env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+            env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1", **(env or {})},
         )
         self.assertEqual(expected, result.returncode, result.stdout + result.stderr)
         return result
@@ -286,6 +288,44 @@ class ParityIntegrationTests(unittest.TestCase):
             else:
                 os.environ["AI_PARITY_CODEX_HOME"] = old
         self.assertEqual(2, len(list((self.root / "ai-parity/.proposals").glob("*/proposal.json"))))
+
+    def test_codex_memory_scan_reads_a_copy_not_the_live_database(self) -> None:
+        codex_home = self.root / "fake-codex-live"
+        codex_home.mkdir()
+        database = codex_home / "memories_1.sqlite"
+        connection = sqlite3.connect(database)
+        try:
+            connection.execute("PRAGMA journal_mode=WAL")
+            connection.execute(
+                "CREATE TABLE stage1_outputs (thread_id TEXT, raw_memory TEXT, source_updated_at INTEGER)"
+            )
+            connection.execute(
+                "INSERT INTO stage1_outputs VALUES ('live-thread', 'WAL-resident candidate', 1)"
+            )
+            connection.commit()
+            # The row lives in the hot -wal sidecar while Codex (here: this
+            # open connection) is still running; an immutable read of the
+            # live file cannot see it.
+            self.assertTrue((codex_home / "memories_1.sqlite-wal").exists())
+            self.run_parity(
+                "memories", "scan", "--from", "codex",
+                env={"AI_PARITY_CODEX_HOME": str(codex_home)},
+            )
+        finally:
+            connection.close()
+        proposals = [
+            json.loads(path.read_text())
+            for path in (self.root / "ai-parity/.proposals").glob("*/proposal.json")
+        ]
+        self.assertTrue(any(p.get("origin") == "codex:live-thread" for p in proposals))
+
+    def test_docs_without_codex_cli_fails_cleanly(self) -> None:
+        empty_path = self.root / "empty-path-dir"
+        empty_path.mkdir()
+        result = self.run_parity(
+            "docs", "status", expected=2, env={"PATH": str(empty_path)},
+        )
+        self.assertIn("codex CLI", result.stderr)
 
     def test_manifest_cannot_redefine_write_envelope_or_runtime_paths(self) -> None:
         manifest = self.root / "ai-parity/manifest.toml"
