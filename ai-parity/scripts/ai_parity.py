@@ -34,7 +34,9 @@ RESERVED_WINDOWS = {
 CHEZMOI_PREFIXES = (
     "private_", "executable_", "literal_", "create_", "modify_",
     "remove_", "symlink_", "empty_", "exact_", "readonly_",
+    "encrypted_", "dot_", "run_", "once_", "onchange_", "before_", "after_",
 )
+CHEZMOI_SUFFIXES = (".tmpl", ".age", ".asc", ".literal")
 MAX_OWNED_ROOTS = (PurePosixPath("dot_codex"), PurePosixPath("dot_agents"))
 MAX_PROTECTED_ROOTS = (PurePosixPath("dot_claude"),)
 OPERATIONAL_PATHS = {
@@ -336,6 +338,18 @@ class Parity:
     def _assert_destination_safe(self, rel: PurePosixPath) -> None:
         if not self._under_owned(rel):
             raise ParityError(f"destination is outside owned roots: {rel}")
+        # Chezmoi interprets attribute prefixes, attribute suffixes, and
+        # `.chezmoi*` special names anywhere in its source tree: `run_` files
+        # are executed, `.tmpl` files are template-executed, `dot_` renames,
+        # and subdirectory `.chezmoiignore`/`.chezmoiremove` change deployment.
+        # Only `literal_` is admitted (validated against manifest mappings).
+        for part in rel.parts[1:]:
+            if part.startswith(".chezmoi"):
+                raise ParityError(f"chezmoi special name in generated path: {rel}")
+            if part.endswith(CHEZMOI_SUFFIXES):
+                raise ParityError(f"chezmoi attribute suffix in generated path: {rel}")
+            if part.startswith(CHEZMOI_PREFIXES) and not part.startswith("literal_"):
+                raise ParityError(f"chezmoi attribute prefix in generated path: {rel}")
         if self._forbidden_runtime_path(rel):
             raise ParityError(f"destination is Codex-owned runtime state: {rel}")
         protected = any(rel == p or p in rel.parents for p in self.protected)

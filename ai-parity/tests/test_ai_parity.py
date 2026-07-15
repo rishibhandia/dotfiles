@@ -507,10 +507,13 @@ mode = "copy"
         self.assertIn("case-folded artifacts collision", result.stderr)
 
         manifest.write_text((REPO / "ai-parity/manifest.toml").read_text())
+        # A plain run_* canonical file is now rejected as a chezmoi attribute
+        # before the decoded-target collision guard (which remains as defense
+        # in depth) can even see it.
         duplicate_target = self.root / "ai-parity/shared/skills/matlab-runner/scripts/run_matlab.sh"
         duplicate_target.write_text("duplicate decoded target")
         result = self.run_parity("status", expected=2)
-        self.assertIn("decoded chezmoi target collision", result.stderr)
+        self.assertIn("unsafe chezmoi attribute", result.stderr)
 
         duplicate_target.unlink()
         manifest.write_text(manifest.read_text().replace(
@@ -531,6 +534,49 @@ mode = "copy"
         path.write_text(json.dumps(proposal))
         result = self.run_parity("proposals", "show", proposal_id, expected=2)
         self.assertIn("unknown fields", result.stderr)
+
+    def test_chezmoi_semantic_names_are_rejected_in_canonical_trees(self) -> None:
+        canonical = self.root / "ai-parity/shared/skills/matlab"
+        cases = (
+            ("run_setup.sh", "unsafe chezmoi attribute"),
+            ("dot_gitignore", "unsafe chezmoi attribute"),
+            ("encrypted_note.md", "unsafe chezmoi attribute"),
+            ("once_bootstrap.sh", "unsafe chezmoi attribute"),
+            ("notes.tmpl", "chezmoi attribute suffix"),
+            ("payload.age", "chezmoi attribute suffix"),
+            (".chezmoiignore", "chezmoi special name"),
+            (".chezmoiremove", "chezmoi special name"),
+        )
+        for name, message in cases:
+            path = canonical / name
+            path.write_text("fixture")
+            try:
+                result = self.run_parity("status", expected=2)
+                self.assertIn(message, result.stderr, name)
+            finally:
+                path.unlink()
+        self.run_parity("status", expected=1)
+
+    def test_chezmoi_semantic_names_are_rejected_in_artifact_trees(self) -> None:
+        source = self.root / "dot_claude/skills/learned/run_x.sh"
+        source.write_text("fixture")
+        result = self.run_parity("status", expected=2)
+        self.assertIn("chezmoi-reserved source name", result.stderr)
+
+    def test_copy_destinations_cannot_carry_chezmoi_attributes(self) -> None:
+        manifest = self.root / "ai-parity/manifest.toml"
+        original = manifest.read_text()
+        for destination, message in (
+            ("dot_codex/run_setup.sh", "chezmoi attribute prefix"),
+            ("dot_codex/dot_profile", "chezmoi attribute prefix"),
+            ("dot_codex/AGENTS.md.tmpl", "chezmoi attribute suffix"),
+            ("dot_codex/.chezmoiignore", "chezmoi special name"),
+        ):
+            manifest.write_text(original.replace(
+                'destination = "dot_codex/AGENTS.md"', f'destination = "{destination}"', 1,
+            ))
+            result = self.run_parity("status", expected=2)
+            self.assertIn(message, result.stderr, destination)
 
     def test_path_traversal_is_rejected(self) -> None:
         manifest = self.root / "ai-parity/manifest.toml"
