@@ -199,6 +199,22 @@ Claude reads REDLINING.md or OOXML.md only when the user needs those features.
 - **Avoid deeply nested references** - Keep references one level deep from SKILL.md. All reference files should link directly from SKILL.md.
 - **Structure longer reference files** - For files longer than 100 lines, include a table of contents at the top so Claude can see the full scope when previewing.
 
+## Skill Placement in the Dotfiles Repo (ai-parity)
+
+When creating or updating a skill inside the chezmoi dotfiles repo (`~/.local/share/chezmoi`) — or one destined for `~/.claude/skills/` — placement is governed by the ai-parity system, which keeps selected skills in parity between Claude Code and Codex. Read `ai-parity/SPEC.md` in that repo before proceeding.
+
+**Decide placement first:**
+
+- **Shared with Codex**: author under `ai-parity/shared/skills/<name>/` and add a `[[shared_artifacts]]` entry with claude/codex targets to `ai-parity/manifest.toml`. Codex-specific wording goes in an override under `ai-parity/adapters/skills/<name>/`.
+- **Claude-only**: author under `dot_claude/skills/<name>/` and add a `[[skills]]` entry (`mode = "planned"`) to `ai-parity/manifest.toml`. This entry is mandatory — the parity inventory check fails closed on any unlisted top-level skill directory.
+- **Never** create or edit skills under `dot_codex/`, `dot_agents/`, or the migrated (generated) `dot_claude/skills/` roots listed in the manifest — those are rendered output. An edit found there is imported with `dots ai propose`, not adopted in place.
+
+**After creating or editing:** run `dots ai sync` (dry-run preview), then `dots ai sync --write`, then `dots ai verify`. This renders only the chezmoi source; deployment to the home directory remains a separate explicit `chezmoi diff` / `chezmoi apply`.
+
+**Bundled scripts in shared skills:** where a filename would collide with chezmoi attribute prefixes, use a manifest-declared `literal_*` source name (e.g. `literal_run_matlab.sh` → `run_matlab.sh`). Scripts deploy as non-executable `0644` files and are invoked with `uv run`.
+
+**Packaging:** Step 5 below (`.skill` file) is for distribution only. Skills living in the dotfiles repo are committed to Git, not packaged.
+
 ## Skill Creation Process
 
 Skill creation involves these steps:
