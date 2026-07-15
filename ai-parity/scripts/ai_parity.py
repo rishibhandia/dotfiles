@@ -274,7 +274,6 @@ class Parity:
                     raise ParityError(f"owned roots overlap: {left}, {right}")
             if any(left == p or left in p.parents or p in left.parents for p in self.protected):
                 raise ParityError(f"owned and protected roots overlap: {left}")
-        self._validate_inventory()
 
     def _assert_no_symlink_components(self, path: Path, label: str) -> None:
         try:
@@ -288,7 +287,11 @@ class Parity:
                 raise ParityError(f"{label} traverses symlink: {current}")
 
     def _validate_inventory(self) -> None:
-        actual_skills = {p.name for p in (self.root / "dot_claude/skills").iterdir() if p.is_dir()}
+        skills_dir = self.root / "dot_claude/skills"
+        try:
+            actual_skills = {p.name for p in skills_dir.iterdir() if p.is_dir()}
+        except OSError as exc:
+            raise ParityError(f"cannot inventory {skills_dir}: {exc}") from exc
         listed_skills = [x["name"] for x in self.manifest.get("skills", [])]
         actual_agents = {p.stem for p in (self.root / "dot_claude/agents").glob("*.md")}
         listed_agents = [x["name"] for x in self.manifest.get("agents", [])]
@@ -300,7 +303,9 @@ class Parity:
             if duplicates or actual != set(listed):
                 raise ParityError(
                     f"{kind} inventory mismatch; missing={sorted(actual-set(listed))}, "
-                    f"stale={sorted(set(listed)-actual)}, duplicates={duplicates}"
+                    f"stale={sorted(set(listed)-actual)}, duplicates={duplicates}; "
+                    f'classify missing names with a [[{kind}]] entry (e.g. mode = "planned") '
+                    f"in ai-parity/manifest.toml, or remove stale entries/directories"
                 )
 
     @staticmethod
@@ -384,6 +389,11 @@ class Parity:
         path.unlink()
 
     def expected(self) -> tuple[dict[str, bytes], dict[str, dict[str, str]]]:
+        # Inventory classification gates generation, verification, and
+        # synchronization — but deliberately not doctor, proposal inspection,
+        # or lock/journal diagnosis, which must stay usable while the
+        # manifest is out of date.
+        self._validate_inventory()
         outputs: dict[str, bytes] = {}
         metadata: dict[str, dict[str, str]] = {}
         folded: dict[str, str] = {}

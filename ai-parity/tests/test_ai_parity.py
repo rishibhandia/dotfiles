@@ -89,6 +89,13 @@ class ParityIntegrationTests(unittest.TestCase):
         (self.root / "dot_claude/skills/new-skill").mkdir()
         result = self.run_parity("status", expected=2)
         self.assertIn("inventory mismatch", result.stderr)
+        self.assertIn("manifest.toml", result.stderr)
+        result = self.run_parity("sync", "--write", expected=2)
+        self.assertIn("inventory mismatch", result.stderr)
+        # Diagnosis and recovery inspection must stay usable while the
+        # inventory is unclassified (SPEC: usability decisions).
+        self.run_parity("doctor")
+        self.run_parity("proposals", "list")
 
     def test_explicit_transaction_rollback_and_finish(self) -> None:
         transaction_id, _ = self.interrupt_sync()
