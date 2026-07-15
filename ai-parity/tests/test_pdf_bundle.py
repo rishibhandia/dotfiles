@@ -19,6 +19,10 @@ TRANSFORM = ROOT / "ai-parity/adapters/skills/pdf/scripts/pdf_transform.py"
 
 def run_script(script, *arguments, path=None):
     environment = os.environ.copy()
+    # The bundled scripts import pdf_common from the canonical shared tree;
+    # without this the subprocess writes __pycache__ into that tree, which
+    # hash_tree correctly rejects on the next parity verify.
+    environment["PYTHONDONTWRITEBYTECODE"] = "1"
     if path is not None:
         environment["PATH"] = path
     return subprocess.run(
