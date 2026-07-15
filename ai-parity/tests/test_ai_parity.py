@@ -471,13 +471,19 @@ class ParityIntegrationTests(unittest.TestCase):
 
     def test_codex_runtime_destinations_are_forbidden(self) -> None:
         manifest = self.root / "ai-parity/manifest.toml"
-        manifest.write_text(manifest.read_text().replace(
-            'destination = "dot_codex/AGENTS.md"',
-            'destination = "dot_codex/history.jsonl"',
-            1,
-        ))
-        result = self.run_parity("status", expected=2)
-        self.assertIn("runtime state", result.stderr)
+        original = manifest.read_text()
+        for destination in (
+            "dot_codex/history.jsonl",
+            "dot_codex/config.toml",
+            "dot_codex/plugins/thing.json",
+            "dot_codex/packages/pkg.json",
+            "dot_codex/.tmp/scratch.json",
+        ):
+            manifest.write_text(original.replace(
+                'destination = "dot_codex/AGENTS.md"', f'destination = "{destination}"', 1,
+            ))
+            result = self.run_parity("status", expected=2)
+            self.assertIn("runtime state", result.stderr, destination)
 
     def test_closed_schemas_reject_unknown_and_future_fields(self) -> None:
         manifest = self.root / "ai-parity/manifest.toml"

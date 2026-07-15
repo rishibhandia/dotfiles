@@ -129,6 +129,8 @@ class IsolatedChezmoiDeploymentTests(unittest.TestCase):
                 "dot_codex/sessions/session.json", "dot_codex/logs/current.log",
                 "dot_codex/shell_snapshots/snapshot.sh",
                 "dot_codex/skills/dot_system/SKILL.md",
+                "dot_codex/config.toml", "dot_codex/packages/pkg.json",
+                "dot_codex/plugins/plugin.json", "dot_codex/dot_tmp/scratch.json",
                 "dot_agents/skills/dot_system/SKILL.md",
             )
             for relative in runtime_sources:

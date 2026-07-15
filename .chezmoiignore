@@ -134,5 +134,9 @@ ai-parity/**
 .codex/logs/**
 .codex/shell_snapshots/**
 .codex/tmp/**
+.codex/.tmp/**
 .codex/cache/**
+.codex/packages/**
+.codex/plugins/**
+.codex/config.toml
 .agents/skills/.system/**

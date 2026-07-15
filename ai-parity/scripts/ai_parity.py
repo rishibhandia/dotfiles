@@ -338,9 +338,13 @@ class Parity:
             "version.json", ".personality_migration", "dot_personality_migration",
         } or name.endswith(".sqlite") or ".sqlite-" in name:
             return True
+        if tail == "config.toml":
+            # Parity never generates or replaces the complete Codex config.
+            return True
         runtime_roots = (
             "sessions", "archived_sessions", "memories", "goals", "log", "logs",
-            "shell_snapshots", "tmp", "cache", "skills/.system", "skills/dot_system",
+            "shell_snapshots", "tmp", ".tmp", "cache", "packages", "plugins",
+            "skills/.system", "skills/dot_system",
         )
         return any(tail == root or tail.startswith(root + "/") for root in runtime_roots)
 
