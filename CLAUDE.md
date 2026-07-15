@@ -169,6 +169,47 @@ Fallback for Windows machines where Scoop is unavailable (`.portable = true`). D
 
 **Windows package manager policy:** Use Scoop exclusively. Do not use npm, cargo, winget, or other package managers as alternatives for CLI tools.
 
+### AI Parity (Claude ↔ Codex Skill Sync)
+
+**Read [`ai-parity/SPEC.md`](ai-parity/SPEC.md) before modifying Claude or Codex skills.** The `ai-parity/` directory is a manifest-driven layer that keeps selected Claude Code and Codex configuration semantically aligned. Canonical content is human-authored under `ai-parity/`; the parity engine renders it into checked-in chezmoi source trees. [`ai-parity/README.md`](ai-parity/README.md) is the shorter workflow guide.
+
+**Ownership — where to edit:**
+
+| Path | Role |
+|---|---|
+| `ai-parity/shared/**` | Canonical content for both tools — the default place for cross-tool changes |
+| `ai-parity/adapters/**` | Tool-specific variants of shared content (e.g. Codex `SKILL.md` overrides) |
+| `ai-parity/contracts/**` | Codex-native config (`AGENTS.md`, agent TOML, rules, profiles) |
+| `ai-parity/manifest.toml` | Ownership, mappings, render policy, review acknowledgements |
+| Non-migrated `dot_claude/**` | Legacy Claude-owned source (still edited directly) |
+
+**Generated — never hand-edit:** `dot_codex/**`, `dot_agents/**`, `ai-parity/generated-state.json`, and these migrated `dot_claude/skills/` roots: `matlab`, `matlab-runner`, `zotero`, `pdf-chunk`, `llm-pdf-processing`, `scientific-figures`. Two Claude-owned sources are additionally *rendered* to Codex (edit the Claude side, then sync): `dot_claude/skills/gemini-billing-blocks` and `dot_claude/skills/learned` (→ `dot_agents/skills/learned-patterns/references`). If a useful edit already landed in a rendered target, import it with `dots ai propose` — do not treat the rendered file as source.
+
+**Quick decision guide:** shared behavior → `shared/`; tool-specific expression → `adapters/`; Codex-native config → `contracts/`; legacy Claude skill → its `dot_claude/` path; edit found in rendered output → proposal; runtime memory worth keeping → `dots ai memories scan` then curate.
+
+**Commands** (run via `dots ai …`; requires `uv`):
+
+| Command | Purpose |
+|---|---|
+| `dots ai status` / `diff` | Inspect parity state / pending render changes (read-only) |
+| `dots ai sync` | Dry run (default). `--write` renders into chezmoi source — **never** applies to `$HOME` |
+| `dots ai verify` | Check manifest, digests, inventory, and generated outputs |
+| `dots ai propose --from claude\|codex NAME` | Turn a rendered-target edit into a review proposal |
+| `dots ai proposals list\|show\|accept\|resolve\|reject ID` | Review intake (accept = direct-shared only, atomic transaction) |
+| `dots ai doctor` → `repair TXN --finish\|--rollback` | Diagnose / recover an interrupted write |
+| `dots ai reconcile --after-merge` | Regenerate derived files after resolving canonical Git conflicts |
+| `dots ai hooks install` | Opt-in Git hooks (pre-commit blocks stale parity commits and turns staged rendered-target edits into proposals) |
+| `dots ai memories scan --from claude\|codex` | Create local review proposals from runtime memories |
+
+**Gotchas:**
+- Every top-level `dot_claude/skills/` directory and every `dot_claude/agents/*.md` **must** have a `[[skills]]`/`[[agents]]` entry in `manifest.toml` — the inventory check fails closed on unlisted (or stale) names.
+- Editing a `[[reviews]]` source (`dot_claude/CLAUDE.md`, `dot_claude/skills/verify/`, `dot_claude/agents/code-reviewer.md`, `dot_claude/agents/debugger.md`) stales its `acknowledged_digest`. Review the Codex counterpart still matches in spirit, then update the digest that the `verify` failure prints.
+- Adapted skills (`matlab-runner`, `zotero`, `pdf-chunk`) have full Codex `SKILL.md` overrides — a general change to the canonical `SKILL.md` must be reviewed against the adapter too. Bundled scripts stay shared byte-for-byte.
+- Never touch parity runtime state: `ai-parity/.proposals/`, `.transactions/`, `.sync-journal.json`, `.sync-lock` (git- and chezmoi-ignored; schemas enforced by the normal commands).
+- `dot_claude/skills/pdf` is protected licensed content — never a parity input, adapter, or destination (the Codex `pdf` skill under `adapters/skills/pdf` is independently authored).
+- Shared scripts use manifest-declared `literal_*` source names (e.g. `literal_run_matlab.sh` → `run_matlab.sh`), deploy as `0644` non-executables, and are invoked with `uv run`.
+- Parity sync and home deployment are separate review boundaries: after `dots ai sync --write`, deployment is still an explicit `chezmoi diff` → `chezmoi apply`.
+
 ### Claude Code Skills
 Skills are synced via chezmoi to `~/.claude/skills/`. Included skills, by category:
 
@@ -180,20 +221,23 @@ Skills are synced via chezmoi to `~/.claude/skills/`. Included skills, by catego
 
 **macOS app integrations (darwin-only via `.chezmoiignore`):** `things` (Things 3), `fantastical` (calendar), `keynote` (presentations; **also personal-only**)
 
+**Parity-generated skills:** `matlab`, `matlab-runner`, `zotero`, `pdf-chunk`, `llm-pdf-processing`, and `scientific-figures` are rendered from `ai-parity/shared/skills/` — edit the canonical source (and adapter, if any), then `dots ai sync --write`. See "AI Parity" above.
+
 **Adding more skills from the marketplace:**
 ```
 /plugin marketplace add anthropics/skills              # Register marketplace (one-time)
 /plugin install example-skills@anthropic-agent-skills  # Install a bundle
 ```
 
-**Custom skills:** Create a folder with a `SKILL.md` file containing YAML frontmatter (`name`, `description`) and markdown instructions. Add to `dot_claude/skills/` in this repo.
+**Custom skills:** Create a folder with a `SKILL.md` file containing YAML frontmatter (`name`, `description`) and markdown instructions. Decide placement first: a skill shared with Codex goes in `ai-parity/shared/skills/` with a `[[shared_artifacts]]` manifest entry; a Claude-only skill goes in `dot_claude/skills/` **and requires** a `[[skills]]` entry (`mode = "planned"`) in `ai-parity/manifest.toml` — the parity inventory check fails without one. Then `dots ai sync --write` and `dots ai verify`.
 
 ### Learned Skills
 Extracted patterns and project-specific knowledge live in `dot_claude/skills/learned/` and sync via chezmoi to `~/.claude/skills/learned/`. These are reference files (not invocable commands) created by the `/learn` skill during sessions.
 
-**Important:** After `/learn` creates a new file in `~/.claude/skills/learned/`, it must be explicitly added to chezmoi and committed to sync across machines:
+**Important:** After `/learn` creates a new file in `~/.claude/skills/learned/`, it must be explicitly added to chezmoi, rendered to Codex, and committed to sync across machines. The `learned/` collection is a parity source rendered to `dot_agents/skills/learned-patterns/references/`, so run `dots ai sync --write` and commit the regenerated Codex copies alongside:
 ```bash
 dots add ~/.claude/skills/learned/<new-file>.md
+dots ai sync --write   # renders the Codex copy under dot_agents/
 dots git add -A && dots git commit -m "feat: add learned skill <name>"
 dots git push
 ```
@@ -398,3 +442,9 @@ scripts at error severity; a templates job renders every `.tmpl` with the
 non-personal CI profile, so an ungated 1Password call fails the build.
 `GITHUB_TOKEN` is exported workflow-wide for chezmoi's `gitHub*` template
 functions.
+
+An `ai-parity` job additionally runs `ai_parity.py verify` plus the engine's
+unit tests (`unittest discover -s ai-parity/tests`), and each OS job runs
+`test_chezmoi_deploy.py`, which applies only the generated parity source paths
+into an isolated temporary home and checks the full deployed inventory, bytes,
+modes, and a second idempotent apply.
