@@ -1788,7 +1788,7 @@ def git(root: Path, *args: str) -> subprocess.CompletedProcess:
 
 
 def verify_staged(root: Path) -> int:
-    staged_result = git(root, "diff", "--cached", "--name-only", "--diff-filter=ACMR")
+    staged_result = git(root, "diff", "--cached", "--name-only")
     unstaged_result = git(root, "diff", "--name-only", "--diff-filter=ACMR")
     untracked_result = git(root, "ls-files", "--others", "--exclude-standard")
     for result in (staged_result, unstaged_result, untracked_result):
@@ -1802,11 +1802,19 @@ def verify_staged(root: Path) -> int:
     def relevant(name: str) -> bool:
         return name in relevant_files or name.startswith(relevant_prefixes)
     staged = {x for x in staged_result.stdout.splitlines() if relevant(x)}
+    if not staged:
+        # Commits that stage no parity-relevant path are not parity commits;
+        # they must never be taxed or blocked by unrelated parity staleness.
+        return 0
     remaining = {
         x for x in (unstaged_result.stdout + untracked_result.stdout).splitlines() if relevant(x)
     }
-    if staged and remaining:
-        raise ParityError("partial parity staging refused; remaining paths: " + ", ".join(sorted(remaining)))
+    if remaining:
+        raise ParityError(
+            "partial parity staging refused; remaining paths: " + ", ".join(sorted(remaining))
+            + " — stage them in this commit, stash them (`git stash push -- <paths>`), "
+            "or commit them separately"
+        )
     prefix_base = Path(tempfile.mkdtemp(prefix="ai-parity-index-"))
     try:
         prefix = str(prefix_base) + os.sep
@@ -1822,7 +1830,17 @@ def verify_staged(root: Path) -> int:
             print("Review them with `dots ai proposals list`; the commit is blocked.", file=sys.stderr)
             return 2
         env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
-        return subprocess.run([sys.executable, str(script), "--snapshot", "verify"], cwd=prefix_base, env=env).returncode
+        returncode = subprocess.run(
+            [sys.executable, str(script), "--snapshot", "verify"], cwd=prefix_base, env=env,
+        ).returncode
+        if returncode:
+            print(
+                "ai-parity: staged parity state is stale; run `dots ai sync --write`, "
+                "review, and stage the regenerated files (including "
+                "ai-parity/generated-state.json)",
+                file=sys.stderr,
+            )
+        return returncode
     finally:
         shutil.rmtree(prefix_base, ignore_errors=True)
 

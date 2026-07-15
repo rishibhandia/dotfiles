@@ -234,20 +234,54 @@ class ParityIntegrationTests(unittest.TestCase):
         self.assertEqual(claude.read_bytes(), canonical.read_bytes())
         self.assertEqual(claude.read_bytes(), codex.read_bytes())
 
-    def test_staged_generated_edit_creates_proposal_and_blocks(self) -> None:
-        self.run_parity("sync", "--write")
+    def _init_git_baseline(self) -> None:
         subprocess.run(["git", "init", "-q"], cwd=self.root, check=True)
         subprocess.run(["git", "config", "user.email", "test@example.invalid"], cwd=self.root, check=True)
         subprocess.run(["git", "config", "user.name", "Parity Test"], cwd=self.root, check=True)
         subprocess.run(["git", "config", "commit.gpgsign", "false"], cwd=self.root, check=True)
         subprocess.run(["git", "add", "-A"], cwd=self.root, check=True)
         subprocess.run(["git", "commit", "-qm", "baseline"], cwd=self.root, check=True)
+
+    def test_staged_generated_edit_creates_proposal_and_blocks(self) -> None:
+        self.run_parity("sync", "--write")
+        self._init_git_baseline()
         generated = self.root / "dot_agents/skills/matlab/fft.md"
         generated.write_text(generated.read_text() + "\nstaged proposal\n")
         subprocess.run(["git", "add", str(generated)], cwd=self.root, check=True)
         result = self.run_parity("verify", "--staged", expected=2)
         self.assertIn("created staged import proposal", result.stderr)
         self.assertTrue(any((self.root / "ai-parity/.proposals").glob("*/proposal.json")))
+
+    def test_non_parity_commit_is_not_blocked_by_stale_parity(self) -> None:
+        self.run_parity("sync", "--write")
+        self._init_git_baseline()
+        canonical = self.root / "ai-parity/shared/skills/matlab/fft.md"
+        canonical.write_text(canonical.read_text() + "\nstale, not yet synchronized\n")
+        unrelated = self.root / "unrelated.txt"
+        unrelated.write_text("nothing to do with parity")
+        subprocess.run(["git", "add", "unrelated.txt"], cwd=self.root, check=True)
+        self.run_parity("verify", "--staged")
+
+    def test_stale_parity_commit_refusal_points_to_sync(self) -> None:
+        self.run_parity("sync", "--write")
+        self._init_git_baseline()
+        canonical = self.root / "ai-parity/shared/skills/matlab/fft.md"
+        canonical.write_text(canonical.read_text() + "\nstaged but not synchronized\n")
+        subprocess.run(["git", "add", str(canonical)], cwd=self.root, check=True)
+        result = self.run_parity("verify", "--staged", expected=1)
+        self.assertIn("dots ai sync --write", result.stderr)
+
+    def test_partial_staging_refusal_points_to_next_commands(self) -> None:
+        self.run_parity("sync", "--write")
+        self._init_git_baseline()
+        canonical = self.root / "ai-parity/shared/skills/matlab/fft.md"
+        canonical.write_text(canonical.read_text() + "\nstaged half\n")
+        subprocess.run(["git", "add", str(canonical)], cwd=self.root, check=True)
+        other = self.root / "ai-parity/contracts/AGENTS.md"
+        other.write_text(other.read_text() + "\nleft dirty\n")
+        result = self.run_parity("verify", "--staged", expected=2)
+        self.assertIn("partial parity staging refused", result.stderr)
+        self.assertIn("stash", result.stderr)
 
     def test_nested_codex_interface_is_not_shared_reverse_drift(self) -> None:
         self.run_parity("sync", "--write")
