@@ -737,8 +737,34 @@ class Parity:
     def _lock_process_alive(self, lock: dict) -> bool:
         if lock["host"] != socket.gethostname():
             return False
+        return self._pid_alive(lock["pid"])
+
+    @staticmethod
+    def _pid_alive(pid: int) -> bool:
+        # Never use os.kill(pid, 0) on Windows: sig 0 is signal.CTRL_C_EVENT
+        # there, which delivers a real console Ctrl-C to the target process
+        # group (or fails for unrelated reasons) instead of probing existence.
+        if os.name == "nt":
+            import ctypes
+
+            process_query_limited_information = 0x1000
+            still_active = 259
+            error_access_denied = 5
+            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+            handle = kernel32.OpenProcess(process_query_limited_information, False, pid)
+            if not handle:
+                # Access denied means the process exists but is not ours:
+                # fail safe and treat it as alive.
+                return ctypes.get_last_error() == error_access_denied
+            try:
+                code = ctypes.c_ulong()
+                if not kernel32.GetExitCodeProcess(handle, ctypes.byref(code)):
+                    return True
+                return code.value == still_active
+            finally:
+                kernel32.CloseHandle(handle)
         try:
-            os.kill(lock["pid"], 0)
+            os.kill(pid, 0)
         except ProcessLookupError:
             return False
         except PermissionError:

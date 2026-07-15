@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import hashlib
+import importlib.util
 import json
 import os
 import shutil
@@ -9,6 +10,7 @@ import sqlite3
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -587,6 +589,43 @@ mode = "copy"
         ))
         result = self.run_parity("status", expected=2)
         self.assertIn("unsafe artifact destination", result.stderr)
+
+
+class PidLivenessTests(unittest.TestCase):
+    """The lock-owner probe must never signal, interrupt, or kill the target.
+
+    os.kill(pid, 0) is only an existence probe on POSIX; on Windows sig 0 is
+    signal.CTRL_C_EVENT and delivers a real console Ctrl-C (or misreports
+    liveness), so the engine needs a signal-free probe.
+    """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        spec = importlib.util.spec_from_file_location(
+            "ai_parity_engine", REPO / "ai-parity/scripts/ai_parity.py",
+        )
+        cls.engine = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.engine)
+
+    def test_probe_reports_liveness_without_signaling_the_target(self) -> None:
+        probe = self.engine.Parity._pid_alive
+        self.assertTrue(probe(os.getpid()))
+        victim = subprocess.Popen(
+            [sys.executable, "-c", "import time; time.sleep(30)"],
+        )
+        try:
+            self.assertTrue(probe(victim.pid))
+            time.sleep(0.3)
+            self.assertIsNone(victim.poll(), "probe must not stop the probed process")
+        finally:
+            victim.kill()
+            victim.wait()
+
+    def test_probe_reports_exited_process_dead(self) -> None:
+        probe = self.engine.Parity._pid_alive
+        gone = subprocess.Popen([sys.executable, "-c", "pass"])
+        gone.wait()
+        self.assertFalse(probe(gone.pid))
 
 
 if __name__ == "__main__":
