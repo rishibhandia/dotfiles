@@ -497,6 +497,13 @@ review acknowledgement, update that source and acknowledgement after review.
 
 ### Import an edit made in Codex or Claude output
 
+If the edit was made in the deployed home directory (`~/.claude`, `~/.codex`,
+`~/.agents`) rather than in the repository's rendered tree, first bring it into
+the source repository — for example `dots add ~/.claude/skills/matlab` — and
+then create the proposal. `propose` reads only the repository; home-directory
+edits are otherwise invisible and will be overwritten by the next
+`chezmoi apply`.
+
 ```sh
 dots ai propose --from codex matlab
 # or: dots ai propose --from claude matlab
@@ -637,14 +644,19 @@ dots ai hooks install
 
 Their responsibilities are intentionally narrow:
 
-- `pre-commit` verifies the exact Git index, creates an ignored proposal for a
-  staged rendered-target edit, and blocks stale or partial parity commits.
+- `pre-commit` verifies the exact Git index when the commit stages
+  parity-relevant paths; commits staging no parity-relevant path are neither
+  verified nor blocked. For parity commits it creates an ignored proposal for a
+  staged rendered-target edit and blocks stale or partial parity commits, and
+  every refusal prints the next command (`dots ai sync --write`, or how to
+  complete or split the staging).
 - `post-checkout` and `post-merge` warn about drift but never synchronize.
 - `pre-merge-commit` and `pre-rebase` block history changes while a recovery
   journal is active; `post-checkout` warns immediately because Git has no
   standard pre-checkout hook.
 - `post-commit` removes transaction backups only after `HEAD` contains the
-  matching generated state.
+  matching generated state. Without installed hooks, backups accumulate; run
+  `dots ai transaction-gc` periodically after committing.
 
 Hook installation refuses to replace an existing hook configuration it does
 not own. Hooks never accept proposals, stage files, run `chezmoi apply`, or
@@ -703,14 +715,27 @@ review rather than an automatic text merge.
 
 An active or stale lock blocks new writes, but `status`, `diff`, `doctor`, and
 proposal inspection remain usable. A lock cannot trap the user without a
-diagnostic path.
+diagnostic path. Inventory-classification failures likewise must not block
+`doctor`, proposal inspection, or lock and journal diagnosis; they block only
+generation, verification, and synchronization.
 
 ### Cross-platform filename handling
 
-The engine rejects unsafe and case-colliding paths. Chezmoi attribute prefixes
-are denied unless the manifest declares the exact source-to-decoded-target
-mapping. Only `literal_` is presently supported; destructive, symlink,
-exact-directory, executable, and script-like attributes remain forbidden.
+The engine rejects unsafe and case-colliding paths. Chezmoi source-name
+semantics are denied by default in every canonical tree and every rendered
+destination component, including single-file `copy` destinations. The denied
+set covers all attribute **prefixes** — `private_`, `executable_`, `create_`,
+`modify_`, `remove_`, `symlink_`, `empty_`, `exact_`, `readonly_`,
+`encrypted_`, `dot_`, and the script family `run_`, `once_`, `onchange_`,
+`before_`, `after_` — all attribute **suffixes** (`.tmpl`, `.age`, `.asc`,
+`.literal`), and all chezmoi **special names** (any component beginning
+`.chezmoi`, such as `.chezmoiignore`, `.chezmoiremove`, `.chezmoitemplates`,
+`.chezmoiscripts`). Script prefixes are denied because chezmoi executes `run_`
+sources found anywhere in the source tree; `.tmpl` is denied because chezmoi
+template-executes it; special names are denied because chezmoi interprets them
+in the directory in which they appear. Only `literal_` is admitted, and only
+through an exact manifest `chezmoi_mappings` entry whose value equals the
+decoded target.
 MATLAB Runner declares `literal_run_matlab.sh` mapping to `run_matlab.sh`.
 PDF Chunk similarly declares `literal_pdf_stats.py` and
 `literal_extract_pages.py`, which chezmoi decodes to ordinary `0644` Python
@@ -725,8 +750,10 @@ on every platform.
 ### Runtime privacy
 
 Codex databases and Claude project memories are read only for explicit scans.
-Raw content stays in ignored, permission-restricted proposals and is never
-silently promoted.
+Memory scans copy the Codex database (with any `-wal`/`-shm` sidecars) to a
+private temporary location and read the copy; the live database is never
+opened while Codex may be writing it. Raw content stays in ignored,
+permission-restricted proposals and is never silently promoted.
 
 The Zotero skill deploys only when chezmoi data sets `personal = true`. Its
 script reads `~/Zotero/zotero.sqlite` only when explicitly invoked, copies the
@@ -775,8 +802,9 @@ The implementation must preserve these rules:
 13. Adapter overrides remain below `ai-parity/adapters` and every override must
     name an existing canonical child.
 14. Codex credentials, identity, SQLite state, history, sessions, logs,
-    snapshots, caches, memories, goals, and system-managed skills are forbidden
-    generated destinations and ignored deployment sources.
+    snapshots, caches, memories, goals, packages, plugins, the top-level
+    `config.toml`, and system-managed skills are forbidden generated
+    destinations and ignored deployment sources.
 15. Direct proposal acceptance changes canonical source, rendered outputs,
     proposal status, and generated state in one recoverable transaction.
 16. Every current state document passes its local structural schema and
