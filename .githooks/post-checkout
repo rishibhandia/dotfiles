@@ -1,0 +1,12 @@
+#!/bin/sh
+root=$(git rev-parse --show-toplevel) || exit 0
+if [ -e "$root/ai-parity/.sync-journal.json" ]; then
+  echo "ai-parity: checkout occurred with an active transaction; run 'dots ai doctor' and recover it before writing" >&2
+fi
+if command -v uv >/dev/null 2>&1; then
+  uv run --script "$root/ai-parity/scripts/ai_parity.py" status >/dev/null 2>&1 ||
+    echo "ai-parity: generated files are stale; run 'dots ai status'" >&2
+else
+  echo "ai-parity: uv unavailable; parity status was not checked" >&2
+fi
+exit 0

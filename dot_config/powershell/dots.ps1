@@ -11,7 +11,7 @@ function dots {
     A unified interface for managing dotfiles with chezmoi
 
     .PARAMETER Command
-    The command to run: apply, diff, status, update, edit, add, cd, git, doctor, data, re-init, test, help
+    The command to run: apply, diff, status, update, edit, add, cd, git, doctor, data, re-init, test, ai, help
 
     .PARAMETER Args
     Additional arguments to pass to the command
@@ -59,6 +59,7 @@ Commands:
   data           Show template data (name, email, OS, etc.)
   re-init        Re-run chezmoi init (regenerate config)
   test           Run dotfiles setup tests
+  ai <cmd>       Check or synchronize Claude/Codex parity
   uninstall      Remove all managed files (deregisters fonts, then chezmoi purge)
   help           Show this help message
 
@@ -70,6 +71,8 @@ Examples:
   dots add ~/.somerc   # Start managing a new file
   dots git status      # Check git status of dotfiles repo
   dots git push        # Push dotfiles changes to remote
+  dots ai status       # Check generated Codex configuration
+  dots ai sync --write # Update chezmoi source; does not apply it
 "@
         return
     }
@@ -130,6 +133,15 @@ Examples:
                 Write-Host "No test script found at $testScript" -ForegroundColor Yellow
             }
         }
+        "ai" {
+            $parityScript = Join-Path $ChezmoiDir "ai-parity\scripts\ai_parity.py"
+            if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
+                Write-Error "dots ai requires uv"
+                $global:LASTEXITCODE = 127
+                return
+            }
+            & uv run --script $parityScript @Args
+        }
         { $_ -in "uninstall", "purge" } {
             # Deregister chezmoi-managed fonts before purging
             $fontDir = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
@@ -173,6 +185,7 @@ Register-ArgumentCompleter -CommandName dots -ScriptBlock {
         @{ Name = 'data';     Description = 'Show template data' }
         @{ Name = 're-init';  Description = 'Re-run chezmoi init' }
         @{ Name = 'test';      Description = 'Run setup tests' }
+        @{ Name = 'ai';        Description = 'Check Claude/Codex parity' }
         @{ Name = 'uninstall'; Description = 'Deregister fonts and chezmoi purge' }
         @{ Name = 'help';      Description = 'Show help message' }
     )

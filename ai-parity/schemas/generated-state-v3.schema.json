@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "urn:ai-parity:generated-state:3",
+  "type": "object", "additionalProperties": false,
+  "required": ["format", "schema_version", "generator_version", "generation_id", "generator_inputs", "outputs"],
+  "properties": {
+    "format": {"const": "ai-parity-generated-state"}, "schema_version": {"const": 3},
+    "generator_version": {"const": 3}, "generation_id": {"$ref": "#/$defs/hash"},
+    "generator_inputs": {
+      "type": "object", "additionalProperties": false,
+      "required": ["engine_sha256", "manifest_sha256", "schemas_sha256"],
+      "properties": {"engine_sha256": {"$ref": "#/$defs/hash"}, "manifest_sha256": {"$ref": "#/$defs/hash"}, "schemas_sha256": {"$ref": "#/$defs/hash"}}
+    },
+    "outputs": {"type": "object", "additionalProperties": {"$ref": "#/$defs/output"}}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "output": {
+      "type": "object", "additionalProperties": false,
+      "required": ["artifact", "source", "source_digest", "sha256", "source_mode", "deployed_mode"],
+      "properties": {
+        "artifact": {"type": "string"}, "source": {"type": "string"}, "source_digest": {"$ref": "#/$defs/hash"},
+        "sha256": {"$ref": "#/$defs/hash"}, "source_mode": {"const": 420}, "deployed_mode": {"const": 420},
+        "canonical": {"type": "string"}, "canonical_digest": {"$ref": "#/$defs/hash"},
+        "side": {"enum": ["claude", "codex"]}
+      }
+    }
+  }
+}

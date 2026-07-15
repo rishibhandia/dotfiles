@@ -1,0 +1,4 @@
+interface:
+  display_name: "PDF Chunk Reader"
+  short_description: "Inspect and extract large PDFs safely"
+  default_prompt: "Use $pdf-chunk to inspect and extract only the relevant PDF pages."

@@ -1,0 +1,6 @@
+#!/bin/sh
+root=$(git rev-parse --show-toplevel) || exit 0
+if command -v uv >/dev/null 2>&1; then
+  uv run --script "$root/ai-parity/scripts/ai_parity.py" transaction-gc >/dev/null 2>&1 || true
+fi
+exit 0

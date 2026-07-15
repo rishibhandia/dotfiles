@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "urn:ai-parity:journal:3",
+  "type": "object", "additionalProperties": false,
+  "required": ["format", "schema_version", "transaction_id", "generation_id", "operation", "transaction_digest", "status"],
+  "properties": {
+    "format": {"const": "ai-parity-journal"}, "schema_version": {"const": 3},
+    "transaction_id": {"type": "string", "pattern": "^[0-9a-f]{32}$"},
+    "generation_id": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "operation": {"enum": ["sync", "reconcile-after-merge", "proposal-accept"]},
+    "transaction_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "status": {"const": "prepared"}
+  }
+}

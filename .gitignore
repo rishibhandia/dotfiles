@@ -6,3 +6,13 @@
 
 # macOS Finder metadata (don't rely on contributors' global git ignore)
 .DS_Store
+__pycache__/
+*.pyc
+
+# ai-parity runtime coordination (never commit or deploy)
+ai-parity/.sync-lock
+ai-parity/.sync-journal.json
+ai-parity/.transactions/
+ai-parity/.proposals/
+ai-parity/.active-transaction
+ai-parity/.docs-mcp-install.json

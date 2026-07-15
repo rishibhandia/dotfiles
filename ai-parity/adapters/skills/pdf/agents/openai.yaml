@@ -1,0 +1,4 @@
+interface:
+  display_name: "PDF Toolkit"
+  short_description: "Read and transform PDF documents safely"
+  default_prompt: "Use $pdf to read or transform this PDF safely."

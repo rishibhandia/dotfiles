@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "urn:ai-parity:transaction:3",
+  "type": "object", "additionalProperties": false,
+  "required": ["format", "schema_version", "transaction_id", "status", "generation_id", "operation", "context", "transaction_digest", "entries"],
+  "properties": {
+    "format": {"const": "ai-parity-transaction"}, "schema_version": {"const": 3},
+    "transaction_id": {"type": "string", "pattern": "^[0-9a-f]{32}$"},
+    "status": {"enum": ["prepared", "rendered", "rolled_back"]},
+    "generation_id": {"$ref": "#/$defs/hash"},
+    "operation": {"enum": ["sync", "reconcile-after-merge", "proposal-accept"]},
+    "context": {"type": ["object", "null"]}, "transaction_digest": {"$ref": "#/$defs/hash"},
+    "entries": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/entry"}}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "snapshot": {
+      "type": "object", "additionalProperties": false, "required": ["exists", "sha256", "mode", "data"],
+      "properties": {"exists": {"type": "boolean"}, "sha256": {"type": ["string", "null"]}, "mode": {"type": ["integer", "null"]}, "data": {"type": ["string", "null"]}}
+    },
+    "entry": {
+      "type": "object", "additionalProperties": false, "required": ["path", "old", "new"],
+      "properties": {"path": {"type": "string", "minLength": 1}, "old": {"$ref": "#/$defs/snapshot"}, "new": {"$ref": "#/$defs/snapshot"}}
+    }
+  }
+}

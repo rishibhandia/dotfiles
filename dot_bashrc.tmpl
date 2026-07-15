@@ -75,8 +75,15 @@ dots() {
     cd)      cd "$src" ;;
     git)     git -C "$src" "$@" ;;
     test)    bash "$src/scripts/test.sh" ;;
+    ai)
+      if ! command -v uv >/dev/null 2>&1; then
+        echo "dots ai requires uv" >&2
+        return 127
+      fi
+      uv run --script "$src/ai-parity/scripts/ai_parity.py" "$@"
+      ;;
     doctor)  chezmoi doctor ;;
-    *)       echo "Usage: dots <apply|diff|status|update|edit|add|cd|git|test|doctor>" ;;
+    *)       echo "Usage: dots <apply|diff|status|update|edit|add|cd|git|test|ai|doctor>" ;;
   esac
 }
 {{- end }}

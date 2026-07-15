@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "urn:ai-parity:docs-marker:2",
+  "type": "object", "additionalProperties": false,
+  "required": ["format", "schema_version", "name", "url", "host"],
+  "properties": {
+    "format": {"const": "ai-parity-docs-marker"}, "schema_version": {"const": 2},
+    "name": {"const": "openaiDeveloperDocs"}, "url": {"const": "https://developers.openai.com/mcp"},
+    "host": {"type": "string", "minLength": 1}
+  }
+}

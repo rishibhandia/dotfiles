@@ -46,6 +46,9 @@
 .claude/skills/things
 .claude/skills/fantastical
 .claude/skills/keynote
+.agents/skills/things
+.agents/skills/fantastical
+.agents/skills/keynote
 {{ end }}
 
 # =============================================================================
@@ -54,6 +57,8 @@
 {{ if not .personal }}
 .claude/skills/keynote
 .claude/skills/zotero
+.agents/skills/keynote
+.agents/skills/zotero
 {{ end }}
 
 # =============================================================================
@@ -99,3 +104,30 @@ install.sh
 install.ps1
 scripts
 docs/**
+ai-parity/**
+.githooks/**
+
+# Codex-owned runtime state must never be sourced from this repository.
+.codex/installation_id
+.codex/auth.json
+.codex/credentials.json
+.codex/identity.json
+.codex/token.json
+.codex/tokens.json
+.codex/*.sqlite
+.codex/*.sqlite-*
+.codex/history.jsonl
+.codex/models_cache.json
+.codex/version.json
+.codex/.personality_migration
+.codex/skills/.system/**
+.codex/sessions/**
+.codex/archived_sessions/**
+.codex/memories/**
+.codex/goals/**
+.codex/log/**
+.codex/logs/**
+.codex/shell_snapshots/**
+.codex/tmp/**
+.codex/cache/**
+.agents/skills/.system/**

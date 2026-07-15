@@ -1,0 +1,4 @@
+interface:
+  display_name: "LLM PDF Processing"
+  short_description: "Prepare PDFs for bounded model analysis"
+  default_prompt: "Use $llm-pdf-processing to prepare attributable PDF evidence for analysis."

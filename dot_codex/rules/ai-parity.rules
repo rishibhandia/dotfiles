@@ -1,0 +1,12 @@
+# Managed separately from default.rules because Codex may update default.rules.
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "forbidden",
+    justification = "Preserve user work; use a non-destructive inspection or request explicit authorization.",
+)
+
+prefix_rule(
+    pattern = ["git", "push", "--force"],
+    decision = "forbidden",
+    justification = "History rewriting requires an explicitly reviewed workflow outside this default policy.",
+)

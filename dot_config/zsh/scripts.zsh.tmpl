@@ -954,6 +954,7 @@ Commands:
   re-init        Re-run chezmoi init (regenerate config)
   test           Run dotfiles setup tests
   brew <cmd>     Manage Brewfile (add/remove/list packages)
+  ai <cmd>       Check or synchronize Claude/Codex parity
   help           Show this help message
 
 Examples:
@@ -966,6 +967,9 @@ Examples:
   dots git push        # Push dotfiles changes to remote
   dots brew add htop   # Add package to Brewfile
   dots brew list       # List packages in Brewfile
+  dots ai status       # Check generated Codex configuration
+  dots ai sync         # Preview parity changes (dry run)
+  dots ai sync --write # Update chezmoi source; does not apply it
 EOF
         return 0
     fi
@@ -1031,6 +1035,13 @@ EOF
         brew)
             _dots_brew "$@"
             ;;
+        ai)
+            if ! command -v uv >/dev/null 2>&1; then
+                echo "dots ai requires uv" >&2
+                return 127
+            fi
+            uv run --script "$CHEZMOI_DIR/ai-parity/scripts/ai_parity.py" "$@"
+            ;;
         help|--help|-h)
             dots  # Call without args to show help
             ;;
@@ -1060,6 +1071,7 @@ if [ -n "$ZSH_VERSION" ]; then
             're-init:Re-run chezmoi init'
             'test:Run setup tests'
             'brew:Manage Brewfile packages'
+            'ai:Check or synchronize Claude/Codex parity'
             'help:Show help message'
         )
 
@@ -1085,6 +1097,24 @@ if [ -n "$ZSH_VERSION" ]; then
                         'list:List packages in Brewfile'
                     )
                     _describe 'brew command' brew_cmds
+                    ;;
+                ai)
+                    local -a ai_cmds
+                    ai_cmds=(
+                        'status:Check generated files and review acknowledgements'
+                        'diff:Show generated-file differences'
+                        'sync:Preview or write generated files'
+                        'verify:Run the blocking parity check'
+                        'hooks:Install or uninstall repository hooks'
+                        'propose:Create a reviewed import proposal'
+                        'proposals:List, inspect, accept, resolve, or reject proposals'
+                        'memories:Create proposals from runtime memories'
+                        'docs:Manage the official documentation MCP bootstrap'
+                        'doctor:Inspect transaction and lock state'
+                        'repair:Explicitly finish or roll back a transaction'
+                        'reconcile:Regenerate derived Git merge conflicts'
+                    )
+                    _describe 'AI parity command' ai_cmds
                     ;;
             esac
         elif (( CURRENT == 4 )); then

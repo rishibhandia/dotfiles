@@ -1,0 +1,4 @@
+interface:
+  display_name: "Scientific Figures"
+  short_description: "Create faithful publication-quality figures"
+  default_prompt: "Use $scientific-figures to create or review this figure without distorting the underlying data."

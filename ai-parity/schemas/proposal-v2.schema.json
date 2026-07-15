@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "urn:ai-parity:proposal:2",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "proposal_id", "kind", "status"],
+  "properties": {
+    "schema_version": {"const": 2}, "proposal_id": {"type": "string", "pattern": "^[0-9a-f]{24}$"},
+    "kind": {"enum": ["artifact", "memory"]}, "status": {"enum": ["applicable", "review_required", "accepted_pending_render", "resolved", "rejected"]},
+    "artifact": {"type": "string"}, "side": {"enum": ["claude", "codex"]}, "state_generation": {"type": "string"},
+    "canonical_digest": {"type": "string"}, "baseline_canonical_digest": {"type": ["string", "null"]},
+    "changed": {"type": "array", "items": {"type": "string"}}, "current": {"type": "object"},
+    "source": {"enum": ["claude", "codex"]}, "origin": {"type": "string"}, "content_sha256": {"type": "string"}, "content": {"type": "string"}
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Zotero Library Lookup"
+  short_description: "Search your local Zotero citation library"
+  default_prompt: "Use $zotero to find papers and citations in my local Zotero library."

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ai-parity:manifest:3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "schema_version", "generator_version", "policy", "shared_artifacts", "artifacts", "reviews", "skills", "agents"],
+  "properties": {
+    "format": {"const": "ai-parity-manifest"},
+    "schema_version": {"const": 3},
+    "generator_version": {"const": 3},
+    "policy": {"$ref": "#/$defs/policy"},
+    "shared_artifacts": {"type": "array", "items": {"$ref": "#/$defs/sharedArtifact"}},
+    "artifacts": {"type": "array", "items": {"$ref": "#/$defs/artifact"}},
+    "reviews": {"type": "array", "items": {"$ref": "#/$defs/review"}},
+    "skills": {"type": "array", "items": {"$ref": "#/$defs/classification"}},
+    "agents": {"type": "array", "items": {"$ref": "#/$defs/classification"}}
+  },
+  "$defs": {
+    "path": {"type": "string", "minLength": 1},
+    "stringMap": {"type": "object", "additionalProperties": {"type": "string"}},
+    "policy": {
+      "type": "object", "additionalProperties": false,
+      "required": ["protected_roots", "owned_roots", "state_file", "journal_file", "lock_file", "transactions_dir", "proposals_dir", "docs_marker"],
+      "properties": {
+        "protected_roots": {"type": "array", "items": {"type": "string"}},
+        "owned_roots": {"type": "array", "items": {"type": "string"}},
+        "state_file": {"$ref": "#/$defs/path"}, "journal_file": {"$ref": "#/$defs/path"},
+        "lock_file": {"$ref": "#/$defs/path"}, "transactions_dir": {"$ref": "#/$defs/path"},
+        "proposals_dir": {"$ref": "#/$defs/path"}, "docs_marker": {"$ref": "#/$defs/path"}
+      }
+    },
+    "target": {
+      "type": "object", "additionalProperties": false,
+      "required": ["side", "destination", "mode"],
+      "properties": {
+        "side": {"enum": ["claude", "codex"]}, "destination": {"$ref": "#/$defs/path"},
+        "mode": {"const": "tree-copy"}, "source_overrides": {"$ref": "#/$defs/stringMap"},
+        "chezmoi_mappings": {"$ref": "#/$defs/stringMap"}
+      }
+    },
+    "sharedArtifact": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "canonical", "import_mode", "targets"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1}, "canonical": {"$ref": "#/$defs/path"},
+        "import_mode": {"enum": ["direct", "review"]},
+        "targets": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/target"}}
+      }
+    },
+    "artifact": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "source", "destination", "mode"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1}, "source": {"$ref": "#/$defs/path"},
+        "destination": {"$ref": "#/$defs/path"}, "mode": {"enum": ["copy", "tree-copy"]}
+      }
+    },
+    "review": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "source", "acknowledged_digest"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1}, "source": {"$ref": "#/$defs/path"},
+        "acknowledged_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "classification": {
+      "type": "object", "additionalProperties": false, "required": ["name", "mode"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "mode": {"enum": ["planned", "planned-platform-gated", "shared-explicit-pilot", "adapted-explicit-pilot", "collection-explicit-pilot", "converted-explicit-pilot"]}
+      }
+    }
+  }
+}

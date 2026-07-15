@@ -1,0 +1,356 @@
+format = "ai-parity-manifest"
+schema_version = 3
+generator_version = 3
+
+[policy]
+protected_roots = ["dot_claude"]
+owned_roots = ["dot_codex", "dot_agents"]
+state_file = "ai-parity/generated-state.json"
+journal_file = "ai-parity/.sync-journal.json"
+lock_file = "ai-parity/.sync-lock"
+transactions_dir = "ai-parity/.transactions"
+proposals_dir = "ai-parity/.proposals"
+docs_marker = "ai-parity/.docs-mcp-install.json"
+
+[[shared_artifacts]]
+name = "matlab"
+canonical = "ai-parity/shared/skills/matlab"
+import_mode = "direct"
+
+[[shared_artifacts.targets]]
+side = "claude"
+destination = "dot_claude/skills/matlab"
+mode = "tree-copy"
+
+[[shared_artifacts.targets]]
+side = "codex"
+destination = "dot_agents/skills/matlab"
+mode = "tree-copy"
+
+[[shared_artifacts]]
+name = "scientific-figures"
+canonical = "ai-parity/shared/skills/scientific-figures"
+import_mode = "direct"
+
+[[shared_artifacts.targets]]
+side = "claude"
+destination = "dot_claude/skills/scientific-figures"
+mode = "tree-copy"
+
+[[shared_artifacts.targets]]
+side = "codex"
+destination = "dot_agents/skills/scientific-figures"
+mode = "tree-copy"
+
+[[shared_artifacts]]
+name = "matlab-runner"
+canonical = "ai-parity/shared/skills/matlab-runner"
+import_mode = "review"
+
+[[shared_artifacts.targets]]
+side = "claude"
+destination = "dot_claude/skills/matlab-runner"
+mode = "tree-copy"
+chezmoi_mappings = { "scripts/literal_run_matlab.sh" = "scripts/run_matlab.sh" }
+
+[[shared_artifacts.targets]]
+side = "codex"
+destination = "dot_agents/skills/matlab-runner"
+mode = "tree-copy"
+chezmoi_mappings = { "scripts/literal_run_matlab.sh" = "scripts/run_matlab.sh" }
+source_overrides = { "SKILL.md" = "ai-parity/adapters/skills/matlab-runner/SKILL.md" }
+
+[[shared_artifacts]]
+name = "zotero"
+canonical = "ai-parity/shared/skills/zotero"
+import_mode = "review"
+
+[[shared_artifacts.targets]]
+side = "claude"
+destination = "dot_claude/skills/zotero"
+mode = "tree-copy"
+
+[[shared_artifacts.targets]]
+side = "codex"
+destination = "dot_agents/skills/zotero"
+mode = "tree-copy"
+source_overrides = { "SKILL.md" = "ai-parity/adapters/skills/zotero/SKILL.md" }
+
+[[shared_artifacts]]
+name = "pdf-chunk"
+canonical = "ai-parity/shared/skills/pdf-chunk"
+import_mode = "review"
+
+[[shared_artifacts.targets]]
+side = "claude"
+destination = "dot_claude/skills/pdf-chunk"
+mode = "tree-copy"
+chezmoi_mappings = { "scripts/literal_pdf_stats.py" = "scripts/pdf_stats.py", "scripts/literal_extract_pages.py" = "scripts/extract_pages.py" }
+
+[[shared_artifacts.targets]]
+side = "codex"
+destination = "dot_agents/skills/pdf-chunk"
+mode = "tree-copy"
+chezmoi_mappings = { "scripts/literal_pdf_stats.py" = "scripts/pdf_stats.py", "scripts/literal_extract_pages.py" = "scripts/extract_pages.py" }
+source_overrides = { "SKILL.md" = "ai-parity/adapters/skills/pdf-chunk/SKILL.md" }
+
+[[shared_artifacts]]
+name = "llm-pdf-processing"
+canonical = "ai-parity/shared/skills/llm-pdf-processing"
+import_mode = "review"
+
+[[shared_artifacts.targets]]
+side = "claude"
+destination = "dot_claude/skills/llm-pdf-processing"
+mode = "tree-copy"
+
+[[shared_artifacts.targets]]
+side = "codex"
+destination = "dot_agents/skills/llm-pdf-processing"
+mode = "tree-copy"
+
+[[artifacts]]
+name = "global-agents"
+source = "ai-parity/contracts/AGENTS.md"
+destination = "dot_codex/AGENTS.md"
+mode = "copy"
+
+[[artifacts]]
+name = "careful-review-profile"
+source = "ai-parity/contracts/careful-review.config.toml"
+destination = "dot_codex/careful-review.config.toml"
+mode = "copy"
+
+[[artifacts]]
+name = "reviewer-agent"
+source = "ai-parity/contracts/agents/reviewer.toml"
+destination = "dot_codex/agents/reviewer.toml"
+mode = "copy"
+
+[[artifacts]]
+name = "debugger-agent"
+source = "ai-parity/contracts/agents/debugger.toml"
+destination = "dot_codex/agents/debugger.toml"
+mode = "copy"
+
+[[artifacts]]
+name = "ai-parity-rules"
+source = "ai-parity/contracts/ai-parity.rules"
+destination = "dot_codex/rules/ai-parity.rules"
+mode = "copy"
+
+[[artifacts]]
+name = "gemini-billing-blocks-skill"
+source = "dot_claude/skills/gemini-billing-blocks"
+destination = "dot_agents/skills/gemini-billing-blocks"
+mode = "tree-copy"
+
+[[artifacts]]
+name = "verify-skill-adapter"
+source = "ai-parity/adapters/skills/verify"
+destination = "dot_agents/skills/verify"
+mode = "tree-copy"
+
+[[artifacts]]
+name = "learned-patterns-skill"
+source = "ai-parity/adapters/skills/learned-patterns"
+destination = "dot_agents/skills/learned-patterns"
+mode = "tree-copy"
+
+[[artifacts]]
+name = "learned-pattern-references"
+source = "dot_claude/skills/learned"
+destination = "dot_agents/skills/learned-patterns/references"
+mode = "tree-copy"
+
+[[artifacts]]
+name = "zotero-codex-interface"
+source = "ai-parity/adapters/skills/zotero/agents/openai.yaml"
+destination = "dot_agents/skills/zotero/agents/openai.yaml"
+mode = "copy"
+
+[[artifacts]]
+name = "pdf-codex-skill"
+source = "ai-parity/adapters/skills/pdf"
+destination = "dot_agents/skills/pdf"
+mode = "tree-copy"
+
+[[artifacts]]
+name = "pdf-chunk-codex-interface"
+source = "ai-parity/adapters/skills/pdf-chunk/agents/openai.yaml"
+destination = "dot_agents/skills/pdf-chunk/agents/openai.yaml"
+mode = "copy"
+
+[[artifacts]]
+name = "llm-pdf-processing-codex-interface"
+source = "ai-parity/adapters/skills/llm-pdf-processing/agents/openai.yaml"
+destination = "dot_agents/skills/llm-pdf-processing/agents/openai.yaml"
+mode = "copy"
+
+[[artifacts]]
+name = "scientific-figures-codex-interface"
+source = "ai-parity/adapters/skills/scientific-figures/agents/openai.yaml"
+destination = "dot_agents/skills/scientific-figures/agents/openai.yaml"
+mode = "copy"
+
+[[reviews]]
+name = "global-agents-contract"
+source = "dot_claude/CLAUDE.md"
+acknowledged_digest = "495df45e1918a1e99fadb5aae78369badcce3073f23e18e158c176c946fc460a"
+
+[[reviews]]
+name = "verify-skill-adapter"
+source = "dot_claude/skills/verify"
+acknowledged_digest = "010643d0322f0d08c58d48542051f0176543b89e383ddbd5749c4ba20f23b1bb"
+
+[[reviews]]
+name = "reviewer-agent-adapter"
+source = "dot_claude/agents/code-reviewer.md"
+acknowledged_digest = "06aca1d5f8f6e5fceb9362ecd9e2e1a4f90cef2550259b068eaecbc4ec9a7b31"
+
+[[reviews]]
+name = "debugger-agent-adapter"
+source = "dot_claude/agents/debugger.md"
+acknowledged_digest = "ec57e9052b54179aefb5381df6f885794102b1e5663bd5beb8cc81d5fbc7519a"
+
+# Every top-level Claude skill directory must be classified. "planned" means
+# intentionally unavailable to Codex until it receives an explicit review.
+[[skills]]
+name = "academic-review"
+mode = "planned"
+[[skills]]
+name = "build-fix"
+mode = "planned"
+[[skills]]
+name = "checkpoint"
+mode = "planned"
+[[skills]]
+name = "code-review"
+mode = "planned"
+[[skills]]
+name = "doc-coauthoring"
+mode = "planned"
+[[skills]]
+name = "docx"
+mode = "planned"
+[[skills]]
+name = "e2e"
+mode = "planned"
+[[skills]]
+name = "eval"
+mode = "planned"
+[[skills]]
+name = "fantastical"
+mode = "planned-platform-gated"
+[[skills]]
+name = "gemini-billing-blocks"
+mode = "shared-explicit-pilot"
+[[skills]]
+name = "keynote"
+mode = "planned-platform-gated"
+[[skills]]
+name = "learn"
+mode = "planned"
+[[skills]]
+name = "learned"
+mode = "collection-explicit-pilot"
+[[skills]]
+name = "llm-pdf-processing"
+mode = "shared-explicit-pilot"
+[[skills]]
+name = "matlab"
+mode = "shared-explicit-pilot"
+[[skills]]
+name = "matlab-runner"
+mode = "adapted-explicit-pilot"
+[[skills]]
+name = "orchestrate"
+mode = "planned"
+[[skills]]
+name = "pdf"
+mode = "adapted-explicit-pilot"
+[[skills]]
+name = "pdf-chunk"
+mode = "adapted-explicit-pilot"
+[[skills]]
+name = "plan"
+mode = "planned"
+[[skills]]
+name = "pptx"
+mode = "planned"
+[[skills]]
+name = "refactor-clean"
+mode = "planned"
+[[skills]]
+name = "scientific-figures"
+mode = "shared-explicit-pilot"
+[[skills]]
+name = "session-wrap"
+mode = "planned"
+[[skills]]
+name = "skill-creator"
+mode = "planned"
+[[skills]]
+name = "tdd"
+mode = "planned"
+[[skills]]
+name = "test-coverage"
+mode = "planned"
+[[skills]]
+name = "theme-factory"
+mode = "planned"
+[[skills]]
+name = "things"
+mode = "planned-platform-gated"
+[[skills]]
+name = "update-codemaps"
+mode = "planned"
+[[skills]]
+name = "update-docs"
+mode = "planned"
+[[skills]]
+name = "uv-launchd-jobs"
+mode = "planned"
+[[skills]]
+name = "verify"
+mode = "adapted-explicit-pilot"
+[[skills]]
+name = "xlsx"
+mode = "planned"
+[[skills]]
+name = "zotero"
+mode = "adapted-explicit-pilot"
+
+[[agents]]
+name = "architect"
+mode = "planned"
+[[agents]]
+name = "build-error-resolver"
+mode = "planned"
+[[agents]]
+name = "code-reviewer"
+mode = "converted-explicit-pilot"
+[[agents]]
+name = "debugger"
+mode = "converted-explicit-pilot"
+[[agents]]
+name = "doc-updater"
+mode = "planned"
+[[agents]]
+name = "e2e-runner"
+mode = "planned"
+[[agents]]
+name = "git-commit"
+mode = "planned"
+[[agents]]
+name = "planner"
+mode = "planned"
+[[agents]]
+name = "refactor-cleaner"
+mode = "planned"
+[[agents]]
+name = "security-reviewer"
+mode = "planned"
+[[agents]]
+name = "tdd-guide"
+mode = "planned"

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "urn:ai-parity:lock:3",
+  "type": "object", "additionalProperties": false,
+  "required": ["format", "schema_version", "pid", "host", "token", "transaction_id", "operation", "generation_id", "transaction_digest"],
+  "properties": {
+    "format": {"const": "ai-parity-lock"}, "schema_version": {"const": 3}, "pid": {"type": "integer", "minimum": 1},
+    "host": {"type": "string", "minLength": 1}, "token": {"type": "string", "pattern": "^[0-9a-f]{32}$"},
+    "transaction_id": {"type": "string", "pattern": "^[0-9a-f]{32}$"},
+    "operation": {"enum": ["sync", "reconcile-after-merge", "proposal-accept", "transaction-gc"]},
+    "generation_id": {"type": ["string", "null"]}, "transaction_digest": {"type": ["string", "null"]}
+  }
+}

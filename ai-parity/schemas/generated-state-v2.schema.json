@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "urn:ai-parity:generated-state:2",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "generator_version", "generation_id", "generator_inputs", "outputs"],
+  "properties": {
+    "schema_version": {"const": 2}, "generator_version": {"type": "integer"}, "generation_id": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "generator_inputs": {"type": "object"}, "outputs": {"type": "object"}
+  }
+}

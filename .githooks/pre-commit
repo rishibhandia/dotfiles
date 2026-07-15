@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+
+root=$(git rev-parse --show-toplevel)
+if ! command -v uv >/dev/null 2>&1; then
+  echo "ai-parity: uv is required to verify the staged snapshot" >&2
+  exit 1
+fi
+
+exec uv run --script "$root/ai-parity/scripts/ai_parity.py" verify --staged

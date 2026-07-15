@@ -1,0 +1,533 @@
+{
+  "format": "ai-parity-generated-state",
+  "generation_id": "292109aac91b0bd52fdec3a1ae02edde073a2272c434e0969843f83ce72478c5",
+  "generator_inputs": {
+    "engine_sha256": "e81016e2cd3a8808239254898c5cd2c79f607631c8e8c8512424f3888e3d0259",
+    "manifest_sha256": "3035322c5891b42e00b3e108415de31a82fd629f583b4e2b98655ca22a94d0f9",
+    "schemas_sha256": "33b5c6cc4c6a44a35ddf1ee205308857c2b651920ae21d7e93184ae9d22ed728"
+  },
+  "generator_version": 3,
+  "outputs": {
+    "dot_agents/skills/gemini-billing-blocks/SKILL.md": {
+      "artifact": "gemini-billing-blocks-skill",
+      "deployed_mode": 420,
+      "sha256": "d4deba953560369135677ea693abd7e35195e2d017c28a79a7944f95d87be720",
+      "source": "dot_claude/skills/gemini-billing-blocks",
+      "source_digest": "70b340c335cdfa2397a1633a2e9d9709026cc32dc5312d7d4a927ee6bd36c86d",
+      "source_mode": 420
+    },
+    "dot_agents/skills/learned-patterns/SKILL.md": {
+      "artifact": "learned-patterns-skill",
+      "deployed_mode": 420,
+      "sha256": "cfd736130cd3372c2adf72fbc0eb81e2eb203d92517b2bec9cb47fdb3155bb60",
+      "source": "ai-parity/adapters/skills/learned-patterns",
+      "source_digest": "96dc60e957d284134fd3579da94f47eee485d9a64f4cbc5dbfad06589f08e36a",
+      "source_mode": 420
+    },
+    "dot_agents/skills/learned-patterns/references/andor-sdk-dll-lifecycle.md": {
+      "artifact": "learned-pattern-references",
+      "deployed_mode": 420,
+      "sha256": "f5ca7a10d196dd742aa7d5d86afc0edf97799c32fa323fb24ba16231d234de7d",
+      "source": "dot_claude/skills/learned",
+      "source_digest": "2ed0a74dcb82d8b8739d2c59641e173f1e1893453ceb8a1c8997eed993636be1",
+      "source_mode": 420
+    },
+    "dot_agents/skills/learned-patterns/references/apple-photos-bulk-import.md": {
+      "artifact": "learned-pattern-references",
+      "deployed_mode": 420,
+      "sha256": "07c85a1247bdd7dac08cef1994af006b98e6bea836169888c378cd199e6e8b41",
+      "source": "dot_claude/skills/learned",
+      "source_digest": "2ed0a74dcb82d8b8739d2c59641e173f1e1893453ceb8a1c8997eed993636be1",
+      "source_mode": 420
+    },
+    "dot_agents/skills/learned-patterns/references/mockobject-attribute-getattr-trap.md": {
+      "artifact": "learned-pattern-references",
+      "deployed_mode": 420,
+      "sha256": "6b19bf2c7c8b6578cc9447ae741ba31cd85b72c1d261fef43b3d09d09efcc922",
+      "source": "dot_claude/skills/learned",
+      "source_digest": "2ed0a74dcb82d8b8739d2c59641e173f1e1893453ceb8a1c8997eed993636be1",
+      "source_mode": 420
+    },
+    "dot_agents/skills/learned-patterns/references/powershell-utf8-bom-em-dash.md": {
+      "artifact": "learned-pattern-references",
+      "deployed_mode": 420,
+      "sha256": "096a23fb266127350ec5737b29d57d0bac3aa902da0f7433648aa8115f0d7ed3",
+      "source": "dot_claude/skills/learned",
+      "source_digest": "2ed0a74dcb82d8b8739d2c59641e173f1e1893453ceb8a1c8997eed993636be1",
+      "source_mode": 420
+    },
+    "dot_agents/skills/learned-patterns/references/qt-test-window-close-blocking-shutdown.md": {
+      "artifact": "learned-pattern-references",
+      "deployed_mode": 420,
+      "sha256": "614859c62598fd6f80a22f3cc92794cb22e98ccc50d2cbe2958ee3e91f16c876",
+      "source": "dot_claude/skills/learned",
+      "source_digest": "2ed0a74dcb82d8b8739d2c59641e173f1e1893453ceb8a1c8997eed993636be1",
+      "source_mode": 420
+    },
+    "dot_agents/skills/learned-patterns/references/windows-phantom-usb-devices.md": {
+      "artifact": "learned-pattern-references",
+      "deployed_mode": 420,
+      "sha256": "193a786d5e5c79df7eade8801152c8fac14c6aab1be9d1f51adc2d9a1fe83817",
+      "source": "dot_claude/skills/learned",
+      "source_digest": "2ed0a74dcb82d8b8739d2c59641e173f1e1893453ceb8a1c8997eed993636be1",
+      "source_mode": 420
+    },
+    "dot_agents/skills/llm-pdf-processing/SKILL.md": {
+      "artifact": "llm-pdf-processing",
+      "canonical": "ai-parity/shared/skills/llm-pdf-processing",
+      "canonical_digest": "529764ef06b5ff1cf4ff4b282db16a10e9c2ee1efd5f10d0e2fddba3684361a6",
+      "deployed_mode": 420,
+      "sha256": "e6cdf75bcc4713db8ca3ddb15c8d9beb65979ef058f2221aa4a2369ea268831c",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/llm-pdf-processing/SKILL.md",
+      "source_digest": "ce2403a7efec1f694ef5b0d263e3e561f741336b18fc9e5dad87513bcc04943d",
+      "source_mode": 420
+    },
+    "dot_agents/skills/llm-pdf-processing/agents/openai.yaml": {
+      "artifact": "llm-pdf-processing-codex-interface",
+      "deployed_mode": 420,
+      "sha256": "78a211dd24910087ee0bb8421540f235ce4c89accbedca32efac5484990ec68c",
+      "source": "ai-parity/adapters/skills/llm-pdf-processing/agents/openai.yaml",
+      "source_digest": "42ed584209a800dfa85fe560c434ce5a1527effbd0f9f6382616fa06cd38d663",
+      "source_mode": 420
+    },
+    "dot_agents/skills/matlab-runner/SKILL.md": {
+      "artifact": "matlab-runner",
+      "canonical": "ai-parity/shared/skills/matlab-runner",
+      "canonical_digest": "38d4d37ada6a058ee7cb41570529fdf6fc857b9bd17af1ba5c4ea040a21c2417",
+      "deployed_mode": 420,
+      "sha256": "1d0d62f52ff620cf534c04f0e42affcd72bfa07d124a184a3491fcaf4a7312a5",
+      "side": "codex",
+      "source": "ai-parity/adapters/skills/matlab-runner/SKILL.md",
+      "source_digest": "2399787cf756b88955d32edff142bb1c4bca4da8a129421f1d6a6dd7e0fa32ad",
+      "source_mode": 420
+    },
+    "dot_agents/skills/matlab-runner/scripts/literal_run_matlab.sh": {
+      "artifact": "matlab-runner",
+      "canonical": "ai-parity/shared/skills/matlab-runner",
+      "canonical_digest": "38d4d37ada6a058ee7cb41570529fdf6fc857b9bd17af1ba5c4ea040a21c2417",
+      "deployed_mode": 420,
+      "sha256": "d6250363290510bfadaa1da8ad69003f387c7c2b898d09eeb14f3701ea6383aa",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/matlab-runner/scripts/literal_run_matlab.sh",
+      "source_digest": "c8d80ad5422f3cff1c7f719fe5ebd88609c2e31cc22170b2c73bf83eb740bce1",
+      "source_mode": 420
+    },
+    "dot_agents/skills/matlab/SKILL.md": {
+      "artifact": "matlab",
+      "canonical": "ai-parity/shared/skills/matlab",
+      "canonical_digest": "0d410258aab468868594c7b8cdd42ed7539a96fb19849bebcbe14eb0c5287a7f",
+      "deployed_mode": 420,
+      "sha256": "21b5b650c001cff3099993f1273dbcaac9ce65b727133efb599e28d898e1034e",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/matlab/SKILL.md",
+      "source_digest": "c259ac099c8cff891637ca86c4d5ed1b3dcb81973e3d6ea415dc9efaf2e52522",
+      "source_mode": 420
+    },
+    "dot_agents/skills/matlab/fft.md": {
+      "artifact": "matlab",
+      "canonical": "ai-parity/shared/skills/matlab",
+      "canonical_digest": "0d410258aab468868594c7b8cdd42ed7539a96fb19849bebcbe14eb0c5287a7f",
+      "deployed_mode": 420,
+      "sha256": "101c6a14e9e6069433cf58e165269349b46be3a5cba11caed1e5397849b59131",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/matlab/fft.md",
+      "source_digest": "3fdec6a77a0b17131b5c234d92d18f06d88c4740f469c94b1c23b7009332b52b",
+      "source_mode": 420
+    },
+    "dot_agents/skills/matlab/performance.md": {
+      "artifact": "matlab",
+      "canonical": "ai-parity/shared/skills/matlab",
+      "canonical_digest": "0d410258aab468868594c7b8cdd42ed7539a96fb19849bebcbe14eb0c5287a7f",
+      "deployed_mode": 420,
+      "sha256": "857803c5fa572d58aa96cc5d64f20882bf6d9ad8e02695e50863f299a6b266c5",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/matlab/performance.md",
+      "source_digest": "333c89e4a06f21b852abceda49a507d681419edc3b53764608fb51302b7f1e1b",
+      "source_mode": 420
+    },
+    "dot_agents/skills/matlab/plotting.md": {
+      "artifact": "matlab",
+      "canonical": "ai-parity/shared/skills/matlab",
+      "canonical_digest": "0d410258aab468868594c7b8cdd42ed7539a96fb19849bebcbe14eb0c5287a7f",
+      "deployed_mode": 420,
+      "sha256": "7255b1d558af5ec74d561126d1715d3618a361c9318ede97c0e0d7d5b8e88ff5",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/matlab/plotting.md",
+      "source_digest": "5b419b245401c2a401612be4822a93bc7351abf87286c8924e0a79e5d027345d",
+      "source_mode": 420
+    },
+    "dot_agents/skills/matlab/style-guide.md": {
+      "artifact": "matlab",
+      "canonical": "ai-parity/shared/skills/matlab",
+      "canonical_digest": "0d410258aab468868594c7b8cdd42ed7539a96fb19849bebcbe14eb0c5287a7f",
+      "deployed_mode": 420,
+      "sha256": "c002c35130a962cbf50bc5d302c03f92e8e3198612fcde3ebf6f8925304ec7e9",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/matlab/style-guide.md",
+      "source_digest": "fb0f4ca14ec49a17c35d4f2522f08c48f8b56414df2e07ec19622a9e5c45bce1",
+      "source_mode": 420
+    },
+    "dot_agents/skills/matlab/ta.md": {
+      "artifact": "matlab",
+      "canonical": "ai-parity/shared/skills/matlab",
+      "canonical_digest": "0d410258aab468868594c7b8cdd42ed7539a96fb19849bebcbe14eb0c5287a7f",
+      "deployed_mode": 420,
+      "sha256": "a5f5836e885b5288e36f163513c1971e808365ce0c307d1ee6f5214dafec6bad",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/matlab/ta.md",
+      "source_digest": "145c95a8b50da259289ce30a5211f504046e7a592ed12842199ae5fe7460bdbc",
+      "source_mode": 420
+    },
+    "dot_agents/skills/pdf-chunk/SKILL.md": {
+      "artifact": "pdf-chunk",
+      "canonical": "ai-parity/shared/skills/pdf-chunk",
+      "canonical_digest": "101892fe94c337fe516c5564f24692a78d5063a931201e6c1e9cb6304991aa59",
+      "deployed_mode": 420,
+      "sha256": "de8ebc398310f946b9319eefa4efa892131b3fb9913041caabb83934555fffab",
+      "side": "codex",
+      "source": "ai-parity/adapters/skills/pdf-chunk/SKILL.md",
+      "source_digest": "6cf0ab49ddf4aaa57aa4daee2910f8fa3cf1ba3f3cbda23be1576ab439de3194",
+      "source_mode": 420
+    },
+    "dot_agents/skills/pdf-chunk/agents/openai.yaml": {
+      "artifact": "pdf-chunk-codex-interface",
+      "deployed_mode": 420,
+      "sha256": "60f01d6c87f6795a4613c395b1c309c8a3490cc1ecf30459149f0db177aa68a3",
+      "source": "ai-parity/adapters/skills/pdf-chunk/agents/openai.yaml",
+      "source_digest": "936ac57e2fc1a3e77b379e48e1c73f5d26206da240cacb1bb613ff2c02507320",
+      "source_mode": 420
+    },
+    "dot_agents/skills/pdf-chunk/scripts/literal_extract_pages.py": {
+      "artifact": "pdf-chunk",
+      "canonical": "ai-parity/shared/skills/pdf-chunk",
+      "canonical_digest": "101892fe94c337fe516c5564f24692a78d5063a931201e6c1e9cb6304991aa59",
+      "deployed_mode": 420,
+      "sha256": "6be3e409a757ab29e45d5e5447a04b8171764d07f8e8247342b0b62de71fea43",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/pdf-chunk/scripts/literal_extract_pages.py",
+      "source_digest": "3dac6d5f5a51e0a5fdf5cf03e28b2b6ceff41ee8ca2e6979de7e553fc1461ffd",
+      "source_mode": 420
+    },
+    "dot_agents/skills/pdf-chunk/scripts/literal_pdf_stats.py": {
+      "artifact": "pdf-chunk",
+      "canonical": "ai-parity/shared/skills/pdf-chunk",
+      "canonical_digest": "101892fe94c337fe516c5564f24692a78d5063a931201e6c1e9cb6304991aa59",
+      "deployed_mode": 420,
+      "sha256": "a431ea98bb306c5a43b2124d9000857e27c786ab15cdf738d4a519c639d8cca0",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/pdf-chunk/scripts/literal_pdf_stats.py",
+      "source_digest": "333c309276b169cc543d9a52958c30161826c1f3e456a420d5c09c46e8c87ce3",
+      "source_mode": 420
+    },
+    "dot_agents/skills/pdf-chunk/scripts/pdf_common.py": {
+      "artifact": "pdf-chunk",
+      "canonical": "ai-parity/shared/skills/pdf-chunk",
+      "canonical_digest": "101892fe94c337fe516c5564f24692a78d5063a931201e6c1e9cb6304991aa59",
+      "deployed_mode": 420,
+      "sha256": "a72c03b39bd20cb6788c82dd30932bdc7b8c818c4d9c76c1b8ec635cb610db5f",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/pdf-chunk/scripts/pdf_common.py",
+      "source_digest": "1ab296a4cd32c4de51b31c6fdaaaaf68bb225254954a9ab0f04e778c7f898706",
+      "source_mode": 420
+    },
+    "dot_agents/skills/pdf/SKILL.md": {
+      "artifact": "pdf-codex-skill",
+      "deployed_mode": 420,
+      "sha256": "d2c4259256aa7d9e922cfb5f370366e581ccae5d69fb0ae80a15fc794ce6486e",
+      "source": "ai-parity/adapters/skills/pdf",
+      "source_digest": "e54fedc3fc177b8e0f93f41d00ef87e9a1df985feaaa9f095c13f59e6da3f59e",
+      "source_mode": 420
+    },
+    "dot_agents/skills/pdf/agents/openai.yaml": {
+      "artifact": "pdf-codex-skill",
+      "deployed_mode": 420,
+      "sha256": "cffafe4cdf14e6b77cccbaee609f1d7de7ac6384423546a64860b228ddb35b61",
+      "source": "ai-parity/adapters/skills/pdf",
+      "source_digest": "e54fedc3fc177b8e0f93f41d00ef87e9a1df985feaaa9f095c13f59e6da3f59e",
+      "source_mode": 420
+    },
+    "dot_agents/skills/pdf/scripts/pdf_transform.py": {
+      "artifact": "pdf-codex-skill",
+      "deployed_mode": 420,
+      "sha256": "2c0eeaa204f940e1fb846839e09d542517917896ad150bdebfbacbc0dff7e13b",
+      "source": "ai-parity/adapters/skills/pdf",
+      "source_digest": "e54fedc3fc177b8e0f93f41d00ef87e9a1df985feaaa9f095c13f59e6da3f59e",
+      "source_mode": 420
+    },
+    "dot_agents/skills/scientific-figures/SKILL.md": {
+      "artifact": "scientific-figures",
+      "canonical": "ai-parity/shared/skills/scientific-figures",
+      "canonical_digest": "cf4f904bedc871975d16f3972313ba03046f317cad3efdaa936db87e364ac12f",
+      "deployed_mode": 420,
+      "sha256": "7ce3c8984e11e858759974449a0c35dbf080c1eecebc00233a75a103db65b14e",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/scientific-figures/SKILL.md",
+      "source_digest": "97eba44f644159366df122166d3e36952756dd622d648fc70a699df07eaa66b9",
+      "source_mode": 420
+    },
+    "dot_agents/skills/scientific-figures/agents/openai.yaml": {
+      "artifact": "scientific-figures-codex-interface",
+      "deployed_mode": 420,
+      "sha256": "3d2baa3f797fe689b1ecaf4b44cc72058d24398a79b188d386ddba964d1d1a2e",
+      "source": "ai-parity/adapters/skills/scientific-figures/agents/openai.yaml",
+      "source_digest": "05413e105428bfa41cd40617049a01f24fd6de521868fc759ec4b5ed5324fd3e",
+      "source_mode": 420
+    },
+    "dot_agents/skills/verify/SKILL.md": {
+      "artifact": "verify-skill-adapter",
+      "deployed_mode": 420,
+      "sha256": "84fc15b4a6e535a5814421cd07c16e8e29d6e67cc3c9d24e0e0a5b5be70c5be2",
+      "source": "ai-parity/adapters/skills/verify",
+      "source_digest": "eaa7df8d88fb99da6cd9dd35da2aa29111dc5a2e141c5a0e6e714cf00f713b43",
+      "source_mode": 420
+    },
+    "dot_agents/skills/zotero/SKILL.md": {
+      "artifact": "zotero",
+      "canonical": "ai-parity/shared/skills/zotero",
+      "canonical_digest": "00e64cc49187e2c7333ed84dc24ea159b2490cfc78691d28c0a2240be98dcf5c",
+      "deployed_mode": 420,
+      "sha256": "8982cc0bfbcd804036a77bbd54a67ca954126d5197b2a10b7119909ccc6ab077",
+      "side": "codex",
+      "source": "ai-parity/adapters/skills/zotero/SKILL.md",
+      "source_digest": "0e550138b26cfa782984798be99dfc6b26c901663a8128841e2c424dd6e2262f",
+      "source_mode": 420
+    },
+    "dot_agents/skills/zotero/agents/openai.yaml": {
+      "artifact": "zotero-codex-interface",
+      "deployed_mode": 420,
+      "sha256": "0ba6db9a38ef724ce0497dc76262e1ba7247bb47ff3ae0b9f4d76e6d3ffa2019",
+      "source": "ai-parity/adapters/skills/zotero/agents/openai.yaml",
+      "source_digest": "96c3d1beb797462b4adcf3d5babca207bfc7ebf9c745f9f378fe9dfd3930a4fe",
+      "source_mode": 420
+    },
+    "dot_agents/skills/zotero/scripts/zotero_query.py": {
+      "artifact": "zotero",
+      "canonical": "ai-parity/shared/skills/zotero",
+      "canonical_digest": "00e64cc49187e2c7333ed84dc24ea159b2490cfc78691d28c0a2240be98dcf5c",
+      "deployed_mode": 420,
+      "sha256": "7e164d4d53ea53e3f6dc8a207dc63ab0eacaa60fa32b810d53e28ab5a82cdde9",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/zotero/scripts/zotero_query.py",
+      "source_digest": "883927cbd9ca15161977ac470192e44fec3e73dae99886512fe30282ca32525d",
+      "source_mode": 420
+    },
+    "dot_claude/skills/llm-pdf-processing/SKILL.md": {
+      "artifact": "llm-pdf-processing",
+      "canonical": "ai-parity/shared/skills/llm-pdf-processing",
+      "canonical_digest": "529764ef06b5ff1cf4ff4b282db16a10e9c2ee1efd5f10d0e2fddba3684361a6",
+      "deployed_mode": 420,
+      "sha256": "e6cdf75bcc4713db8ca3ddb15c8d9beb65979ef058f2221aa4a2369ea268831c",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/llm-pdf-processing/SKILL.md",
+      "source_digest": "ce2403a7efec1f694ef5b0d263e3e561f741336b18fc9e5dad87513bcc04943d",
+      "source_mode": 420
+    },
+    "dot_claude/skills/matlab-runner/SKILL.md": {
+      "artifact": "matlab-runner",
+      "canonical": "ai-parity/shared/skills/matlab-runner",
+      "canonical_digest": "38d4d37ada6a058ee7cb41570529fdf6fc857b9bd17af1ba5c4ea040a21c2417",
+      "deployed_mode": 420,
+      "sha256": "e9d2c90c1ce06af1dc735fcc448e8bb691023f6d8745029f8cb62c18ef97669d",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/matlab-runner/SKILL.md",
+      "source_digest": "7663bed12737cf39d1fe6e4e5bd25eb60bbe4a448960111c0d290fae561250f3",
+      "source_mode": 420
+    },
+    "dot_claude/skills/matlab-runner/scripts/literal_run_matlab.sh": {
+      "artifact": "matlab-runner",
+      "canonical": "ai-parity/shared/skills/matlab-runner",
+      "canonical_digest": "38d4d37ada6a058ee7cb41570529fdf6fc857b9bd17af1ba5c4ea040a21c2417",
+      "deployed_mode": 420,
+      "sha256": "d6250363290510bfadaa1da8ad69003f387c7c2b898d09eeb14f3701ea6383aa",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/matlab-runner/scripts/literal_run_matlab.sh",
+      "source_digest": "c8d80ad5422f3cff1c7f719fe5ebd88609c2e31cc22170b2c73bf83eb740bce1",
+      "source_mode": 420
+    },
+    "dot_claude/skills/matlab/SKILL.md": {
+      "artifact": "matlab",
+      "canonical": "ai-parity/shared/skills/matlab",
+      "canonical_digest": "0d410258aab468868594c7b8cdd42ed7539a96fb19849bebcbe14eb0c5287a7f",
+      "deployed_mode": 420,
+      "sha256": "21b5b650c001cff3099993f1273dbcaac9ce65b727133efb599e28d898e1034e",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/matlab/SKILL.md",
+      "source_digest": "c259ac099c8cff891637ca86c4d5ed1b3dcb81973e3d6ea415dc9efaf2e52522",
+      "source_mode": 420
+    },
+    "dot_claude/skills/matlab/fft.md": {
+      "artifact": "matlab",
+      "canonical": "ai-parity/shared/skills/matlab",
+      "canonical_digest": "0d410258aab468868594c7b8cdd42ed7539a96fb19849bebcbe14eb0c5287a7f",
+      "deployed_mode": 420,
+      "sha256": "101c6a14e9e6069433cf58e165269349b46be3a5cba11caed1e5397849b59131",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/matlab/fft.md",
+      "source_digest": "3fdec6a77a0b17131b5c234d92d18f06d88c4740f469c94b1c23b7009332b52b",
+      "source_mode": 420
+    },
+    "dot_claude/skills/matlab/performance.md": {
+      "artifact": "matlab",
+      "canonical": "ai-parity/shared/skills/matlab",
+      "canonical_digest": "0d410258aab468868594c7b8cdd42ed7539a96fb19849bebcbe14eb0c5287a7f",
+      "deployed_mode": 420,
+      "sha256": "857803c5fa572d58aa96cc5d64f20882bf6d9ad8e02695e50863f299a6b266c5",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/matlab/performance.md",
+      "source_digest": "333c89e4a06f21b852abceda49a507d681419edc3b53764608fb51302b7f1e1b",
+      "source_mode": 420
+    },
+    "dot_claude/skills/matlab/plotting.md": {
+      "artifact": "matlab",
+      "canonical": "ai-parity/shared/skills/matlab",
+      "canonical_digest": "0d410258aab468868594c7b8cdd42ed7539a96fb19849bebcbe14eb0c5287a7f",
+      "deployed_mode": 420,
+      "sha256": "7255b1d558af5ec74d561126d1715d3618a361c9318ede97c0e0d7d5b8e88ff5",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/matlab/plotting.md",
+      "source_digest": "5b419b245401c2a401612be4822a93bc7351abf87286c8924e0a79e5d027345d",
+      "source_mode": 420
+    },
+    "dot_claude/skills/matlab/style-guide.md": {
+      "artifact": "matlab",
+      "canonical": "ai-parity/shared/skills/matlab",
+      "canonical_digest": "0d410258aab468868594c7b8cdd42ed7539a96fb19849bebcbe14eb0c5287a7f",
+      "deployed_mode": 420,
+      "sha256": "c002c35130a962cbf50bc5d302c03f92e8e3198612fcde3ebf6f8925304ec7e9",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/matlab/style-guide.md",
+      "source_digest": "fb0f4ca14ec49a17c35d4f2522f08c48f8b56414df2e07ec19622a9e5c45bce1",
+      "source_mode": 420
+    },
+    "dot_claude/skills/matlab/ta.md": {
+      "artifact": "matlab",
+      "canonical": "ai-parity/shared/skills/matlab",
+      "canonical_digest": "0d410258aab468868594c7b8cdd42ed7539a96fb19849bebcbe14eb0c5287a7f",
+      "deployed_mode": 420,
+      "sha256": "a5f5836e885b5288e36f163513c1971e808365ce0c307d1ee6f5214dafec6bad",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/matlab/ta.md",
+      "source_digest": "145c95a8b50da259289ce30a5211f504046e7a592ed12842199ae5fe7460bdbc",
+      "source_mode": 420
+    },
+    "dot_claude/skills/pdf-chunk/SKILL.md": {
+      "artifact": "pdf-chunk",
+      "canonical": "ai-parity/shared/skills/pdf-chunk",
+      "canonical_digest": "101892fe94c337fe516c5564f24692a78d5063a931201e6c1e9cb6304991aa59",
+      "deployed_mode": 420,
+      "sha256": "56a11483abb18725dc07f6fdddd3ede33b75b44faeee0cba1e48e7fbfa60b974",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/pdf-chunk/SKILL.md",
+      "source_digest": "cc9bd2d66ae34f794d56bf5235296ffd057438c030c3ec5b6970e6b0b6bb198a",
+      "source_mode": 420
+    },
+    "dot_claude/skills/pdf-chunk/scripts/literal_extract_pages.py": {
+      "artifact": "pdf-chunk",
+      "canonical": "ai-parity/shared/skills/pdf-chunk",
+      "canonical_digest": "101892fe94c337fe516c5564f24692a78d5063a931201e6c1e9cb6304991aa59",
+      "deployed_mode": 420,
+      "sha256": "6be3e409a757ab29e45d5e5447a04b8171764d07f8e8247342b0b62de71fea43",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/pdf-chunk/scripts/literal_extract_pages.py",
+      "source_digest": "3dac6d5f5a51e0a5fdf5cf03e28b2b6ceff41ee8ca2e6979de7e553fc1461ffd",
+      "source_mode": 420
+    },
+    "dot_claude/skills/pdf-chunk/scripts/literal_pdf_stats.py": {
+      "artifact": "pdf-chunk",
+      "canonical": "ai-parity/shared/skills/pdf-chunk",
+      "canonical_digest": "101892fe94c337fe516c5564f24692a78d5063a931201e6c1e9cb6304991aa59",
+      "deployed_mode": 420,
+      "sha256": "a431ea98bb306c5a43b2124d9000857e27c786ab15cdf738d4a519c639d8cca0",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/pdf-chunk/scripts/literal_pdf_stats.py",
+      "source_digest": "333c309276b169cc543d9a52958c30161826c1f3e456a420d5c09c46e8c87ce3",
+      "source_mode": 420
+    },
+    "dot_claude/skills/pdf-chunk/scripts/pdf_common.py": {
+      "artifact": "pdf-chunk",
+      "canonical": "ai-parity/shared/skills/pdf-chunk",
+      "canonical_digest": "101892fe94c337fe516c5564f24692a78d5063a931201e6c1e9cb6304991aa59",
+      "deployed_mode": 420,
+      "sha256": "a72c03b39bd20cb6788c82dd30932bdc7b8c818c4d9c76c1b8ec635cb610db5f",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/pdf-chunk/scripts/pdf_common.py",
+      "source_digest": "1ab296a4cd32c4de51b31c6fdaaaaf68bb225254954a9ab0f04e778c7f898706",
+      "source_mode": 420
+    },
+    "dot_claude/skills/scientific-figures/SKILL.md": {
+      "artifact": "scientific-figures",
+      "canonical": "ai-parity/shared/skills/scientific-figures",
+      "canonical_digest": "cf4f904bedc871975d16f3972313ba03046f317cad3efdaa936db87e364ac12f",
+      "deployed_mode": 420,
+      "sha256": "7ce3c8984e11e858759974449a0c35dbf080c1eecebc00233a75a103db65b14e",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/scientific-figures/SKILL.md",
+      "source_digest": "97eba44f644159366df122166d3e36952756dd622d648fc70a699df07eaa66b9",
+      "source_mode": 420
+    },
+    "dot_claude/skills/zotero/SKILL.md": {
+      "artifact": "zotero",
+      "canonical": "ai-parity/shared/skills/zotero",
+      "canonical_digest": "00e64cc49187e2c7333ed84dc24ea159b2490cfc78691d28c0a2240be98dcf5c",
+      "deployed_mode": 420,
+      "sha256": "800e46771f9f6c135982568d58d0acfd834c85156cac6343cb4b0a0a4d7aab5d",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/zotero/SKILL.md",
+      "source_digest": "3e882dcc5702caa9a88d733d7a8b7a516bf2ce067e0eff59b811c39734523f60",
+      "source_mode": 420
+    },
+    "dot_claude/skills/zotero/scripts/zotero_query.py": {
+      "artifact": "zotero",
+      "canonical": "ai-parity/shared/skills/zotero",
+      "canonical_digest": "00e64cc49187e2c7333ed84dc24ea159b2490cfc78691d28c0a2240be98dcf5c",
+      "deployed_mode": 420,
+      "sha256": "7e164d4d53ea53e3f6dc8a207dc63ab0eacaa60fa32b810d53e28ab5a82cdde9",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/zotero/scripts/zotero_query.py",
+      "source_digest": "883927cbd9ca15161977ac470192e44fec3e73dae99886512fe30282ca32525d",
+      "source_mode": 420
+    },
+    "dot_codex/AGENTS.md": {
+      "artifact": "global-agents",
+      "deployed_mode": 420,
+      "sha256": "ffcfeef2b102b7e536574c8de50c03d3270926d2ef239255650e1df5496fa63c",
+      "source": "ai-parity/contracts/AGENTS.md",
+      "source_digest": "40984f64dab0570519757bf040754c5fb699c5514e716997c156c82e90612e9b",
+      "source_mode": 420
+    },
+    "dot_codex/agents/debugger.toml": {
+      "artifact": "debugger-agent",
+      "deployed_mode": 420,
+      "sha256": "821b92daf1ae5c80e407e6c2e299116a4c81f8ede59e568a58d1bcc23803295a",
+      "source": "ai-parity/contracts/agents/debugger.toml",
+      "source_digest": "333d00a7f3fb3b48fc654f58ad58943ff022f95a479371e706d4638f8468384d",
+      "source_mode": 420
+    },
+    "dot_codex/agents/reviewer.toml": {
+      "artifact": "reviewer-agent",
+      "deployed_mode": 420,
+      "sha256": "bac75914a90ffceef09724fcba6d824be91e64598bb135974b1180bd1a943262",
+      "source": "ai-parity/contracts/agents/reviewer.toml",
+      "source_digest": "8621150c21cd76f605df72573a2f1ffb6887facac35f62e5c7427586f374b0d2",
+      "source_mode": 420
+    },
+    "dot_codex/careful-review.config.toml": {
+      "artifact": "careful-review-profile",
+      "deployed_mode": 420,
+      "sha256": "33feb4259b82f2c496b7c2fb6637d80f8df82e0b8bc92ca1103e3c8ac1db5577",
+      "source": "ai-parity/contracts/careful-review.config.toml",
+      "source_digest": "42863dee2895e0e86e3a8f60e8be8ab54487fe2cf2c8e47aa1da936cf3a41db2",
+      "source_mode": 420
+    },
+    "dot_codex/rules/ai-parity.rules": {
+      "artifact": "ai-parity-rules",
+      "deployed_mode": 420,
+      "sha256": "f4c7f0fdcb4fafc53dc1c984db42a4409abb0251417c952bf06d3ab1a6affeaa",
+      "source": "ai-parity/contracts/ai-parity.rules",
+      "source_digest": "b4708511a1eb2f58830f26543b24be21ed3f04bfd9ff0e6fa1f2685f98773fef",
+      "source_mode": 420
+    }
+  },
+  "schema_version": 3
+}
