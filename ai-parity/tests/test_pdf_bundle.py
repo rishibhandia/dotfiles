@@ -106,7 +106,7 @@ class PdfIntegrationTests(unittest.TestCase):
         self.assertIn("Physical page 2", output.read_text())
         self.assertNotIn("Physical page 1", output.read_text())
 
-    def test_merge_select_and_rotate_preserve_sources(self):
+    def transform_round_trip(self, path=None):
         before = self.first.read_bytes()
         merged = self.directory / "merged.pdf"
         selected = self.directory / "selected.pdf"
@@ -117,17 +117,33 @@ class PdfIntegrationTests(unittest.TestCase):
             ("rotate", self.first, "--pages", "2", "--degrees", "90", "--output", rotated),
         )
         for arguments in commands:
-            result = run_script(TRANSFORM, *arguments)
+            result = run_script(TRANSFORM, *arguments, path=path)
             self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(self.first.read_bytes(), before)
         counts = []
-        for path in (merged, selected, rotated):
-            report = run_script(STATS, path, "--json")
+        for path_ in (merged, selected, rotated):
+            report = run_script(STATS, path_, "--json")
             self.assertEqual(report.returncode, 0, report.stderr)
             counts.append(json.loads(report.stdout)["page_count"])
             if os.name != "nt":
-                self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+                self.assertEqual(path_.stat().st_mode & 0o777, 0o600)
         self.assertEqual(counts, [5, 2, 3])
+
+    def test_merge_select_and_rotate_preserve_sources(self):
+        self.transform_round_trip()
+
+    def test_transform_python_fallback_without_qpdf(self):
+        # A PATH holding only uv hides any installed qpdf, so this always
+        # exercises the pypdf branch — dev machines with qpdf otherwise never
+        # run the code CI runs.
+        uv = Path(shutil.which("uv"))
+        binonly = self.directory / "binonly"
+        binonly.mkdir()
+        try:
+            os.symlink(uv, binonly / uv.name)
+        except OSError:
+            shutil.copy2(uv, binonly / uv.name)
+        self.transform_round_trip(path=str(binonly))
 
     def test_encrypted_and_malformed_inputs_fail_explicitly(self):
         encrypted = self.directory / "encrypted.pdf"
