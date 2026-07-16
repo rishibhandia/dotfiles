@@ -122,7 +122,11 @@ def python_write(args, inputs: list[Path], selected: list[int] | None, temporary
                 writer.add_page(page)
     else:
         reader = readable(inputs[0])
-        chosen = selected if selected is not None else list(range(1, len(reader.pages) + 1))
+        if args.action == "select":
+            chosen = selected
+        else:
+            # rotate keeps every page; `selected` only marks which ones turn
+            chosen = list(range(1, len(reader.pages) + 1))
         for number in chosen:
             page = reader.pages[number - 1]
             if args.action == "rotate" and number in selected:

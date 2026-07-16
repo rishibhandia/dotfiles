@@ -1,6 +1,6 @@
 {
   "format": "ai-parity-generated-state",
-  "generation_id": "a2d77bcbf53f53b9b15c4298b5e2438986e6b1805711e212689f27fe6fa9e511",
+  "generation_id": "30140098cb243f9ad8e4dfc584b7b11469ca3814ea32e03695a386228f675db8",
   "generator_inputs": {
     "engine_sha256": "15effeaec09f7411b716276c9a9ddc062f62be03e37c8308ad8a804e3114166f",
     "manifest_sha256": "f48da25d4988606f72fe7b18a1cdfb46ff233a65999a2b8cfa257e83247e5fef",
@@ -236,7 +236,7 @@
       "deployed_mode": 420,
       "sha256": "d2c4259256aa7d9e922cfb5f370366e581ccae5d69fb0ae80a15fc794ce6486e",
       "source": "ai-parity/adapters/skills/pdf",
-      "source_digest": "e54fedc3fc177b8e0f93f41d00ef87e9a1df985feaaa9f095c13f59e6da3f59e",
+      "source_digest": "c89556c6f0e6f3621638edaccfd8e773919391eaff4fa0dc22d3b69ac6f563f5",
       "source_mode": 420
     },
     "dot_agents/skills/pdf/agents/openai.yaml": {
@@ -244,15 +244,15 @@
       "deployed_mode": 420,
       "sha256": "cffafe4cdf14e6b77cccbaee609f1d7de7ac6384423546a64860b228ddb35b61",
       "source": "ai-parity/adapters/skills/pdf",
-      "source_digest": "e54fedc3fc177b8e0f93f41d00ef87e9a1df985feaaa9f095c13f59e6da3f59e",
+      "source_digest": "c89556c6f0e6f3621638edaccfd8e773919391eaff4fa0dc22d3b69ac6f563f5",
       "source_mode": 420
     },
     "dot_agents/skills/pdf/scripts/pdf_transform.py": {
       "artifact": "pdf-codex-skill",
       "deployed_mode": 420,
-      "sha256": "2c0eeaa204f940e1fb846839e09d542517917896ad150bdebfbacbc0dff7e13b",
+      "sha256": "005a8b249712880bfc8ae01f85778f416462550b1dd49f71479e1fe2da9a676f",
       "source": "ai-parity/adapters/skills/pdf",
-      "source_digest": "e54fedc3fc177b8e0f93f41d00ef87e9a1df985feaaa9f095c13f59e6da3f59e",
+      "source_digest": "c89556c6f0e6f3621638edaccfd8e773919391eaff4fa0dc22d3b69ac6f563f5",
       "source_mode": 420
     },
     "dot_agents/skills/scientific-figures/SKILL.md": {
