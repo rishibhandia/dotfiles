@@ -1822,7 +1822,13 @@ def verify_staged(root: Path) -> int:
     prefix_base = Path(tempfile.mkdtemp(prefix="ai-parity-index-"))
     try:
         prefix = str(prefix_base) + os.sep
-        result = git(root, "checkout-index", "--all", f"--prefix={prefix}")
+        # The staged comparison needs the exact index blob bytes; host-level
+        # core.autocrlf (Git for Windows default) would otherwise smudge CRLF
+        # into the materialized tree and misreport every text output as edited.
+        result = git(
+            root, "-c", "core.autocrlf=false", "-c", "core.eol=lf",
+            "checkout-index", "--all", f"--prefix={prefix}",
+        )
         if result.returncode:
             raise ParityError(result.stderr.strip() or "git checkout-index failed")
         script = prefix_base / "ai-parity/scripts/ai_parity.py"
