@@ -1,6 +1,6 @@
 {
   "format": "ai-parity-generated-state",
-  "generation_id": "68ca967a086d71c7df62e43c15ed0614954eeca5d1cce172756c9a83b4c292c2",
+  "generation_id": "a2d77bcbf53f53b9b15c4298b5e2438986e6b1805711e212689f27fe6fa9e511",
   "generator_inputs": {
     "engine_sha256": "15effeaec09f7411b716276c9a9ddc062f62be03e37c8308ad8a804e3114166f",
     "manifest_sha256": "f48da25d4988606f72fe7b18a1cdfb46ff233a65999a2b8cfa257e83247e5fef",
@@ -491,9 +491,9 @@
     "dot_codex/AGENTS.md": {
       "artifact": "global-agents",
       "deployed_mode": 420,
-      "sha256": "ffcfeef2b102b7e536574c8de50c03d3270926d2ef239255650e1df5496fa63c",
+      "sha256": "b303f4faf2f81dea8ac19b38895a4190cea0469b5a96430b260e268ae8401fc2",
       "source": "ai-parity/contracts/AGENTS.md",
-      "source_digest": "40984f64dab0570519757bf040754c5fb699c5514e716997c156c82e90612e9b",
+      "source_digest": "70964005035e4aac06b6ed7f0e1e6b62e17b23104b0436ec0c30a90005187f69",
       "source_mode": 420
     },
     "dot_codex/agents/debugger.toml": {

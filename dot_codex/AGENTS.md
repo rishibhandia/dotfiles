@@ -64,9 +64,30 @@ When working in the chezmoi repository:
 
 - Treat `dot_claude/**` as read-only unless the user explicitly requests a
   Claude change or accepts a proposal for a manifest-declared shared artifact.
+- Edit canonical sources (`ai-parity/shared/**`, `ai-parity/adapters/**`,
+  `ai-parity/contracts/**`), never `dot_codex/**`, `dot_agents/**`, or the
+  migrated `dot_claude/skills` roots — rendered trees are compiled output.
+- Never create files or directories under `dot_codex/` or `dot_agents/` as a
+  side effect (temp files, `tmp/` scratch dirs). Parity verification fails
+  closed on any unowned file or directory under a generated root.
+- New skill files must avoid chezmoi-semantic names: no `run_`, `dot_`,
+  `encrypted_`, `once_`, `onchange_`, `before_`, `after_` (or other attribute)
+  prefixes, no `.tmpl`/`.age`/`.asc`/`.literal` suffixes, no `.chezmoi*`
+  names. A deployed file whose real name needs a reserved prefix uses a
+  `literal_` source name plus a manifest `chezmoi_mappings` entry.
+- A new `dot_claude/skills/<name>` directory requires a `[[skills]]` entry in
+  `ai-parity/manifest.toml` (`mode = "planned"` unless reviewed for Codex);
+  generation is blocked until the inventory is classified.
 - Import rendered Claude/Codex edits with `dots ai propose`; canonical shared
-  content is the source of truth.
+  content is the source of truth. Edits made in the deployed home directories
+  must be re-added to the repository (`dots add`) before proposing.
 - Use `dots ai diff` before `dots ai sync --write`.
+- Parity-relevant commits stage the complete set: canonical edits, regenerated
+  outputs, and `ai-parity/generated-state.json` (run `dots ai sync --write`
+  first). Partial parity staging is refused.
+- `~/.codex` runtime state (`config.toml`, `packages/`, `plugins/`, sessions,
+  `*.sqlite`, `.tmp/`) is never parity- or chezmoi-managed; do not propose
+  managing it.
 - Never synchronize AI parity from a Git or chezmoi hook.
 - Run `dots ai verify` before reporting parity work complete.
 - Use `dots ai doctor` and an explicit transaction finish or rollback after an
