@@ -29,7 +29,8 @@ export COLIMA_HOME="$XDG_CONFIG_HOME/colima"
 
 # editor — CotEditor when available (macOS GUI), nvim otherwise.
 # `cot -w` waits for the document to close so git/crontab/chezmoi edit work.
-if command -v cot >/dev/null 2>&1; then
+# Skip cot over SSH: it would open a window on the remote machine's display.
+if command -v cot >/dev/null 2>&1 && [ -z "$SSH_CONNECTION" ] && [ -z "$SSH_TTY" ]; then
     export EDITOR="cot -w"
     export VISUAL="cot -w"
 else
