@@ -27,9 +27,15 @@ export XDG_STATE_HOME="$HOME/.local/state"
 export COLIMA_HOME="$XDG_CONFIG_HOME/colima"
 {{- end }}
 
-# editor
-export EDITOR="nvim"
-export VISUAL="nvim"
+# editor — CotEditor when available (macOS GUI), nvim otherwise.
+# `cot -w` waits for the document to close so git/crontab/chezmoi edit work.
+if command -v cot >/dev/null 2>&1; then
+    export EDITOR="cot -w"
+    export VISUAL="cot -w"
+else
+    export EDITOR="nvim"
+    export VISUAL="nvim"
+fi
 
 # zsh
 # Setting ZDOTDIR so zsh doesn't make stuff in HOME dir

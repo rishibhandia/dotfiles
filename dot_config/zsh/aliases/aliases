@@ -38,10 +38,11 @@ if [[ -o interactive ]]; then
     alias mv='mv -iv'
     alias rm='rm -iv'
 
-    # Editor aliases
+    # Editor aliases (vim/vi stay terminal; edit prefers the GUI editor)
     alias vim='nvim'
     alias vi='nvim'
     alias edit='nvim'
+    alias_if_exists edit cot
 fi
 
 # =============================================================================
