@@ -417,6 +417,33 @@ fi
 
 # LLM functions
 #------------------------------------------------------------------------------
+# Resolve provider credentials only for the lifetime of each llm process.
+# The env file contains op:// references, never resolved secret values.
+function llm {
+    local llm_executable
+    local secrets_file="${XDG_CONFIG_HOME:-$HOME/.config}/llm/secrets.env.op"
+
+    llm_executable="$(whence -p llm)"
+    if [ -z "$llm_executable" ]; then
+        echo "Error: llm not found (brew install llm)"
+        return 1
+    fi
+
+    # Non-personal machines do not deploy the reference file and continue to
+    # use llm's normal key resolution (for example, a work-provided key).
+    if [ ! -r "$secrets_file" ]; then
+        "$llm_executable" "$@"
+        return $?
+    fi
+
+    if ! command -v op >/dev/null 2>&1; then
+        echo "Error: 1Password CLI not found; cannot resolve llm API keys"
+        return 1
+    fi
+
+    command op run --env-file="$secrets_file" -- "$llm_executable" "$@"
+}
+
 function q {
     command -v llm >/dev/null 2>&1 || { echo "Error: llm not found (brew install llm)"; return 1; }
     # String literal needs to be properly escaped in zsh

@@ -55,6 +55,7 @@
 # Personal-machine-only skills (local Zotero library, Keynote decks)
 # =============================================================================
 {{ if not .personal }}
+.config/llm/secrets.env.op
 .claude/skills/keynote
 .claude/skills/zotero
 .agents/skills/keynote

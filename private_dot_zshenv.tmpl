@@ -73,51 +73,12 @@ export NAVI_PATH="$XDG_DATA_HOME/navi/cheats"
 # Local bin
 export PATH="$HOME/.local/bin:$PATH"
 
-{{- if .personal }}
-# API Keys from 1Password (personal machines only)
-{{- with (onepassword "OpenAI API Key").fields -}}
-{{- range . -}}
-{{- if eq .id "credential" }}
-export OPENAI_API_KEY="{{ .value }}"
-{{- end -}}
-{{- end -}}
-{{- end }}
-
-{{- with (onepassword "OpenRouter API Key").fields -}}
-{{- range . -}}
-{{- if eq .id "credential" }}
-export OPENROUTER_API_KEY="{{ .value }}"
-{{- end -}}
-{{- end -}}
-{{- end }}
-
-export OPENROUTER_KEY="$OPENROUTER_API_KEY"
-export LLM_OPENROUTER_KEY="$OPENROUTER_KEY"
-
-{{- with (onepassword "Anthropic API Key").fields -}}
-{{- range . -}}
-{{- if eq .id "credential" }}
-export ANTHROPIC_API_KEY="{{ .value }}"
-{{- end -}}
-{{- end -}}
-{{- end }}
-
-{{- with (onepassword "Google Gemini API Key").fields -}}
-{{- range . -}}
-{{- if eq .id "credential" }}
-export LLM_GEMINI_KEY="{{ .value }}"
-{{- end -}}
-{{- end -}}
-{{- end }}
-
 # SSH agent for 1Password
-{{- if eq .chezmoi.os "darwin" }}
+{{- if and .personal (eq .chezmoi.os "darwin") }}
 export SSH_AUTH_SOCK=~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock
-{{- end }}
 {{- end }}
 
 # Cargo
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
-
 
 
