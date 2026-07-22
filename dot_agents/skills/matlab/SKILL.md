@@ -1,17 +1,17 @@
 ---
 name: matlab
-description: MATLAB R2025a coding patterns and the personal +thz analysis package at ~/Documents/MATLAB/. Use when writing or reviewing MATLAB code (.m files), working in the +thz package, or analyzing THz/TA data. Trigger on package names (thz.fft, thz.eos, thz.ta, thz.io), function names from +thz, or general MATLAB style/performance questions. Do NOT use for executing scripts headlessly — that's matlab-runner's job.
+description: MATLAB R2025a coding patterns and the personal +thz analysis package at ~/Code/matlab-thz-analysis/. Use when writing or reviewing MATLAB code (.m files), working in the +thz package, or analyzing THz/TA data. Trigger on package names (thz.fft, thz.eos, thz.ta, thz.io), function names from +thz, or general MATLAB style/performance questions. Do NOT use for executing scripts headlessly — that's matlab-runner's job.
 ---
 
 # MATLAB Skill — +thz Package and Coding Patterns
 
 **Extracted:** 2026-03-15
-**Updated:** 2026-05-04
-**Context:** NbOI2 SHG/THz pump-probe scripts; general MATLAB R2025a; the personal `+thz` analysis package at `~/Documents/MATLAB/` (synced via `rishibhandia/matlab-thz-analysis`).
+**Updated:** 2026-07-21
+**Context:** NbOI2 SHG/THz pump-probe scripts; general MATLAB R2025a; the personal `+thz` analysis package at `~/Code/matlab-thz-analysis/` (the `rishibhandia/matlab-thz-analysis` repo).
 
 This SKILL.md is the entry point. It documents the package layout,
 calling conventions, and the patterns that affect every script in
-`~/Documents/MATLAB/` and `~/Documents/Scientific Data/`. For deeper
+`~/Code/matlab-thz-analysis/` and `~/Documents/Scientific Data/`. For deeper
 topic-specific guidance, see the satellite docs in this directory.
 
 ## Navigation
@@ -48,9 +48,11 @@ section-by-section execution.
 ## The +thz Analysis Package
 
 All shared THz/TA analysis lives in the `+thz` package at the root of
-`~/Documents/MATLAB/` (synced across machines via the
-`rishibhandia/matlab-thz-analysis` GitHub repo). Per-experiment scripts
-live in `~/Documents/Scientific Data/` and call into the package.
+`~/Code/matlab-thz-analysis/` (a clone of the
+`rishibhandia/matlab-thz-analysis` GitHub repo). MATLAB picks it up via
+`~/Documents/MATLAB/startup.m` (userpath), which delegates to the repo's
+own `startup.m` for path setup and figure defaults. Per-experiment
+scripts live in `~/Documents/Scientific Data/` and call into the package.
 
 ### Package layout
 
