@@ -48,7 +48,7 @@ Unknown interactive machines get prompted; unknown non-interactive machines
 
 | Flag | Gates |
 |---|---|
-| `personal` | 1Password API keys in zshenv, age encryption + key file, zotero/keynote skills, LiteParse, tirith MCP registration, lab-sync function |
+| `personal` | command-scoped 1Password API keys for `llm`, age encryption + key file, zotero/keynote skills, LiteParse, tirith MCP registration, lab-sync function |
 | `work` | NYU email in git config; personal apps (1Password, tailscale, mpv, …) excluded from Brewfile/Scoopfile |
 | `portable` (Windows) | GitHub-release externals instead of Scoop, psmux shell path, Astral uv installer, font install path |
 | `ephemeral`/`headless` | skips prompts/secrets; CI profile |
@@ -141,10 +141,11 @@ Ordering constraints: the brew re-fix must precede anything using
 `$HOMEBREW_PREFIX`; `compinit` must precede `scripts.zsh` (whose `dots`
 completion calls `compdef`). Set `ZSH_DEBUG=1` to trace sourcing.
 
-Secrets: the zshenv API-key block (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`,
-`LLM_GEMINI_KEY`, `OPENROUTER_API_KEY` + re-exports) is `{{ if .personal }}`
-and resolved from 1Password **at apply time**. The LLM helper functions are
-not gated, so they exist-but-fail on non-personal machines.
+Secrets: personal machines deploy `~/.config/llm/secrets.env.op`, a mode-0600
+file containing only 1Password references. The `llm` shell wrapper resolves
+those references with `op run` for the lifetime of each command; API-key values
+are not rendered into `.zshenv`. Non-personal machines do not deploy the
+reference file, so the wrapper delegates to `llm`'s normal key resolution.
 
 Key functions in `scripts.zsh.tmpl`: `dots` (the chezmoi wrapper —
 `apply/diff/status/update/edit/add/cd/git/doctor/test/brew/ai`; `dots ai` →
@@ -219,9 +220,9 @@ LAN DNS + anime media server; everything gated by hostname.
 
 ## Secrets
 
-1Password is the source of truth; nothing secret is committed. Three
-mechanisms: template-time `onepassword*` calls (API keys, git identity, lab
-sync config, the age private key itself via
+1Password is the source of truth; nothing secret is committed. Four
+mechanisms: command-scoped `op run` injection for LLM API keys; template-time
+`onepassword*` calls (git identity, lab sync config, and the age private key via
 `dot_config/private_age/private_key.txt.tmpl`), **age encryption** for whole
 files (the AGH seed; `chezmoi add --encrypt`), and runtime reads (the Shoko
 API key file). Non-personal/ephemeral profiles never invoke `op` — the age
