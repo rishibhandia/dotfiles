@@ -23,6 +23,7 @@ topic-specific guidance, see the satellite docs in this directory.
 | Plotting recipes: color, polar in tiledlayout, region highlighting, figure fonts and exportgraphics sizing | [`plotting.md`](plotting.md) |
 | FFT in tables: `thz.fft.disc_ft` zero-padding, datatable row-vector conventions for stored FFTs | [`fft.md`](fft.md) |
 | Transient absorption: sideband analysis, fluence scaling with wire grids, FFT frequency axis for negative-going time vectors, SHG probe-polarization normalization | [`ta.md`](ta.md) |
+| Golden-baseline workspace verification for output-identical refactors (loader migrations, package moves) | [`verification.md`](verification.md) |
 
 ---
 
@@ -93,6 +94,15 @@ sb  = findSidebands(oscPower, ta.Wavelengths, 600);
 Bare unqualified calls (`disc_ft(...)`, `calcEOS(...)`) still work via thin
 root wrappers that delegate to the package — kept indefinitely so existing
 analysis scripts on other computers don't need edits.
+
+**Loading pump-probe/Kerr time traces (2026-07-22):** use
+`thz.io.loadTHzPumpProbeTimeTrace` for ALL new loading code — its
+`columnMap`/`columnsToExtract` schema covers every 2–6 column text format.
+`loadKerrTimeTrace` is a deprecated thin delegate (2-col schema, legacy
+`DataFileName`/`ScanNumber` names) pinned by `tests/testKerrEquivalence.m`;
+all TiSe2 call sites were migrated. String-valued template parameters are
+not supported by the universal loader — `replace()` them into the template
+before the call and re-attach as a column afterward.
 
 ### TA analysis primitives in `+thz/+ta`
 

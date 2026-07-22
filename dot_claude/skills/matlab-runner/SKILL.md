@@ -93,3 +93,43 @@ Then use the Read tool on each PNG path to view the figure.
 - `-batch` mode has no display — `figure()` calls are valid but windows won't appear; only `exportgraphics`/`saveas` outputs are accessible
 - Long-running scripts may exceed the Bash tool's default 120s timeout — increase with the `timeout` parameter if needed
 - On Linux, MATLAB may require a license server reachable from the machine
+
+## Path Setup: userpath Is Empty in -batch on This Mac
+
+**Updated:** 2026-07-22
+
+Headless `matlab -batch` runs on this machine report an **empty `userpath`**,
+so `~/Documents/MATLAB/startup.m` never auto-runs and the thz library
+(`~/Code/matlab-thz-analysis`) is NOT on the path — symptoms are
+`Unrecognized function or variable 'loadTHzPumpProbeTimeTrace'` (or any thz
+function) even though interactive MATLAB works fine.
+
+**Always start wrapper scripts with an explicit startup call:**
+
+```matlab
+run('/Users/rishi/Documents/MATLAB/startup.m');
+cd('/path/to/analysis/dir');
+scriptName;
+```
+
+Two related traps:
+
+- `runtests('tests')` **cd's into the tests folder** while executing, so
+  repo-root functions (root wrappers, `+thz` resolution via cwd) vanish
+  mid-run unless the repo root is on the *path* — cwd alone is not enough.
+  The startup call fixes this too.
+- When snapshotting a script's workspace with `save`, first `close all` and
+  exclude graphics variables — `save` serializes live figure objects into
+  the .mat, which can burn tens of CPU-minutes and bloat the file:
+
+```matlab
+wsVars = whos;
+wsKeep = {};
+for wsIdx = 1:numel(wsVars)
+    if ~startsWith(wsVars(wsIdx).class, 'matlab.ui.') && ...
+       ~startsWith(wsVars(wsIdx).class, 'matlab.graphics.')
+        wsKeep{end+1} = wsVars(wsIdx).name;
+    end
+end
+save('snapshot.mat', wsKeep{:});
+```

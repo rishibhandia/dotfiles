@@ -76,3 +76,30 @@ working.
 - Whenever `thz.fft.disc_ft` errors with the zero-padding message
 - When deciding between cell vs matrix storage for FFT results — the
   matrix-of-rows convention is the default in this codebase
+
+## Output Orientation: disc_ft Is a Column, rfftFreq Is a Row
+
+**Updated:** 2026-07-22
+
+`thz.fft.disc_ft` always returns a **column** vector (it builds the padded
+signal with `vertcat`), regardless of input orientation. `thz.fft.rfftFreq`
+always returns a **row** vector (documented in its help). This asymmetry
+caused the same latent bug in six TiSe2 analysis scripts:
+
+```matlab
+% CORRECT row-per-trace accumulation:
+currentFFT  = disc_ft(y, 128, @hanning).';   % column -> row: transpose NEEDED
+currentFreq = rfftFreq(t, 128);              % already a row: NO transpose
+FFT       = [FFT; currentFFT];
+frequency = [frequency; currentFreq];
+
+% BUG (found 2026-07-22 in 6 scripts): transposing the freq axis too
+frequency = [frequency; currentFreq.'];   % column! vertcat stacks into a
+                                          % tall 65N-by-1 column instead of
+                                          % N-by-65 rows
+```
+
+The failure appears far from the cause: `table(frequency, FFT, IntReal, ...)`
+errors with "All table variables must have the same number of rows"
+(65N vs N). If that error appears after an FFT loop, check the orientation
+of every accumulator first.

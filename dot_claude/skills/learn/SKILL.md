@@ -18,7 +18,7 @@ Before writing anything, classify the new pattern by topic:
 - **MATLAB / `+thz` package / THz / TA pump-probe / spectroscopy** →
   append to the relevant section of an **existing** topic file in the
   `matlab` skill at
-  `~/.local/share/chezmoi/dot_claude/skills/matlab/`. The current
+  `~/.local/share/chezmoi/ai-parity/shared/skills/matlab/`. The current
   topic files are:
   - `SKILL.md` — `+thz` package overview, calling conventions, the
     in-progress per-file loader pattern
@@ -114,7 +114,9 @@ write to the chezmoi source, then `dots apply` to mirror into
 Chezmoi source paths (pick one based on the routing decision above):
 
 - MATLAB pattern → existing topic file under
-  `~/.local/share/chezmoi/dot_claude/skills/matlab/<topic>.md`
+  `~/.local/share/chezmoi/ai-parity/shared/skills/matlab/<topic>.md`
+  (an **ai-parity canonical source** — after editing run `dots ai sync --write`
+  before `dots apply`; never edit the rendered `dot_claude/skills/matlab/` copy)
 - Anything else → new file at
   `~/.local/share/chezmoi/dot_claude/skills/learned/[pattern-name].md`
 
