@@ -33,6 +33,15 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any
 
 
+def applescript_string(value: Any) -> str:
+    """Return a safely escaped AppleScript string literal."""
+    escaped = str(value)
+    escaped = escaped.replace("\\", "\\\\")
+    escaped = escaped.replace('"', '\\"')
+    escaped = escaped.replace("\r", "\\r").replace("\n", "\\n").replace("\t", "\\t")
+    return f'"{escaped}"'
+
+
 def run_applescript(script: str, timeout: int = 60) -> tuple[bool, str]:
     """Run AppleScript and return (success, output/error)."""
     try:
@@ -92,8 +101,8 @@ def export_presentation(
     script = f'''
 try
     tell application "Keynote"
-        set theDoc to open POSIX file "{input_abs}"
-        export theDoc to POSIX file "{output_abs}" as {export_format} {props}
+        set theDoc to open POSIX file {applescript_string(input_abs)}
+        export theDoc to POSIX file {applescript_string(output_abs)} as {export_format} {props}
         close theDoc
         return "Success"
     end tell
@@ -122,11 +131,9 @@ def create_presentation(
 
     title_script = ""
     if title:
-        title_escaped = title.replace('"', '\\"').replace('\n', '\\n')
-        title_script += f'set object text of default title item to "{title_escaped}"\n'
+        title_script += f'set object text of default title item to {applescript_string(title)}\n'
     if subtitle:
-        subtitle_escaped = subtitle.replace('"', '\\"').replace('\n', '\\n')
-        title_script += f'set object text of default body item to "{subtitle_escaped}"\n'
+        title_script += f'set object text of default body item to {applescript_string(subtitle)}\n'
 
     slide_config = ""
     if title_script:
@@ -139,9 +146,9 @@ def create_presentation(
     script = f'''
 try
     tell application "Keynote"
-        set theDoc to make new document with properties {{document theme:theme "{theme}"}}
+        set theDoc to make new document with properties {{document theme:theme {applescript_string(theme)}}}
         {slide_config}
-        save theDoc in POSIX file "{output_abs}"
+        save theDoc in POSIX file {applescript_string(output_abs)}
         close theDoc
         return "Success"
     end tell
@@ -171,11 +178,9 @@ def add_slide(
 
     content_script = ""
     if title:
-        title_escaped = title.replace('"', '\\"').replace('\n', '\\n')
-        content_script += f'set object text of default title item to "{title_escaped}"\n'
+        content_script += f'set object text of default title item to {applescript_string(title)}\n'
     if body:
-        body_escaped = body.replace('"', '\\"').replace('\n', '\\n')
-        content_script += f'set object text of default body item to "{body_escaped}"\n'
+        content_script += f'set object text of default body item to {applescript_string(body)}\n'
 
     slide_content = ""
     if content_script:
@@ -187,16 +192,16 @@ def add_slide(
 
     # Position handling
     if position:
-        make_slide = f'set newSlide to make new slide at after slide {position - 1} with properties {{base slide:master slide "{master}"}}'
+        make_slide = f'set newSlide to make new slide at after slide {position - 1} with properties {{base slide:master slide {applescript_string(master)}}}'
         if position == 1:
-            make_slide = f'set newSlide to make new slide at beginning with properties {{base slide:master slide "{master}"}}'
+            make_slide = f'set newSlide to make new slide at beginning with properties {{base slide:master slide {applescript_string(master)}}}'
     else:
-        make_slide = f'set newSlide to make new slide with properties {{base slide:master slide "{master}"}}'
+        make_slide = f'set newSlide to make new slide with properties {{base slide:master slide {applescript_string(master)}}}'
 
     script = f'''
 try
     tell application "Keynote"
-        set theDoc to open POSIX file "{file_abs}"
+        set theDoc to open POSIX file {applescript_string(file_abs)}
         tell theDoc
             {make_slide}
             {slide_content}
@@ -232,14 +237,11 @@ def edit_slide(
 
     edit_commands = []
     if title is not None:
-        title_escaped = title.replace('"', '\\"').replace('\n', '\\n')
-        edit_commands.append(f'set object text of default title item to "{title_escaped}"')
+        edit_commands.append(f'set object text of default title item to {applescript_string(title)}')
     if body is not None:
-        body_escaped = body.replace('"', '\\"').replace('\n', '\\n')
-        edit_commands.append(f'set object text of default body item to "{body_escaped}"')
+        edit_commands.append(f'set object text of default body item to {applescript_string(body)}')
     if notes is not None:
-        notes_escaped = notes.replace('"', '\\"').replace('\n', '\\n')
-        edit_commands.append(f'set presenter notes to "{notes_escaped}"')
+        edit_commands.append(f'set presenter notes to {applescript_string(notes)}')
 
     if not edit_commands:
         return False, "No edits specified. Use --title, --body, or --notes"
@@ -249,7 +251,7 @@ def edit_slide(
     script = f'''
 try
     tell application "Keynote"
-        set theDoc to open POSIX file "{file_abs}"
+        set theDoc to open POSIX file {applescript_string(file_abs)}
         tell slide {slide_num} of theDoc
             {edit_script}
         end tell
@@ -278,7 +280,7 @@ def delete_slide(file_path: str, slide_num: int) -> tuple[bool, str]:
     script = f'''
 try
     tell application "Keynote"
-        set theDoc to open POSIX file "{file_abs}"
+        set theDoc to open POSIX file {applescript_string(file_abs)}
         delete slide {slide_num} of theDoc
         save theDoc
         close theDoc
@@ -313,7 +315,7 @@ def move_slide(file_path: str, from_pos: int, to_pos: int) -> tuple[bool, str]:
     script = f'''
 try
     tell application "Keynote"
-        set theDoc to open POSIX file "{file_abs}"
+        set theDoc to open POSIX file {applescript_string(file_abs)}
         {move_cmd}
         save theDoc
         close theDoc
@@ -356,9 +358,9 @@ def add_image(
     script = f'''
 try
     tell application "Keynote"
-        set theDoc to open POSIX file "{file_abs}"
+        set theDoc to open POSIX file {applescript_string(file_abs)}
         tell slide {slide_num} of theDoc
-            set theImage to make new image with properties {{file:POSIX file "{image_abs}", position:{{{x}, {y}}}{size_props}}}
+            set theImage to make new image with properties {{file:POSIX file {applescript_string(image_abs)}, position:{{{x}, {y}}}{size_props}}}
         end tell
         save theDoc
         close theDoc
@@ -385,7 +387,7 @@ def duplicate_slide(file_path: str, slide_num: int) -> tuple[bool, str]:
     script = f'''
 try
     tell application "Keynote"
-        set theDoc to open POSIX file "{file_abs}"
+        set theDoc to open POSIX file {applescript_string(file_abs)}
         duplicate slide {slide_num} of theDoc
         save theDoc
         close theDoc
@@ -442,21 +444,32 @@ def replace_from_json(
     # Build AppleScript for each slide
     edit_blocks = []
     for slide_num, content in slides_data.items():
+        try:
+            slide_index = int(slide_num)
+        except (TypeError, ValueError):
+            return False, f"Invalid slide number in JSON: {slide_num!r}"
+        if slide_index < 1 or str(slide_index) != str(slide_num):
+            return False, f"Invalid slide number in JSON: {slide_num!r}"
+        if not isinstance(content, dict):
+            return False, f"Slide {slide_num} replacement must be an object"
         edit_commands = []
         if "title" in content and content["title"] is not None:
-            title_escaped = content["title"].replace('"', '\\"').replace('\n', '\\n')
-            edit_commands.append(f'set object text of default title item to "{title_escaped}"')
+            edit_commands.append(
+                f'set object text of default title item to {applescript_string(content["title"])}'
+            )
         if "body" in content and content["body"] is not None:
-            body_escaped = content["body"].replace('"', '\\"').replace('\n', '\\n')
-            edit_commands.append(f'set object text of default body item to "{body_escaped}"')
+            edit_commands.append(
+                f'set object text of default body item to {applescript_string(content["body"])}'
+            )
         if "notes" in content and content["notes"] is not None:
-            notes_escaped = content["notes"].replace('"', '\\"').replace('\n', '\\n')
-            edit_commands.append(f'set presenter notes to "{notes_escaped}"')
+            edit_commands.append(
+                f'set presenter notes to {applescript_string(content["notes"])}'
+            )
 
         if edit_commands:
             edit_script = "\n                ".join(edit_commands)
             edit_blocks.append(f'''
-            tell slide {slide_num} of theDoc
+            tell slide {slide_index} of theDoc
                 {edit_script}
             end tell''')
 
@@ -470,9 +483,9 @@ def replace_from_json(
         script = f'''
 try
     tell application "Keynote"
-        set theDoc to open POSIX file "{file_abs}"
+        set theDoc to open POSIX file {applescript_string(file_abs)}
         {all_edits}
-        save theDoc in POSIX file "{output_abs}"
+        save theDoc in POSIX file {applescript_string(output_abs)}
         close theDoc
         return "Success"
     end tell
@@ -484,7 +497,7 @@ end try
         script = f'''
 try
     tell application "Keynote"
-        set theDoc to open POSIX file "{file_abs}"
+        set theDoc to open POSIX file {applescript_string(file_abs)}
         {all_edits}
         save theDoc
         close theDoc
@@ -521,7 +534,7 @@ def list_masters(theme: str = "Gradient") -> tuple[bool, str]:
     """List master slides for a given theme."""
     script = f'''
 tell application "Keynote"
-    set theDoc to make new document with properties {{document theme:theme "{theme}"}}
+    set theDoc to make new document with properties {{document theme:theme {applescript_string(theme)}}}
     set masterNames to name of every master slide of theDoc
     close theDoc without saving
     return masterNames
@@ -536,7 +549,7 @@ def get_slide_count(file_path: str) -> tuple[bool, str]:
 
     script = f'''
 tell application "Keynote"
-    set theDoc to open POSIX file "{file_abs}"
+    set theDoc to open POSIX file {applescript_string(file_abs)}
     set slideCount to count of slides of theDoc
     close theDoc
     return slideCount

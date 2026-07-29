@@ -1,9 +1,9 @@
 {
   "format": "ai-parity-generated-state",
-  "generation_id": "ecc5e149d771b8f78de9afdeba8798bd7dc88a65ec130cd6de188c3efc47fe24",
+  "generation_id": "adaeade68849fc482b929ec43cc7bd1ee71dae9987af460271e97ec8cab0eef6",
   "generator_inputs": {
     "engine_sha256": "ebebaf96041867bc701fa7491c93cf5ecaf7b54b1723272027e729e695678074",
-    "manifest_sha256": "f48da25d4988606f72fe7b18a1cdfb46ff233a65999a2b8cfa257e83247e5fef",
+    "manifest_sha256": "7302d25bbe12dc6dbf2c1a5b4a44a7b87345afef49d5f218e8e17cc97dc39508",
     "schemas_sha256": "33b5c6cc4c6a44a35ddf1ee205308857c2b651920ae21d7e93184ae9d22ed728"
   },
   "generator_version": 3,
@@ -14,6 +14,102 @@
       "sha256": "d4deba953560369135677ea693abd7e35195e2d017c28a79a7944f95d87be720",
       "source": "dot_claude/skills/gemini-billing-blocks",
       "source_digest": "70b340c335cdfa2397a1633a2e9d9709026cc32dc5312d7d4a927ee6bd36c86d",
+      "source_mode": 420
+    },
+    "dot_agents/skills/keynote/SKILL.md": {
+      "artifact": "keynote",
+      "canonical": "ai-parity/shared/skills/keynote",
+      "canonical_digest": "c189bf471163a00b0ba5471be9182bda398c0cb3451316b8f07999a22a7406cd",
+      "deployed_mode": 420,
+      "sha256": "5db562d2d923ce5139117d88132fdbe80e5eee4f350cebae796c0f73a7c7136c",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/keynote/SKILL.md",
+      "source_digest": "3cb4fbb4310aa9519637f567cef7db5343fb9628ab18a24e97dcf73e3fea1aff",
+      "source_mode": 420
+    },
+    "dot_agents/skills/keynote/agents/openai.yaml": {
+      "artifact": "keynote-codex-interface",
+      "deployed_mode": 420,
+      "sha256": "42326a1b5521d22c7b937ce182ddfb464d0004c1c771fa1d5e2658f899d17a01",
+      "source": "ai-parity/adapters/skills/keynote/agents/openai.yaml",
+      "source_digest": "867e0a10c6d5eb04436c4236d02af8e46663f1276da20d0af2d0f7ea8cd91321",
+      "source_mode": 420
+    },
+    "dot_agents/skills/keynote/references/applescript-pitfalls.md": {
+      "artifact": "keynote",
+      "canonical": "ai-parity/shared/skills/keynote",
+      "canonical_digest": "c189bf471163a00b0ba5471be9182bda398c0cb3451316b8f07999a22a7406cd",
+      "deployed_mode": 420,
+      "sha256": "3fda6dfec5830a3a58156abe419c562abf48a05d6b776314af972327a5bb7932",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/keynote/references/applescript-pitfalls.md",
+      "source_digest": "acaadc2fc7771f01b0a423d20528b7edd77ce3104cb7bcad3591b2f0ce9dadab",
+      "source_mode": 420
+    },
+    "dot_agents/skills/keynote/references/design-workflow.md": {
+      "artifact": "keynote",
+      "canonical": "ai-parity/shared/skills/keynote",
+      "canonical_digest": "c189bf471163a00b0ba5471be9182bda398c0cb3451316b8f07999a22a7406cd",
+      "deployed_mode": 420,
+      "sha256": "0f689f8758cbe4d4493fa93c54da801dd85098168c8245986f4bc014721829dc",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/keynote/references/design-workflow.md",
+      "source_digest": "5cce91d6dca69fe55fcda13ec04c90df4256f4bd4aff6dfd7178f8b98f038c70",
+      "source_mode": 420
+    },
+    "dot_agents/skills/keynote/scripts/keynote_preview.sh": {
+      "artifact": "keynote",
+      "canonical": "ai-parity/shared/skills/keynote",
+      "canonical_digest": "c189bf471163a00b0ba5471be9182bda398c0cb3451316b8f07999a22a7406cd",
+      "deployed_mode": 420,
+      "sha256": "b343fd9c1a0152df5791b769ef4e72d38be8ebb20118b3f59efabb3e1d761f85",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/keynote/scripts/keynote_preview.sh",
+      "source_digest": "de50e4aaee7e89da2e2f8ce3c6f93e076b7361dcb8ba6335638129ac2194b0c3",
+      "source_mode": 420
+    },
+    "dot_agents/skills/keynote/scripts/literal_keynote_audit.py": {
+      "artifact": "keynote",
+      "canonical": "ai-parity/shared/skills/keynote",
+      "canonical_digest": "c189bf471163a00b0ba5471be9182bda398c0cb3451316b8f07999a22a7406cd",
+      "deployed_mode": 420,
+      "sha256": "a47c5c1cf1612347f119b1de54d4d441f3d49ba7d824490607946e8b16d1fedf",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/keynote/scripts/literal_keynote_audit.py",
+      "source_digest": "722b10874c2ddda96140d8611c05189d257502d235b19d002e964e9e4ab204cb",
+      "source_mode": 420
+    },
+    "dot_agents/skills/keynote/scripts/literal_keynote_bridge.py": {
+      "artifact": "keynote",
+      "canonical": "ai-parity/shared/skills/keynote",
+      "canonical_digest": "c189bf471163a00b0ba5471be9182bda398c0cb3451316b8f07999a22a7406cd",
+      "deployed_mode": 420,
+      "sha256": "36a802b9e6f1fd77b9c172599a6c94eba5b42412a66c358134a93fe2a09c9691",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/keynote/scripts/literal_keynote_bridge.py",
+      "source_digest": "2319fe3886b9f1cef4e20b72ab36c39aae8700da87f8a46987f5e3f7b422f974",
+      "source_mode": 420
+    },
+    "dot_agents/skills/keynote/scripts/literal_keynote_inventory.py": {
+      "artifact": "keynote",
+      "canonical": "ai-parity/shared/skills/keynote",
+      "canonical_digest": "c189bf471163a00b0ba5471be9182bda398c0cb3451316b8f07999a22a7406cd",
+      "deployed_mode": 420,
+      "sha256": "d84838a240c80f9d0bcd57c0c5ec897513b8d40f5880cb58f387c12452195336",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/keynote/scripts/literal_keynote_inventory.py",
+      "source_digest": "76107d698ee3826c0e97c90eb236777855524d76ff69fd4ccece2c08eb50b742",
+      "source_mode": 420
+    },
+    "dot_agents/skills/keynote/scripts/literal_keynote_layout.py": {
+      "artifact": "keynote",
+      "canonical": "ai-parity/shared/skills/keynote",
+      "canonical_digest": "c189bf471163a00b0ba5471be9182bda398c0cb3451316b8f07999a22a7406cd",
+      "deployed_mode": 420,
+      "sha256": "c3f7e55f643d8142e975bb7a981b215b439162c710f89ffa082f321b5fa06d72",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/keynote/scripts/literal_keynote_layout.py",
+      "source_digest": "6bda957e3590325f4bc1542bb1e87d78077c2f14d09863d17403ff416350893c",
       "source_mode": 420
     },
     "dot_agents/skills/learned-patterns/SKILL.md": {
@@ -321,6 +417,94 @@
       "side": "codex",
       "source": "ai-parity/shared/skills/zotero/scripts/zotero_query.py",
       "source_digest": "883927cbd9ca15161977ac470192e44fec3e73dae99886512fe30282ca32525d",
+      "source_mode": 420
+    },
+    "dot_claude/skills/keynote/SKILL.md": {
+      "artifact": "keynote",
+      "canonical": "ai-parity/shared/skills/keynote",
+      "canonical_digest": "c189bf471163a00b0ba5471be9182bda398c0cb3451316b8f07999a22a7406cd",
+      "deployed_mode": 420,
+      "sha256": "5db562d2d923ce5139117d88132fdbe80e5eee4f350cebae796c0f73a7c7136c",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/keynote/SKILL.md",
+      "source_digest": "3cb4fbb4310aa9519637f567cef7db5343fb9628ab18a24e97dcf73e3fea1aff",
+      "source_mode": 420
+    },
+    "dot_claude/skills/keynote/references/applescript-pitfalls.md": {
+      "artifact": "keynote",
+      "canonical": "ai-parity/shared/skills/keynote",
+      "canonical_digest": "c189bf471163a00b0ba5471be9182bda398c0cb3451316b8f07999a22a7406cd",
+      "deployed_mode": 420,
+      "sha256": "3fda6dfec5830a3a58156abe419c562abf48a05d6b776314af972327a5bb7932",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/keynote/references/applescript-pitfalls.md",
+      "source_digest": "acaadc2fc7771f01b0a423d20528b7edd77ce3104cb7bcad3591b2f0ce9dadab",
+      "source_mode": 420
+    },
+    "dot_claude/skills/keynote/references/design-workflow.md": {
+      "artifact": "keynote",
+      "canonical": "ai-parity/shared/skills/keynote",
+      "canonical_digest": "c189bf471163a00b0ba5471be9182bda398c0cb3451316b8f07999a22a7406cd",
+      "deployed_mode": 420,
+      "sha256": "0f689f8758cbe4d4493fa93c54da801dd85098168c8245986f4bc014721829dc",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/keynote/references/design-workflow.md",
+      "source_digest": "5cce91d6dca69fe55fcda13ec04c90df4256f4bd4aff6dfd7178f8b98f038c70",
+      "source_mode": 420
+    },
+    "dot_claude/skills/keynote/scripts/keynote_preview.sh": {
+      "artifact": "keynote",
+      "canonical": "ai-parity/shared/skills/keynote",
+      "canonical_digest": "c189bf471163a00b0ba5471be9182bda398c0cb3451316b8f07999a22a7406cd",
+      "deployed_mode": 420,
+      "sha256": "b343fd9c1a0152df5791b769ef4e72d38be8ebb20118b3f59efabb3e1d761f85",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/keynote/scripts/keynote_preview.sh",
+      "source_digest": "de50e4aaee7e89da2e2f8ce3c6f93e076b7361dcb8ba6335638129ac2194b0c3",
+      "source_mode": 420
+    },
+    "dot_claude/skills/keynote/scripts/literal_keynote_audit.py": {
+      "artifact": "keynote",
+      "canonical": "ai-parity/shared/skills/keynote",
+      "canonical_digest": "c189bf471163a00b0ba5471be9182bda398c0cb3451316b8f07999a22a7406cd",
+      "deployed_mode": 420,
+      "sha256": "a47c5c1cf1612347f119b1de54d4d441f3d49ba7d824490607946e8b16d1fedf",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/keynote/scripts/literal_keynote_audit.py",
+      "source_digest": "722b10874c2ddda96140d8611c05189d257502d235b19d002e964e9e4ab204cb",
+      "source_mode": 420
+    },
+    "dot_claude/skills/keynote/scripts/literal_keynote_bridge.py": {
+      "artifact": "keynote",
+      "canonical": "ai-parity/shared/skills/keynote",
+      "canonical_digest": "c189bf471163a00b0ba5471be9182bda398c0cb3451316b8f07999a22a7406cd",
+      "deployed_mode": 420,
+      "sha256": "36a802b9e6f1fd77b9c172599a6c94eba5b42412a66c358134a93fe2a09c9691",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/keynote/scripts/literal_keynote_bridge.py",
+      "source_digest": "2319fe3886b9f1cef4e20b72ab36c39aae8700da87f8a46987f5e3f7b422f974",
+      "source_mode": 420
+    },
+    "dot_claude/skills/keynote/scripts/literal_keynote_inventory.py": {
+      "artifact": "keynote",
+      "canonical": "ai-parity/shared/skills/keynote",
+      "canonical_digest": "c189bf471163a00b0ba5471be9182bda398c0cb3451316b8f07999a22a7406cd",
+      "deployed_mode": 420,
+      "sha256": "d84838a240c80f9d0bcd57c0c5ec897513b8d40f5880cb58f387c12452195336",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/keynote/scripts/literal_keynote_inventory.py",
+      "source_digest": "76107d698ee3826c0e97c90eb236777855524d76ff69fd4ccece2c08eb50b742",
+      "source_mode": 420
+    },
+    "dot_claude/skills/keynote/scripts/literal_keynote_layout.py": {
+      "artifact": "keynote",
+      "canonical": "ai-parity/shared/skills/keynote",
+      "canonical_digest": "c189bf471163a00b0ba5471be9182bda398c0cb3451316b8f07999a22a7406cd",
+      "deployed_mode": 420,
+      "sha256": "c3f7e55f643d8142e975bb7a981b215b439162c710f89ffa082f321b5fa06d72",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/keynote/scripts/literal_keynote_layout.py",
+      "source_digest": "6bda957e3590325f4bc1542bb1e87d78077c2f14d09863d17403ff416350893c",
       "source_mode": 420
     },
     "dot_claude/skills/llm-pdf-processing/SKILL.md": {
