@@ -140,3 +140,8 @@ ai-parity/**
 .codex/plugins/**
 .codex/config.toml
 .agents/skills/.system/**
+
+# Vendored Claude Code / Codex plugin, tracked as a git submodule.
+# Lives in the source tree only — it is loaded via `claude plugin marketplace
+# add ./i-have-adhd`, not by deploying a copy into $HOME.
+i-have-adhd
