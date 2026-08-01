@@ -63,12 +63,14 @@ chezmoi init    # Re-run templates after config changes
 The main configuration template `.chezmoi.toml.tmpl` defines:
 - **Machine detection**: Identifies specific machines by a stable signal — MacBook Pro 14" M5 Max (`Mac17,7`) → `rishi-mbp-2025` via hardware model; MacBook Pro 2019 and Mac Mini 2020 via ComputerName; Ubuntu via hostname
 - **Feature flags**: `ephemeral`, `work`, `headless`, `personal` for conditional configuration
-- **1Password integration**: API keys and secrets retrieved via `onepassword` template function
+- **1Password integration**: long-lived secrets use guarded chezmoi templates;
+  LLM API keys use command-scoped `op run` injection from reference-only config
 
 ### Key Configuration Files
 | Source Path | Target | Purpose |
 |-------------|--------|---------|
-| `private_dot_zshenv.tmpl` | `~/.zshenv` | Environment variables, XDG paths, API keys |
+| `private_dot_zshenv.tmpl` | `~/.zshenv` | Non-secret environment variables and XDG paths |
+| `dot_config/llm/private_secrets.env.op` | `~/.config/llm/secrets.env.op` | Personal-only 1Password references for LLM API keys |
 | `dot_config/zsh/dot_zshrc` | `~/.config/zsh/.zshrc` | Main shell config, history, completions |
 | `dot_config/zsh/scripts.zsh.tmpl` | `~/.config/zsh/scripts.zsh` | Custom shell functions |
 | `dot_config/zsh/aliases/aliases` | `~/.config/zsh/aliases/aliases` | Shell aliases |

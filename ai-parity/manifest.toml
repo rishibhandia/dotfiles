@@ -109,6 +109,23 @@ side = "codex"
 destination = "dot_agents/skills/llm-pdf-processing"
 mode = "tree-copy"
 
+[[shared_artifacts]]
+name = "keynote"
+canonical = "ai-parity/shared/skills/keynote"
+import_mode = "review"
+
+[[shared_artifacts.targets]]
+side = "claude"
+destination = "dot_claude/skills/keynote"
+mode = "tree-copy"
+chezmoi_mappings = { "scripts/literal_keynote_audit.py" = "scripts/keynote_audit.py", "scripts/literal_keynote_bridge.py" = "scripts/keynote_bridge.py", "scripts/literal_keynote_inventory.py" = "scripts/keynote_inventory.py", "scripts/literal_keynote_layout.py" = "scripts/keynote_layout.py" }
+
+[[shared_artifacts.targets]]
+side = "codex"
+destination = "dot_agents/skills/keynote"
+mode = "tree-copy"
+chezmoi_mappings = { "scripts/literal_keynote_audit.py" = "scripts/keynote_audit.py", "scripts/literal_keynote_bridge.py" = "scripts/keynote_bridge.py", "scripts/literal_keynote_inventory.py" = "scripts/keynote_inventory.py", "scripts/literal_keynote_layout.py" = "scripts/keynote_layout.py" }
+
 [[artifacts]]
 name = "global-agents"
 source = "ai-parity/contracts/AGENTS.md"
@@ -193,6 +210,12 @@ source = "ai-parity/adapters/skills/scientific-figures/agents/openai.yaml"
 destination = "dot_agents/skills/scientific-figures/agents/openai.yaml"
 mode = "copy"
 
+[[artifacts]]
+name = "keynote-codex-interface"
+source = "ai-parity/adapters/skills/keynote/agents/openai.yaml"
+destination = "dot_agents/skills/keynote/agents/openai.yaml"
+mode = "copy"
+
 [[reviews]]
 name = "global-agents-contract"
 source = "dot_claude/CLAUDE.md"
@@ -247,7 +270,7 @@ name = "gemini-billing-blocks"
 mode = "shared-explicit-pilot"
 [[skills]]
 name = "keynote"
-mode = "planned-platform-gated"
+mode = "shared-explicit-pilot"
 [[skills]]
 name = "learn"
 mode = "planned"

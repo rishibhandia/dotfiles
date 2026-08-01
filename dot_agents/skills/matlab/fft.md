@@ -76,3 +76,31 @@ working.
 - Whenever `thz.fft.disc_ft` errors with the zero-padding message
 - When deciding between cell vs matrix storage for FFT results — the
   matrix-of-rows convention is the default in this codebase
+
+## Output Orientation: disc_ft and rfftFreq Both Return Rows
+
+**Updated:** 2026-07-24
+
+As of 2026-07-24 (`refactor!: disc_ft returns row vectors`), `thz.fft.disc_ft`
+and `thz.fft.rfftFreq` BOTH return **row** vectors, matching the
+row-per-trace table convention. `appliedWindow` (disc_ft's 2nd output) is a
+row too. Internally disc_ft still computes in column form (the column window
+would implicit-expand a row X into an NxN matrix) and transposes once on
+return.
+
+```matlab
+% Row-per-trace accumulation — NO transposes anywhere:
+currentFFT  = disc_ft(y, 128, @hanning);    % row
+currentFreq = rfftFreq(t, 128);             % row
+FFT       = [FFT; currentFFT];
+frequency = [frequency; currentFreq];
+```
+
+Historical context: before 2026-07-24 disc_ft returned a column, so call
+sites compensated with `disc_ft(...).'` — and six TiSe2 scripts wrongly
+copied that transpose onto `currentFreq` too, stacking the frequency axis
+into one tall 65N-by-1 column and breaking `table(frequency, FFT, ...)` with
+"All table variables must have the same number of rows". If old code errors
+that way after a library update, delete stray `.'` on BOTH accumulators.
+Do NOT re-add `.'` to disc_ft results in old scripts you revive — it now
+produces a column and breaks `[FFT; ...]` stacking loudly.

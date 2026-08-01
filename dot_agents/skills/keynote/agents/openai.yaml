@@ -1,0 +1,4 @@
+interface:
+  display_name: "Keynote"
+  short_description: "Design, inspect, and edit Keynote presentations"
+  default_prompt: "Use $keynote to design, inspect, improve, and export an Apple Keynote presentation."
