@@ -40,8 +40,12 @@ registered. A reboot cleared them and it came back clean.
   misbehave until then.
 - Capture recoverable state *before* upgrading so you can verify restoration afterward
   (e.g. `tailscale serve status` → the port/path mappings).
-- **`brew outdated --cask --greedy` lies about self-updating casks.** Apps that auto-update
-  (`auto_updates: true`) drift ahead of Homebrew's install receipt, so brew reports an
-  "upgrade" that is really a downgrade-then-sidegrade. Confirm the real version from the app
-  itself (`tailscale version`, `systemextensionsctl list`) before acting: brew claimed
-  1.62.1 → 1.98.10 while the running app was already 1.98.8.
+- **Do not pass `--greedy`.** This is the root cause, not a side issue. Casks flagged
+  `auto_updates: true` are *already excluded* from plain `brew outdated --cask` /
+  `brew upgrade --cask` because the app self-updates. `--greedy` overrides that safety and
+  compares against Homebrew's stale install receipt, inventing upgrades that are really
+  downgrade-then-sidegrade: brew claimed `tailscale-app 1.62.1 != 1.98.10` while the running
+  app was already 1.98.8. The default invocation is the correct one; if you need a middle
+  ground, `--greedy-latest` catches `version :latest` casks (which otherwise never report as
+  outdated) without touching self-updaters. Confirm real versions from the app
+  (`tailscale version`, `systemextensionsctl list`), never from brew's receipt.
