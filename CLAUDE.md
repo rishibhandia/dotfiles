@@ -511,6 +511,51 @@ Chezmoi automates the infra only: `run_after_05` (Colima VM + Easystore mount),
 Shoko/Shokofin/library configuration is stateful UI+DB setup and is documented in that
 file rather than codified.
 
+## Mac Mini Reboot & Service Recovery
+
+Rebooting the mini is safe and self-healing, but the recovery path splits by launchd type
+— worth knowing before deciding whether a reboot is acceptable.
+
+| Service | Mechanism | Comes back… |
+|---|---|---|
+| **AdGuard Home** | `/Library/LaunchDaemons/AdGuardHome.plist` (**Daemon**) | At boot, *before* login. LAN DNS outage is only the boot window. |
+| **Colima** (→ Shoko, hbbs/hbbr) | `~/Library/LaunchAgents/com.rishi.colima.plist` (**Agent**) | Only on **login** |
+| **Jellyfin keep-alive** | `~/Library/LaunchAgents/com.rishi.jellyfin.plist` (**Agent**) | Only on **login** |
+| **Showtime Finder** | `~/Library/LaunchAgents/com.rishi.moviefinder.plist` (**Agent**) | Only on **login** |
+
+**The Agents depend on auto-login.** `defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser`
+must return `rishi` — it does today. If auto-login is ever turned off (FileVault being the
+usual cause, since it forces a pre-boot unlock), everything except AGH stays down after an
+unattended reboot. Colima additionally needs `/Volumes/Easystore` mounted or its read-only
+media mount fails.
+
+**Batch reboot-requiring work.** System extensions (`macfuse`, Tailscale) only activate or
+finish uninstalling on reboot — `systemextensionsctl list` showing `[terminated waiting to
+uninstall on reboot]` means a reboot is pending. Install those before rebooting so one
+restart covers them; each reboot costs a whole-house DNS blip.
+
+**Post-reboot verification:**
+```bash
+tailscale status && tailscale serve status   # expect 3 mappings: /showtime, :8111, :8443
+systemextensionsctl list | grep -i tailscale # expect ONE [activated enabled], no stale entries
+colima status && docker ps                   # expect shoko (healthy), hbbs, hbbr
+for p in 8096 8111 5151 3000; do curl -s -o /dev/null -w "$p: %{http_code}\n" --max-time 5 "http://127.0.0.1:$p/"; done
+dig +short @127.0.0.1 doubleclick.net        # 0.0.0.0 = AGH filtering
+ipconfig getifaddr en0                       # 192.168.1.185 = DHCP reservation held
+```
+
+**False alarm: Showtime (5151) reads DOWN right after boot.** The `bun` process under
+`com.rishi.moviefinder.plist` binds the port before it can serve, so `curl` returns
+`HTTP 000` for a few seconds while `lsof -nP -iTCP:5151 -sTCP:LISTEN` already shows it
+listening. Re-test before concluding it failed. (It binds `*:5151` on IPv6 but answers
+IPv4, IPv6, and `localhost` alike once ready.)
+
+**Tailscale after a version change may need one GUI click.** If `tailscale status` says
+`Tailscale is stopped` or the CLI errors with `Tailscale.CLIError error 1`, relaunching
+via `open -a Tailscale` is often not enough — the menu-bar app wants a Connect / extension
+permission confirmation. A reboot that clears stale extensions has resolved this; otherwise
+click it at the machine.
+
 ## Testing
 
 Run tests to verify setup:
