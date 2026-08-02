@@ -205,6 +205,14 @@ Fallback for Windows machines where Scoop is unavailable (`.portable = true`). D
 
 **Windows package manager policy:** Use Scoop exclusively. Do not use npm, cargo, winget, or other package managers as alternatives for CLI tools.
 
+**Cask upgrades that need `sudo` (bites hardest on the mini):** some casks — `tailscale-app`, `macfuse`, anything installing a pkg or system extension — shell out to `sudo` during uninstall-then-reinstall. In a non-interactive shell that fails with `sudo: a terminal is required`, but **only after brew has already quit the running app**. On the mini that means the service stays down and the upgrade never completes. Symptom seen 2026-08-02: `brew upgrade --cask tailscale-app` quit Tailscale, failed at the sudo step, and left the mini off the tailnet (AGH/LAN DNS was unaffected — it's a LaunchDaemon and doesn't route through Tailscale). Run these yourself with a `! sudo -v && brew upgrade --cask <name>` rather than delegating them, and prefer doing them when you're physically at the machine.
+
+**`--greedy` mis-reports self-updating casks — do not chase `tailscale-app`.** Tailscale auto-updates itself, so the app on disk drifts ahead of Homebrew's install record. As of 2026-08-02 brew's receipt said `1.62.1` while the running app and system extension were `1.98.8`; the cask only offered `1.98.10`. `brew outdated --cask --greedy` will keep listing it forever, and "upgrading" it buys ~nothing while risking the sudo-abort above. Verify the *real* version with `tailscale version` or `systemextensionsctl list | grep -i tailscale` before believing brew. Same caution applies to any cask marked `auto_updates`.
+
+**`libtiff` ⇄ `webp` circular dependency warning is cosmetic — do NOT run the suggested fix.** `brew bundle check` prints "Formulae dependency graph sorting found a circular dependency: libtiff, webp" and suggests `brew uninstall --ignore-dependencies --force libtiff webp`. **Ignore it.** The cycle is real and intentional upstream, not stale keg-tab data: `libtiff.dylib` links `libwebp` (WebP codec) and webp's `cwebp`/`dwebp`/`img2webp` link `libtiff` (TIFF I/O). Installed receipts already match the current formula definitions, so a reinstall pours identical bottles and the warning returns — while `--ignore-dependencies --force` temporarily breaks ~19 dependents (`qt`, `mpv`, `poppler`, `deno`, `yt-dlp`, `librsvg`, `gtk4`, `libheif`…). `brew doctor` reports no linkage problems and `brew bundle check` still returns "satisfied". It only affects Homebrew's topological sorter.
+
+**Version-locked casks:** `onyx` ships a separate build per macOS major version (the cask URL carries the version, e.g. `/download/26/OnyX.dmg`) and declares `depends_on macos`. Homebrew picks the right build from the running OS automatically, but after a macOS major upgrade you need `brew reinstall --cask onyx` — `brew upgrade` won't switch builds on its own if the cask version string hasn't changed.
+
 ### AI Parity (Claude ↔ Codex Skill Sync)
 
 **Read [`ai-parity/SPEC.md`](ai-parity/SPEC.md) before modifying Claude or Codex skills.** The `ai-parity/` directory is a manifest-driven layer that keeps selected Claude Code and Codex configuration semantically aligned. Canonical content is human-authored under `ai-parity/`; the parity engine renders it into checked-in chezmoi source trees. [`ai-parity/README.md`](ai-parity/README.md) is the shorter workflow guide.
@@ -325,6 +333,8 @@ Current learned files:
 - **mockobject-attribute-getattr-trap.md** — Python mock `__getattr__` trap
 - **qt-test-window-close-blocking-shutdown.md** — Qt test window close blocking shutdown
 - **powershell-utf8-bom-em-dash.md** — ASCII-only in `*.ps1.tmpl`: PowerShell 5.1 mis-decodes UTF-8 without BOM and em-dashes break parsing
+- **homebrew-cask-sudo-abort.md** — `brew upgrade --cask` quits the app *before* the `sudo` step that fails non-interactively, leaving a service down; also why `--greedy` lies about self-updating casks
+- **homebrew-circular-dep-false-hint.md** — Homebrew's "stale keg tab data" circular-dependency advice is often wrong (`libtiff` ⇄ `webp` is real); verify before running the destructive suggested fix
 
 > MATLAB/TA patterns formerly listed here were consolidated into the **matlab** skill (`dot_claude/skills/matlab/`): `fft.md`, `performance.md`, `plotting.md`, `style-guide.md`, `ta.md`.
 
