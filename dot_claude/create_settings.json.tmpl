@@ -8,6 +8,17 @@
     "CLAUDE_CODE_USE_POWERSHELL_TOOL": "1"
 {{- end }}
   },
+  "extraKnownMarketplaces": {
+    "i-have-adhd": {
+      "source": {
+        "source": "directory",
+        "path": "{{ .chezmoi.sourceDir | replace "\\" "\\\\" }}/i-have-adhd"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "i-have-adhd@i-have-adhd": true
+  },
   "hooks": {
     "PreToolUse": [
       {
