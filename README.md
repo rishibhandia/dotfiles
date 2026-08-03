@@ -193,7 +193,6 @@ The `.chezmoi.toml.tmpl` template sets feature flags based on machine type:
 | [1Password](https://1password.com/) | Password manager |
 | [Logseq](https://logseq.com/) | Note taking / PKM |
 | [Tailscale](https://tailscale.com/) | VPN/mesh network |
-| [MPV](https://mpv.io/) | Video player |
 | [Skim](https://skim-app.sourceforge.io/) | PDF reader |
 
 ### Fonts

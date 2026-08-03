@@ -49,7 +49,7 @@ Unknown interactive machines get prompted; unknown non-interactive machines
 | Flag | Gates |
 |---|---|
 | `personal` | command-scoped 1Password API keys for `llm`, age encryption + key file, zotero/keynote skills, LiteParse, tirith MCP registration, lab-sync function |
-| `work` | NYU email in git config; personal apps (1Password, tailscale, mpv, …) excluded from Brewfile/Scoopfile |
+| `work` | NYU email in git config; personal apps (1Password, tailscale, …) excluded from Brewfile/Scoopfile |
 | `portable` (Windows) | GitHub-release externals instead of Scoop, psmux shell path, Astral uv installer, font install path |
 | `ephemeral`/`headless` | skips prompts/secrets; CI profile |
 | `hostname == rishi-macmini-2020` | the entire server stack (below) |
