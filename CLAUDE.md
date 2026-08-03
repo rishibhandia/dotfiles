@@ -236,6 +236,47 @@ Skills are synced via chezmoi to `~/.claude/skills/`. Included skills, by catego
 
 **Custom skills:** Create a folder with a `SKILL.md` file containing YAML frontmatter (`name`, `description`) and markdown instructions. Decide placement first: a skill shared with Codex goes in `ai-parity/shared/skills/` with a `[[shared_artifacts]]` manifest entry; a Claude-only skill goes in `dot_claude/skills/` **and requires** a `[[skills]]` entry (`mode = "planned"`) in `ai-parity/manifest.toml` — the parity inventory check fails without one. Then `dots ai sync --write` and `dots ai verify`.
 
+### Claude Code Plugins
+Third-party plugins are registered in `dot_claude/create_settings.json.tmpl` via the
+`extraKnownMarketplaces` + `enabledPlugins` keys. Because of the `create_` prefix this
+only reaches **fresh** machines — an existing machine needs the two commands by hand:
+
+```bash
+claude plugin marketplace add "$(chezmoi source-path)/i-have-adhd"
+claude plugin install i-have-adhd@i-have-adhd
+```
+
+| Plugin | Source | Notes |
+|--------|--------|-------|
+| `i-have-adhd` | `i-have-adhd/` submodule (`github.com/ayghri/i-have-adhd`) | ADHD-friendly output shaping. Opt-in via `/i-have-adhd` (`disable-model-invocation: true`); "stop adhd mode" ends it. Optional always-on flag: `~/.claude/.i-have-adhd-always` |
+
+**The marketplace points at the source tree, not GitHub.** The template renders
+`{{ .chezmoi.sourceDir }}/i-have-adhd` (backslash-escaped for Windows, same treatment as
+`statusLine`) so the path resolves per-machine and the **pinned submodule SHA stays
+authoritative**. Using `ayghri/i-have-adhd` as the source instead would have Claude clone
+upstream separately and float on latest, defeating the pin. The directory is
+`.chezmoiignore`d so it is never deployed into `$HOME`, and `chezmoi init` defaults
+`--recurse-submodules` to true, so a fresh clone populates it before `apply` runs.
+
+**Stay pinned — this is deliberate, not neglect.** The plugin registers a `SessionStart`
+hook (`hooks/always-on.sh`, matcher `startup|resume|clear|compact`) that runs shell in
+*every* session in *every* project. Upstream is fast-moving and multi-author (~50 commits
+in 30 days; 17 of the last 50 commits were merged external PRs), so auto-following would
+execute unreviewed third-party shell. The only upside would be fresher output-*formatting*
+rules — not worth giving up the review boundary. Bump deliberately, reading the
+executable surface first:
+
+```bash
+cd "$(chezmoi source-path)/i-have-adhd"
+git fetch origin
+git log --oneline HEAD..origin/main -- hooks/ scripts/   # review executable changes FIRST
+git checkout origin/main
+dots git add i-have-adhd && dots git commit -m "chore: bump i-have-adhd to <sha>"
+```
+
+Not routed through ai-parity: upstream ships its own `.codex-plugin/` and `.agents/`
+manifests, so parity would duplicate work the author already does.
+
 ### Learned Skills
 Extracted patterns and project-specific knowledge live in `dot_claude/skills/learned/` and sync via chezmoi to `~/.claude/skills/learned/`. These are reference files (not invocable commands) created by the `/learn` skill during sessions.
 
