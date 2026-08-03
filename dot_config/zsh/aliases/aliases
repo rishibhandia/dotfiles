@@ -444,6 +444,11 @@ alias dls='cd $HOME/Downloads'
 alias docs='cd $HOME/Documents'
 alias dt='cd $HOME/Desktop'
 
+# Navigates to the iCloud Obsidian vault (macOS-only path).
+if [[ "$OSTYPE" == darwin* ]]; then
+    alias vault='cd "$HOME/Library/Mobile Documents/iCloud~md~obsidian/Documents/Notes"'
+fi
+
 #+---------------------+
 #| Configuration Paths |
 #+---------------------+
