@@ -7,5 +7,7 @@ set -ag terminal-overrides ",xterm-ghostty:RGB"
 set-option -g allow-passthrough on
 set -s extended-keys on
 set -as terminal-features 'xterm*:extkeys'
+# Pass OSC 8 hyperlinks through to the terminal so links stay clickable (tmux 3.4+)
+set -as terminal-features '*:hyperlinks'
 
 {{ template "tmux-shared" . }}
