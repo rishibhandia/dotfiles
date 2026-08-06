@@ -63,6 +63,21 @@ class IsolatedChezmoiDeploymentTests(unittest.TestCase):
                 "XDG_STATE_HOME": str(sandbox / "xdg-state"),
             }
 
+            # .chezmoiignore gates some parity outputs by OS/personal (e.g.
+            # keynote is darwin+personal only), so keep only sources chezmoi
+            # actually manages on this platform.
+            managed = subprocess.run(
+                [*base, "managed", "--include=files"], cwd=REPO, text=True,
+                capture_output=True, env=environment,
+            )
+            self.assertEqual(0, managed.returncode, managed.stdout + managed.stderr)
+            managed_targets = {line for line in managed.stdout.splitlines() if line}
+            sources = [
+                source for source in sources
+                if intended_target(source).as_posix() in managed_targets
+            ]
+            self.assertTrue(sources)
+
             target_paths = subprocess.run(
                 [*base, "target-path", *sources], cwd=REPO, text=True, capture_output=True,
                 env=environment,
