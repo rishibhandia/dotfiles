@@ -219,7 +219,7 @@ mode = "copy"
 [[reviews]]
 name = "global-agents-contract"
 source = "dot_claude/CLAUDE.md"
-acknowledged_digest = "877913fd2dde860469ed4765020a1558e433ff9cfc75cbf3ff6c42a4dbb984c8"
+acknowledged_digest = "84e3643a0d03ec1324c4586c83a374890ad0f59bc1b39bdf3176f149b71989b6"
 
 [[reviews]]
 name = "verify-skill-adapter"

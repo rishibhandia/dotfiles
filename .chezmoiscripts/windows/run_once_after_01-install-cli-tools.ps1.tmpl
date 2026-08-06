@@ -165,6 +165,25 @@ if ((Get-Command claude -ErrorAction SilentlyContinue) -and (Get-Command tirith 
 }
 {{ end -}}
 
+# -----------------------------------------------------------------------------
+# Tirith PreToolUse hook for Claude Code (any machine with tirith)
+# Writes the tirith-check hook script and merges a PreToolUse Bash hook into
+# the Claude Code user settings so every command Claude runs is vetted by
+# tirith (fail-closed). Idempotent: skips files that are already up to date.
+# Not available in portable mode (tirith requires Scoop; see CLAUDE.md).
+# -----------------------------------------------------------------------------
+if ((Get-Command claude -ErrorAction SilentlyContinue) -and (Get-Command tirith -ErrorAction SilentlyContinue)) {
+    Write-Info "Configuring tirith PreToolUse hook for Claude Code..."
+    tirith setup claude-code --scope user --quiet 2>&1 | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Success "tirith Claude Code hook configured"
+    } else {
+        Write-Warn "tirith setup failed (run manually: tirith setup claude-code --scope user)"
+    }
+} else {
+    Write-Warn "claude or tirith not found, skipping tirith Claude Code hook"
+}
+
 
 # -----------------------------------------------------------------------------
 # rtk - wire the Bash output-compression hook into Claude Code's global config

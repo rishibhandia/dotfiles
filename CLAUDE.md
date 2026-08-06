@@ -121,6 +121,7 @@ Cheats live in `dot_local/share/navi/cheats/` and sync to `~/.local/share/navi/c
   - Windows: Installed via Scoop (`scoop bucket add tirith https://github.com/sheeki03/scoop-tirith && scoop install tirith`)
   - Initialized in shell via `eval "$(tirith init)"` (zsh) or `Invoke-Expression (& tirith init powershell)` (PowerShell)
   - **Claude Code MCP**: Registered user-scope on personal machines by the `run_once_after_01-install-cli-tools` scripts via `claude mcp add --scope user tirith -- tirith mcp-server` (a `mcpServers` key in settings.json is NOT honored by Claude Code) — provides `tirith_check_command`, `tirith_check_url`, `tirith_scan_file`, etc.
+  - **Claude Code PreToolUse hook**: `tirith setup claude-code --scope user` (run by the same cli-tools scripts on any machine with tirith) installs `~/.claude/hooks/tirith-check.py` and merges a `PreToolUse` Bash hook into `~/.claude/settings.json`, so every command Claude runs is vetted by `tirith check` before execution (fail-closed; set `TIRITH_FAIL_OPEN=1` to fail open). The `~/.zshrc` append it also makes is inert under ZDOTDIR.
 
 ### AI/LLM Tools
 - **rtk** - Claude Code output compressor (intercepts common dev commands and filters their output before it reaches Claude's context, ~60-90% token reduction)

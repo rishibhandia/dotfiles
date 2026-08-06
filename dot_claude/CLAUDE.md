@@ -415,6 +415,7 @@ Configuration managed via `~/.claude/settings.json` (templated from `create_sett
 | Git push confirmation | permission `ask` rule `Bash(git push:*)` | Native approval prompt before any push (hooks are non-interactive, so this can't be a hook) |
 | Block arbitrary docs | `PreToolUse` hook on `Write` | Exit-2 blocks new .md/.txt outside README/CLAUDE/AGENTS/CONTRIBUTING/SKILL/MEMORY names and skills/memory dirs |
 | Console.log warning | `PostToolUse` hook on `Edit\|Write` | Exit-2 feeds a console.log warning for .ts/.tsx/.js/.jsx back to Claude |
+| Tirith command vetting | `PreToolUse` hook on `Bash` (`~/.claude/hooks/tirith-check.py`, installed by `tirith setup claude-code --scope user` via the cli-tools run_once scripts) | Every Bash command is analyzed by `tirith check` before execution; malicious patterns (curl\|sh, raw-IP URLs, injection) are denied fail-closed with the reason fed back to Claude |
 
 **Permissions (OS-specific):**
 

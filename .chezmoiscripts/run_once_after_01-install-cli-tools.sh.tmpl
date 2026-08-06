@@ -131,6 +131,25 @@ fi
 {{ end -}}
 
 # -----------------------------------------------------------------------------
+# Tirith PreToolUse hook for Claude Code (any machine with tirith)
+# Writes ~/.claude/hooks/tirith-check.py and merges a PreToolUse Bash hook
+# into ~/.claude/settings.json so every command Claude runs is vetted by
+# tirith (fail-closed). Idempotent: skips files that are already up to date.
+# Side effect: appends `eval "$(tirith init)"` to ~/.zshrc, which is inert
+# here — ZDOTDIR points zsh at ~/.config/zsh/.zshrc, which already runs it.
+# -----------------------------------------------------------------------------
+if command -v claude &>/dev/null && command -v tirith &>/dev/null; then
+    info "Configuring tirith PreToolUse hook for Claude Code..."
+    if tirith setup claude-code --scope user --quiet >/dev/null 2>&1; then
+        success "tirith Claude Code hook configured"
+    else
+        warn "tirith setup failed (run manually: tirith setup claude-code --scope user)"
+    fi
+else
+    warn "claude or tirith not found, skipping tirith Claude Code hook"
+fi
+
+# -----------------------------------------------------------------------------
 # Neovim plugins (vim-plug + PlugInstall)
 # -----------------------------------------------------------------------------
 if command -v nvim &>/dev/null; then
