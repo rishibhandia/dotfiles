@@ -128,8 +128,22 @@ function only exists in interactive zsh.
 
 Verified that invoking through the symlink behaves identically to invoking the bundle
 binary directly (some `.app` binaries resolve their bundle from the executable path and
-break behind a symlink — this one does not). The app can also emit zsh completions:
-`terminal-widget completions --shell zsh`.
+break behind a symlink — this one does not).
+
+**Completions:** `dot_config/zsh/completions/` → `~/.config/zsh/completions/` is a
+chezmoi-managed `fpath` entry for tools that generate their own completion scripts. The
+`.zshrc` prepends it to `FPATH` **before** `compinit` (fpath is only scanned at compinit
+time, so order matters). Do **not** use a tool's own `--install` flag — Terminal Widget's
+writes to `~/.zsh/completions/`, which is neither on this setup's fpath nor managed by
+chezmoi. Generate to stdout into the source tree instead:
+
+```bash
+terminal-widget completions --shell zsh --name terminal-widget --stdout \
+  > "$(chezmoi source-path)/dot_config/zsh/completions/_terminal-widget"
+```
+
+The checked-in script is a **generated snapshot** — regenerate it with the command above
+after an app update adds or renames flags.
 
 ### Security Tools
 - **tirith** - Terminal security tool that guards against URL/ANSI injection attacks

@@ -46,6 +46,7 @@
 # =============================================================================
 {{ if or (ne .chezmoi.os "darwin") (not .personal) }}
 .local/bin/terminal-widget
+.config/zsh/completions/_terminal-widget
 {{ end }}
 
 # =============================================================================

@@ -69,6 +69,12 @@ if [[ -n "${HOMEBREW_PREFIX:-}" ]]; then
   FPATH="$HOMEBREW_PREFIX/share/zsh-completions:$HOMEBREW_PREFIX/share/zsh/site-functions:${FPATH}"
 fi
 
+# chezmoi-managed completions for tools that ship their own (see CLAUDE.md).
+# Must precede compinit - fpath is only scanned when compinit runs.
+if [[ -d "$ZDOTDIR/completions" ]]; then
+  FPATH="$ZDOTDIR/completions:${FPATH}"
+fi
+
 autoload -U compinit; compinit
 
 
