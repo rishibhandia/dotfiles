@@ -57,6 +57,7 @@ chezmoi init    # Re-run templates after config changes
 - `_config/` → `~/.config/`
 - `.tmpl` suffix → Go template processed with chezmoi data
 - Files in `.chezmoitemplates/` are reusable template snippets
+- `symlink_` prefix → the target is a **symlink**, and the source file's *contents* are the link target path (e.g. `dot_local/bin/symlink_terminal-widget` → `~/.local/bin/terminal-widget` pointing at the path inside the file)
 - **`include` paths use the actual source filename**, not the target name. For example, `.chezmoiexternal.toml.tmpl` is included as `{{ include ".chezmoiexternal.toml.tmpl" }}`, not `dot_chezmoiexternal.toml.tmpl`. The `dot_` prefix is only for files that chezmoi renames when applying to the home directory; chezmoi-native config files (`.chezmoi*.toml.tmpl`, `.chezmoiignore`, etc.) already start with a dot and don't use `dot_`.
 
 ### Template System
@@ -114,6 +115,21 @@ This repo follows XDG Base Directory spec:
 
 ### Navi Cheatsheets
 Cheats live in `dot_local/share/navi/cheats/` and sync to `~/.local/share/navi/cheats` on every OS. navi's *built-in* default cheat path varies by platform (`directories` crate: `%APPDATA%`-based on Windows, Application Support on some macOS builds), so both shells export `NAVI_PATH` pointing at the managed dir — navi's highest-precedence setting. The zsh widget loads in `.zshrc`, the PowerShell widget in `profile.ps1` (both guarded on navi existing; navi is not installed in Windows portable mode).
+
+### macOS App CLI Shims
+Some macOS apps ship a CLI inside their `.app` bundle. Expose those as a symlink in
+`~/.local/bin` (already on `PATH` via `private_dot_zshenv.tmpl`) rather than a shell
+function — a symlink works in scripts, cron, launchd, and non-zsh shells, while a
+function only exists in interactive zsh.
+
+| Shim | Target | Gating |
+|------|--------|--------|
+| `~/.local/bin/terminal-widget` | `/Applications/TerminalWidget.app/Contents/MacOS/TerminalWidget` (Brett Terpstra's Terminal Widget, Mac App Store) | darwin **and** `.personal` — a Mac App Store purchase tied to the personal Apple ID; gated so other machines don't get a dangling symlink |
+
+Verified that invoking through the symlink behaves identically to invoking the bundle
+binary directly (some `.app` binaries resolve their bundle from the executable path and
+break behind a symlink — this one does not). The app can also emit zsh completions:
+`terminal-widget completions --shell zsh`.
 
 ### Security Tools
 - **tirith** - Terminal security tool that guards against URL/ANSI injection attacks

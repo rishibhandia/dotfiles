@@ -40,6 +40,15 @@
 {{ end }}
 
 # =============================================================================
+# CLI shims for macOS apps - the symlink target only exists where the app is
+# installed, so gate them to avoid dangling links on other machines.
+# Terminal Widget is a Mac App Store purchase tied to the personal Apple ID.
+# =============================================================================
+{{ if or (ne .chezmoi.os "darwin") (not .personal) }}
+.local/bin/terminal-widget
+{{ end }}
+
+# =============================================================================
 # macOS-only skills (require macOS apps)
 # =============================================================================
 {{ if ne .chezmoi.os "darwin" }}
