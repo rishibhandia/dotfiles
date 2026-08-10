@@ -156,8 +156,8 @@ CLI's sandbox.
 
 | Script | Widget | Schedule |
 |--------|--------|----------|
-| `dot_local/bin/executable_tw-memory` | target `widget1` — memory-usage area chart | `com.rishi.tw-memory` LaunchAgent, 60s |
-| `dot_local/bin/executable_tw-energy` | target `energy` — table of top energy consumers | `com.rishi.tw-energy` LaunchAgent, 120s |
+| `dot_local/bin/executable_tw-memory` | target `widget1` — memory sections (App/Wired/Compressed/Cached/Free) as coloured bars | `com.rishi.tw-memory` LaunchAgent, 60s |
+| `dot_local/bin/executable_tw-energy` | target `energy` — top energy consumers as coloured bars | `com.rishi.tw-energy` LaunchAgent, 120s |
 
 **One target per widget.** Two scripts pointed at the same target just overwrite each
 other every interval. Adding a recipe means placing a new widget and setting its
@@ -181,6 +181,18 @@ Both are gated darwin + personal. Conventions worth keeping for future `tw-*` re
 - zsh does not word-split unquoted variables: stash flags in an array
   (`args=(--theme dark)` … `"${args[@]}"`), never a plain string.
 - `--title` is rejected alongside `--table`; let the header row label the table.
+- **Colour comes from ANSI, not from tables.** Tables take colour only from widget-level
+  flags (`--text-color` etc.) — there is no per-cell or per-row colour. For anything
+  where colour must carry meaning (severity, category), emit truecolor escapes
+  (`\033[38;2;R;G;Bm`) into `--text -` with `--ansi-mode on`; they survive into the
+  payload and render. Both `tw-*` scripts draw their bars from `█`/`░` this way.
+- `awk`'s `%-9s` pads by **bytes**, so a multi-byte character (`…`) silently overruns the
+  field and breaks column alignment. Truncate to ASCII in fixed-width output.
+- Use `--font Menlo` whenever output is column-aligned; the default proportional font
+  makes block-character bars ragged.
+- Grouped series (`--chart "a b/c d"` with comma-separated `--fg`) render **side by
+  side, not stacked**, and there is no legend — at small widget sizes, labelled ANSI rows
+  communicate a breakdown better than an unlabelled multi-series chart.
 - Energy impact comes from `top`'s POWER column — the same unitless score Activity
   Monitor's Energy tab shows (CPU, GPU, wakeups, I/O), **not watts**. Treat it as a
   ranking. It needs `top -l 2` (the first sample has no delta), which costs ~2s per run

@@ -12,6 +12,7 @@ set -euo pipefail
 
 TARGET=energy
 ROWS=4
+BAR_WIDTH=6
 WIDGET="$HOME/.local/bin/terminal-widget"
 
 # top's POWER column is macOS's relative energy-impact score - the same figure
@@ -46,17 +47,49 @@ energy_by_app() {
     | sort -rn
 }
 
-# --title is rejected alongside --table, so the header row does the labelling.
-{
-    printf 'Energy\tImpact\n'
-    energy_by_app | head -"$ROWS" | awk -F'\t' '{ printf "%s\t%s\n", $2, $1 }'
-} | "$WIDGET" \
+# Rendered as ANSI-coloured text rather than --table: tables take their colour
+# from widget-level flags only, with no per-row control, so a table cannot show
+# severity. Truecolor escapes survive into the payload and --ansi-mode on makes
+# the widget render them.
+#
+# Bars are scaled to the top consumer so the ranking reads at a glance without
+# parsing the numbers.
+energy_by_app | head -"$ROWS" | awk -F'\t' -v width="$BAR_WIDTH" '
+    NR == 1 { peak = $1 + 0 }
+    {
+        impact = $1 + 0
+        # Plain truncation, no ellipsis: awk pads %-9s by bytes, and a
+        # multi-byte character silently overruns the field and breaks alignment.
+        name = substr($2, 1, 9)
+
+        share = (peak > 0) ? impact / peak : 0
+        filled = int(share * width + 0.5)
+
+        # Catppuccin rose / peach / yellow / teal, keyed to share of the top
+        # consumer rather than an absolute scale, which would read uniformly
+        # cool on an idle machine and tell you nothing.
+        if      (share >= 0.75) { r = 243; g = 139; b = 168 }
+        else if (share >= 0.45) { r = 250; g = 179; b = 135 }
+        else if (share >= 0.20) { r = 249; g = 226; b = 175 }
+        else                    { r = 148; g = 226; b = 213 }
+
+        bar = ""
+        for (i = 0; i < filled; i++)      bar = bar "\xe2\x96\x88"  # full block
+        for (i = filled; i < width; i++)  bar = bar "\xe2\x96\x91"  # light shade
+
+        printf "\033[38;2;%d;%d;%dm%-9s %s %4.1f\033[0m\n", r, g, b, name, bar, impact
+    }
+' | "$WIDGET" \
     --target "$TARGET" \
     --background-mode \
-    --table - \
-    --grid zebra-row \
+    --text - \
+    --ansi-mode on \
+    --no-wrap \
+    --font Menlo \
+    --font-size 11 \
     --theme dark \
-    --bg 1E1E2E \
-    --text-color CDD6F4 \
+    --bg-gradient-from 1E1E2E \
+    --bg-gradient-to 11111B \
+    --bg-gradient-start NW \
     --timestamp \
     --caption-color 9399B2

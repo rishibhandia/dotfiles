@@ -2,52 +2,74 @@
 # Push memory usage to a TerminalWidget target.
 #
 # Follows the house style of the official recipes at terminalwidget.app/recipes:
-# one small script per widget, scheduled by a launchd user agent, keeping its
-# own rolling history file and passing the whole series with --chart.
+# one small script per widget, scheduled by a launchd user agent, content piped
+# in. Renders the memory breakdown as ANSI-coloured rows: a stacked bar unrolled
+# into labelled segments, which fits and self-labels at small widget sizes.
 #
 # TARGET must match the "Target name" in the widget's Edit Widget panel.
 
 set -euo pipefail
 
 TARGET=widget1
-POINTS=96
+BAR_WIDTH=8
 WIDGET="$HOME/.local/bin/terminal-widget"
-HISTORY="${XDG_STATE_HOME:-$HOME/.local/state}/terminal-widget/memory.csv"
 
-# Memory used the way Activity Monitor counts it: App Memory + Wired +
-# Compressed over physical RAM. `memory_pressure` reports a "free percentage"
-# that measures pressure rather than usage and reads far too optimistic here.
-read -r used_gb total_gb percent <<EOF
-$(vm_stat | awk -v total="$(sysctl -n hw.memsize)" '
+# Memory broken into the sections Activity Monitor reports. "Used" is App +
+# Wired + Compressed; Cached is reclaimable-but-occupied, so it is shown
+# separately rather than folded into either side. `memory_pressure` reports a
+# "free percentage" that measures pressure rather than usage and reads far too
+# optimistic here.
+#
+# Bars are scaled to total RAM, so segment lengths are directly comparable and
+# the row widths add up to the machine - a stacked bar unrolled into labelled
+# rows, which a ~155pt widget has room to label and a legend-less chart does not.
+vm_stat | awk -v total="$(sysctl -n hw.memsize)" -v width="$BAR_WIDTH" '
     /page size of/                  { page = $8 }
     /Pages active/                  { active = $3 }
+    /Pages inactive/                 { inactive = $3 }
     /Pages wired down/              { wired = $4 }
     /Pages occupied by compressor/  { compressed = $5 }
+    /Pages free/                    { free = $3 }
     END {
-        gsub(/\./, "", active); gsub(/\./, "", wired); gsub(/\./, "", compressed)
-        used = (active + wired + compressed) * page
-        printf "%.1f %.0f %d", used / 1073741824, total / 1073741824, (used / total) * 100
-    }')
-EOF
+        gsub(/\./, "", active); gsub(/\./, "", inactive); gsub(/\./, "", wired)
+        gsub(/\./, "", compressed); gsub(/\./, "", free)
+        gb = 1073741824
 
-mkdir -p "$(dirname "$HISTORY")"
-printf '%s\n' "$percent" >> "$HISTORY"
-scratch=$(mktemp)
-tail -n "$POINTS" "$HISTORY" > "$scratch"
-mv "$scratch" "$HISTORY"
+        label[1] = "App";    value[1] = active * page / gb
+        label[2] = "Wired";  value[2] = wired * page / gb
+        label[3] = "Compr";  value[3] = compressed * page / gb
+        label[4] = "Cached"; value[4] = inactive * page / gb
+        label[5] = "Free";   value[5] = free * page / gb
 
-# --base-zero keeps the baseline at 0. Left to autoscale, a 2% drift in memory
-# renders as a cliff.
-tr '\n' ' ' < "$HISTORY" | "$WIDGET" \
+        # Catppuccin mauve / rose / peach / sapphire / teal. Distinct hues, not
+        # a severity ramp: these are categories, not a scale.
+        red[1] = 203; grn[1] = 166; blu[1] = 247
+        red[2] = 243; grn[2] = 139; blu[2] = 168
+        red[3] = 250; grn[3] = 179; blu[3] = 135
+        red[4] = 116; grn[4] = 199; blu[4] = 236
+        red[5] = 148; grn[5] = 226; blu[5] = 213
+
+        for (i = 1; i <= 5; i++) {
+            share = value[i] / (total / gb)
+            filled = int(share * width + 0.5)
+            bar = ""
+            for (j = 0; j < filled; j++)     bar = bar "\xe2\x96\x88"
+            for (j = filled; j < width; j++) bar = bar "\xe2\x96\x91"
+            printf "\033[38;2;%d;%d;%dm%-6s %s %4.1f\033[0m\n",
+                   red[i], grn[i], blu[i], label[i], bar, value[i]
+        }
+    }
+' | "$WIDGET" \
     --target "$TARGET" \
     --background-mode \
-    --chart - \
-    --chart-format area \
-    --base-zero \
+    --text - \
+    --ansi-mode on \
+    --no-wrap \
+    --font Menlo \
+    --font-size 11 \
     --theme dark \
-    --bg 1E1E2E \
-    --fg 94E2D5 \
-    --title "Memory  ${percent}%" \
-    --title-color CDD6F4 \
-    --caption-left "${used_gb}/${total_gb} GB" \
+    --bg-gradient-from 1E1E2E \
+    --bg-gradient-to 11111B \
+    --bg-gradient-start NW \
+    --timestamp \
     --caption-color 9399B2
