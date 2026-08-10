@@ -157,6 +157,11 @@ CLI's sandbox.
 | Script | Widget | Schedule |
 |--------|--------|----------|
 | `dot_local/bin/executable_tw-memory` | target `widget1` — memory-usage area chart | `com.rishi.tw-memory` LaunchAgent, 60s |
+| `dot_local/bin/executable_tw-energy` | target `energy` — table of top energy consumers | `com.rishi.tw-energy` LaunchAgent, 120s |
+
+**One target per widget.** Two scripts pointed at the same target just overwrite each
+other every interval. Adding a recipe means placing a new widget and setting its
+**Target name** to match — a GUI step in Edit Widget that cannot be scripted.
 
 Both are gated darwin + personal. Conventions worth keeping for future `tw-*` recipes:
 - Always pass `--background-mode` on anything scheduled; otherwise each firing hands off
@@ -175,6 +180,14 @@ Both are gated darwin + personal. Conventions worth keeping for future `tw-*` re
   full series with `--chart`, which is what `tw-memory` does.
 - zsh does not word-split unquoted variables: stash flags in an array
   (`args=(--theme dark)` … `"${args[@]}"`), never a plain string.
+- `--title` is rejected alongside `--table`; let the header row label the table.
+- Energy impact comes from `top`'s POWER column — the same unitless score Activity
+  Monitor's Energy tab shows (CPU, GPU, wakeups, I/O), **not watts**. Treat it as a
+  ranking. It needs `top -l 2` (the first sample has no delta), which costs ~2s per run
+  and is why `tw-energy` runs at 120s rather than 60s. Filter out `top` itself, which
+  otherwise ranks near the top of its own measurement.
+- Both stats scripts map PIDs to full command paths and group by the outermost `.app`,
+  so a browser's content processes report as one row instead of a dozen.
 
 ### Security Tools
 - **tirith** - Terminal security tool that guards against URL/ANSI injection attacks

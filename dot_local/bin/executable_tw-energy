@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Push the top energy consumers to a TerminalWidget target.
+#
+# Same house style as tw-memory: one small script per widget, scheduled by a
+# launchd user agent, content piped in.
+#
+# TARGET must match the "Target name" in the widget's Edit Widget panel, and
+# must differ from the memory widget's - two scripts writing one target just
+# overwrite each other every interval.
+
+set -euo pipefail
+
+TARGET=energy
+ROWS=4
+WIDGET="$HOME/.local/bin/terminal-widget"
+
+# top's POWER column is macOS's relative energy-impact score - the same figure
+# Activity Monitor's "Energy" tab shows. It is a unitless weighting of CPU,
+# GPU, wakeups and I/O, not watts, so treat it as a ranking rather than a
+# measurement.
+#
+# Two samples are required: the first has no interval to compute a delta over.
+# PIDs are joined against full command paths so a browser's content processes
+# roll up under the browser instead of filling the table with helper rows.
+energy_by_app() {
+    awk '
+        NR == FNR { pid = $1; $1 = ""; sub(/^ /, ""); path[pid] = $0; next }
+        {
+            p = path[$1]
+            if (p == "") next
+            if (match(p, /\.app\//)) {
+                head = substr(p, 1, RSTART - 1)
+                n = split(head, parts, "/")
+                name = parts[n]
+            } else {
+                n = split(p, parts, "/")
+                name = parts[n]
+            }
+            # Drop top itself; it always ranks high in its own measurement.
+            if (name != "" && name != "top") total[name] += $2
+        }
+        END { for (k in total) printf "%.1f\t%s\n", total[k], k }
+    ' <(ps -Ao pid=,comm=) \
+      <(top -l 2 -o power -n 40 -stats pid,power 2>/dev/null \
+          | awk '/^PID/ { sample++ } sample == 2 && !/^PID/ && NF >= 2 { print $1, $2 }') \
+    | sort -rn
+}
+
+# --title is rejected alongside --table, so the header row does the labelling.
+{
+    printf 'Energy\tImpact\n'
+    energy_by_app | head -"$ROWS" | awk -F'\t' '{ printf "%s\t%s\n", $2, $1 }'
+} | "$WIDGET" \
+    --target "$TARGET" \
+    --background-mode \
+    --table - \
+    --grid zebra-row \
+    --theme dark \
+    --bg 1E1E2E \
+    --text-color CDD6F4 \
+    --timestamp \
+    --caption-color 9399B2

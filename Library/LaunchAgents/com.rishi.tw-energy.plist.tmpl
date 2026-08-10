@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Refreshes the TerminalWidget energy widget. Interval is 120s rather than the
+  memory widget's 60s: each run costs ~2s because top needs two samples to
+  compute a power delta, and macOS's energy impact is itself a rolling average,
+  so a faster cadence would burn CPU without showing anything new.
+  Managed by chezmoi; gated to darwin + personal via .chezmoiignore.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.rishi.tw-energy</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>{{ .chezmoi.homeDir }}/.local/bin/tw-energy</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StartInterval</key>
+    <integer>120</integer>
+    <key>StandardOutPath</key>
+    <string>/tmp/com.rishi.tw-energy.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/com.rishi.tw-energy.err</string>
+</dict>
+</plist>
