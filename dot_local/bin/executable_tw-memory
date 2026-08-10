@@ -23,7 +23,23 @@ WIDGET="$HOME/.local/bin/terminal-widget"
 # Bars are scaled to total RAM, so segment lengths are directly comparable and
 # the row widths add up to the machine - a stacked bar unrolled into labelled
 # rows, which a ~155pt widget has room to label and a legend-less chart does not.
-vm_stat | awk -v total="$(sysctl -n hw.memsize)" -v width="$BAR_WIDTH" '
+# Sampled once and reused for both the title and the rows: two vm_stat calls
+# could straddle an allocation and report a headline percentage that does not
+# match the segments below it.
+sample=$(vm_stat)
+total_bytes=$(sysctl -n hw.memsize)
+
+percent=$(printf '%s\n' "$sample" | awk -v total="$total_bytes" '
+    /page size of/                  { page = $8 }
+    /Pages active/                  { active = $3 }
+    /Pages wired down/              { wired = $4 }
+    /Pages occupied by compressor/  { compressed = $5 }
+    END {
+        gsub(/\./, "", active); gsub(/\./, "", wired); gsub(/\./, "", compressed)
+        printf "%d", ((active + wired + compressed) * page / total) * 100
+    }')
+
+printf '%s\n' "$sample" | awk -v total="$total_bytes" -v width="$BAR_WIDTH" '
     /page size of/                  { page = $8 }
     /Pages active/                  { active = $3 }
     /Pages inactive/                 { inactive = $3 }
@@ -71,5 +87,7 @@ vm_stat | awk -v total="$(sysctl -n hw.memsize)" -v width="$BAR_WIDTH" '
     --bg-gradient-from 1E1E2E \
     --bg-gradient-to 11111B \
     --bg-gradient-start NW \
+    --title "Memory  ${percent}%" \
+    --title-color CDD6F4 \
     --timestamp \
     --caption-color 9399B2

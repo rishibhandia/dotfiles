@@ -91,5 +91,7 @@ energy_by_app | head -"$ROWS" | awk -F'\t' -v width="$BAR_WIDTH" '
     --bg-gradient-from 1E1E2E \
     --bg-gradient-to 11111B \
     --bg-gradient-start NW \
+    --title "Energy" \
+    --title-color CDD6F4 \
     --timestamp \
     --caption-color 9399B2
