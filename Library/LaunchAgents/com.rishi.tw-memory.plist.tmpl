@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Refreshes the TerminalWidget memory widget, following the launchd pattern the
+  official recipes use (terminalwidget.app/recipes). The script writes in
+  background mode, so it never pulls focus when the timer fires.
+  Managed by chezmoi; gated to darwin + personal via .chezmoiignore.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.rishi.tw-memory</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>{{ .chezmoi.homeDir }}/.local/bin/tw-memory</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StartInterval</key>
+    <integer>60</integer>
+    <key>StandardOutPath</key>
+    <string>/tmp/com.rishi.tw-memory.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/com.rishi.tw-memory.err</string>
+</dict>
+</plist>

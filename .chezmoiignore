@@ -46,7 +46,9 @@
 # =============================================================================
 {{ if or (ne .chezmoi.os "darwin") (not .personal) }}
 .local/bin/terminal-widget
+.local/bin/tw-memory
 .config/zsh/completions/_terminal-widget
+Library/LaunchAgents/com.rishi.tw-memory.plist
 {{ end }}
 
 # =============================================================================

@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Push memory usage to a TerminalWidget target.
+#
+# Follows the house style of the official recipes at terminalwidget.app/recipes:
+# one small script per widget, scheduled by a launchd user agent, keeping its
+# own rolling history file and passing the whole series with --chart.
+#
+# TARGET must match the "Target name" in the widget's Edit Widget panel.
+
+set -euo pipefail
+
+TARGET=widget1
+POINTS=96
+WIDGET="$HOME/.local/bin/terminal-widget"
+HISTORY="${XDG_STATE_HOME:-$HOME/.local/state}/terminal-widget/memory.csv"
+
+# Memory used the way Activity Monitor counts it: App Memory + Wired +
+# Compressed over physical RAM. `memory_pressure` reports a "free percentage"
+# that measures pressure rather than usage and reads far too optimistic here.
+read -r used_gb total_gb percent <<EOF
+$(vm_stat | awk -v total="$(sysctl -n hw.memsize)" '
+    /page size of/                  { page = $8 }
+    /Pages active/                  { active = $3 }
+    /Pages wired down/              { wired = $4 }
+    /Pages occupied by compressor/  { compressed = $5 }
+    END {
+        gsub(/\./, "", active); gsub(/\./, "", wired); gsub(/\./, "", compressed)
+        used = (active + wired + compressed) * page
+        printf "%.1f %.0f %d", used / 1073741824, total / 1073741824, (used / total) * 100
+    }')
+EOF
+
+mkdir -p "$(dirname "$HISTORY")"
+printf '%s\n' "$percent" >> "$HISTORY"
+scratch=$(mktemp)
+tail -n "$POINTS" "$HISTORY" > "$scratch"
+mv "$scratch" "$HISTORY"
+
+# --base-zero keeps the baseline at 0. Left to autoscale, a 2% drift in memory
+# renders as a cliff.
+tr '\n' ' ' < "$HISTORY" | "$WIDGET" \
+    --target "$TARGET" \
+    --background-mode \
+    --chart - \
+    --chart-format area \
+    --base-zero \
+    --theme dark \
+    --bg 1E1E2E \
+    --fg 94E2D5 \
+    --title "Memory  ${percent}%" \
+    --title-color CDD6F4 \
+    --caption-left "${used_gb}/${total_gb} GB" \
+    --caption-color 9399B2

@@ -145,6 +145,37 @@ terminal-widget completions --shell zsh --name terminal-widget --stdout \
 The checked-in script is a **generated snapshot** — regenerate it with the command above
 after an app update adds or renames flags.
 
+**Widget recipes.** Terminal Widget's intended model (see
+[terminalwidget.app/cli](https://terminalwidget.app/cli/) and `/recipes`): place a widget,
+name its **Target name** in Edit Widget, then write to that target from anything — CLI,
+Shortcuts, AppleScript, or the URL scheme. The house style is *one small script per
+widget*, stored in `~/bin` upstream (here: `dot_local/bin/`, already on `PATH`), scheduled
+by a launchd user agent. Content is normally **piped in** (`--text -`, `--chart -`,
+`--table -`, `--json -`), which keeps your shell's PATH and aliases and sidesteps the
+CLI's sandbox.
+
+| Script | Widget | Schedule |
+|--------|--------|----------|
+| `dot_local/bin/executable_tw-memory` | target `widget1` — memory-usage area chart | `com.rishi.tw-memory` LaunchAgent, 60s |
+
+Both are gated darwin + personal. Conventions worth keeping for future `tw-*` recipes:
+- Always pass `--background-mode` on anything scheduled; otherwise each firing hands off
+  through LaunchServices and steals focus.
+- The CLI is sandboxed and **cannot read arbitrary file paths** — `--json foo.json` and
+  `--table foo.csv` fail outside its scopes. Pipe instead.
+- Charts autoscale to the data range; pass `--base-zero` for percentages so a 2% drift
+  doesn't render as a cliff.
+- The small widget family is ~155pt square and fits about a title, a chart, and one
+  caption. Stacking a second caption, timestamp, and buttons makes them overlap.
+- Memory usage = `(active + wired + compressed) / hw.memsize` from `vm_stat`, matching
+  Activity Monitor. `memory_pressure`'s "free percentage" measures pressure, not usage,
+  and reads far too optimistic.
+- `--append`/`--limit` can maintain a rolling series in-app, but cannot carry
+  `--caption-*`; the upstream network-speed recipe keeps a history file and passes the
+  full series with `--chart`, which is what `tw-memory` does.
+- zsh does not word-split unquoted variables: stash flags in an array
+  (`args=(--theme dark)` … `"${args[@]}"`), never a plain string.
+
 ### Security Tools
 - **tirith** - Terminal security tool that guards against URL/ANSI injection attacks
   - macOS: Installed via Homebrew tap as `sheeki03/tap/tirith` (see "Tap-based formulae" rule above)
