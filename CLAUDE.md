@@ -156,7 +156,7 @@ CLI's sandbox.
 
 | Script | Widget | Schedule |
 |--------|--------|----------|
-| `dot_local/bin/executable_tw-memory` | target `widget1` — memory sections (App/Wired/Compressed/Cached/Free) as coloured bars | `com.rishi.tw-memory` LaunchAgent, 60s |
+| `dot_local/bin/executable_tw-memory` | target `widget1` — 100% stacked column chart (Muller-plot style) of memory composition over time | `com.rishi.tw-memory` LaunchAgent, 60s |
 | `dot_local/bin/executable_tw-energy` | target `energy` — top energy consumers as coloured bars | `com.rishi.tw-energy` LaunchAgent, 120s |
 
 **One target per widget.** Two scripts pointed at the same target just overwrite each
@@ -193,6 +193,17 @@ Both are gated darwin + personal. Conventions worth keeping for future `tw-*` re
 - Grouped series (`--chart "a b/c d"` with comma-separated `--fg`) render **side by
   side, not stacked**, and there is no legend — at small widget sizes, labelled ANSI rows
   communicate a breakdown better than an unlabelled multi-series chart.
+- **There is no stacked chart format.** `tw-memory` draws its 100% stacked column chart
+  (a Muller plot: category share of the whole, over time) out of `█` cells — monospace
+  cells abut exactly, which is what gives columns with no gaps between them. Two things
+  make it correct:
+  - Rows per band are allocated by **largest remainder**, not rounding. Plain rounding
+    lets a column total `H±1` rows, so columns come out ragged instead of all reaching
+    full height.
+  - At `HEIGHT=8` each row is 12.5% of RAM, so **a category under ~6% rounds to zero
+    rows and disappears** (Free often does). Proportions stay accurate; small categories
+    are simply below the resolution. Raise `HEIGHT` for finer bands if the widget is
+    tall enough to take it.
 - Energy impact comes from `top`'s POWER column — the same unitless score Activity
   Monitor's Energy tab shows (CPU, GPU, wakeups, I/O), **not watts**. Treat it as a
   ranking. It needs `top -l 2` (the first sample has no delta), which costs ~2s per run
