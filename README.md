@@ -195,6 +195,9 @@ The `.chezmoi.toml.tmpl` template sets feature flags based on machine type:
 | [Tailscale](https://tailscale.com/) | VPN/mesh network |
 | [Skim](https://skim-app.sourceforge.io/) | PDF reader |
 
+Not a cask, but managed here: [Terminal Widget](https://terminalwidget.app/) (Mac App
+Store) — see **Desktop Widgets** below.
+
 ### Fonts
 - Hack Nerd Font
 - Meslo LG Nerd Font
@@ -210,6 +213,33 @@ Defined in `dot_config/zsh/scripts.zsh.tmpl`:
 | `q` / `qv` | Ask questions about web pages or YouTube videos |
 | `sheet2csv` | Extract spreadsheet data from images using AI |
 | `pdf2text` | Extract text from PDFs using AI |
+
+## Desktop Widgets (macOS, personal machines)
+
+[Terminal Widget](https://terminalwidget.app/) puts terminal output into macOS desktop
+and iOS home-screen widgets. Its CLI lives inside the `.app`; this repo symlinks it onto
+`PATH` as `terminal-widget` and ships zsh completions for it.
+
+The app's model is: place a widget, give it a **Target name** in *Edit Widget*, then
+write to that target from anything — CLI, Shortcuts, AppleScript, or its URL scheme.
+Content is normally piped in (`--text -`, `--chart -`, `--table -`, `--json -`), which
+keeps your shell's PATH and aliases and avoids the CLI's sandbox. Following the
+[official recipes](https://terminalwidget.app/recipes), each widget gets one small
+script scheduled by a launchd user agent.
+
+| Script | Target | Shows | Interval |
+|--------|--------|-------|----------|
+| `tw-memory` | `widget1` | 100% stacked column chart of memory composition over time (App / Wired / Compressed / Cached / Free) | 60s |
+| `tw-energy` | `energy` | Top energy consumers, ranked, as coloured bars | 120s |
+
+Adding a widget means placing it in *Edit Widgets* and setting its Target name to match
+— a GUI step that can't be scripted. **One target per widget:** two scripts pointed at
+the same target just overwrite each other every interval.
+
+Everything here is gated to macOS **and** personal machines in `.chezmoiignore`, since
+the app is a Mac App Store purchase tied to a personal Apple ID. Implementation notes
+and the gotchas worth knowing (ANSI colour passthrough, sandbox path limits, chart
+scaling) are in [CLAUDE.md](CLAUDE.md).
 
 ## Testing
 
