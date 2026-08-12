@@ -10,9 +10,12 @@
 <dict>
     <key>Label</key>
     <string>com.rishi.tw-memory</string>
+    <!-- Runs under the system python3 via the script's shebang: no venv and no
+         `uv run`, which stalls under launchd (see the uv-launchd-jobs skill).
+         The script uses only zlib and struct from the standard library. -->
     <key>ProgramArguments</key>
     <array>
-        <string>/bin/bash</string>
+        <string>/usr/bin/python3</string>
         <string>{{ .chezmoi.homeDir }}/.local/bin/tw-memory</string>
     </array>
     <key>RunAtLoad</key>

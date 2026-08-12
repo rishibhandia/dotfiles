@@ -194,16 +194,26 @@ Both are gated darwin + personal. Conventions worth keeping for future `tw-*` re
   side, not stacked**, and there is no legend — at small widget sizes, labelled ANSI rows
   communicate a breakdown better than an unlabelled multi-series chart.
 - **There is no stacked chart format.** `tw-memory` draws its 100% stacked column chart
-  (a Muller plot: category share of the whole, over time) out of `█` cells — monospace
-  cells abut exactly, which is what gives columns with no gaps between them. Two things
-  make it correct:
-  - Rows per band are allocated by **largest remainder**, not rounding. Plain rounding
-    lets a column total `H±1` rows, so columns come out ragged instead of all reaching
-    full height.
-  - At `HEIGHT=8` each row is 12.5% of RAM, so **a category under ~6% rounds to zero
-    rows and disappears** (Free often does). Proportions stay accurate; small categories
-    are simply below the resolution. Raise `HEIGHT` for finer bands if the widget is
-    tall enough to take it.
+  (a Muller plot: category share of the whole, over time) from block glyphs. Monospace
+  cells abut exactly, which is what gives columns with no gaps. Resolution comes from
+  two colours per cell:
+  - **ANSI background colours render** (verified), so a cell shows its foreground and
+    background as two stacked colours.
+  - The lower block glyphs `U+2581..U+2588` fill 1/8..8/8 of a cell, so a band boundary
+    lands on any eighth. That is `HEIGHT * 8` levels — at `HEIGHT=8`, **64 levels
+    (1.6% of RAM)** rather than 8 levels (12.5%). The coarse version was unusable: any
+    category under ~6% vanished entirely and the mix never appeared to move.
+  - A cell spanning three or more bands can only show two. The lowest band keeps its
+    exact boundary and the rest collapse to whichever dominates above it; with 8 rows
+    over 5 bands that is rare and the error stays under an eighth of a row.
+- **Rendering to a PNG is finer but cannot be scheduled.** `--image` only reads from the
+  app's own group container (not `/tmp`, `~/.local/state`, `/Users/Shared`, `~/Public`,
+  `~/Library/Caches`, or `~/Library/Application Support` — all verified), and a
+  launchd-spawned process cannot write there without Full Disk Access; it fails with
+  `PermissionError: [Errno 1] Operation not permitted` even overwriting an existing
+  file. An interactive shell works because the terminal already holds that grant.
+  `data:` URIs are rejected. Text has no such restriction, which is why the chart is
+  drawn with glyphs.
 - Energy impact comes from `top`'s POWER column — the same unitless score Activity
   Monitor's Energy tab shows (CPU, GPU, wakeups, I/O), **not watts**. Treat it as a
   ranking. It needs `top -l 2` (the first sample has no delta), which costs ~2s per run

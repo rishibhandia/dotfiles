@@ -1,132 +1,188 @@
-#!/usr/bin/env bash
-# Push a 100% stacked column chart of memory composition to a TerminalWidget
-# target - a Muller-plot style view of how the mix of App / Wired / Compressed /
-# Cached / Free shifts over time, each column normalised to full height.
-#
-# Terminal Widget has no stacked chart format (grouped series render side by
-# side), so the chart is drawn with block characters: monospace cells abut
-# exactly, which is what removes the gaps between columns.
-#
-# House style of terminalwidget.app/recipes: one small script per widget,
-# scheduled by a launchd user agent, content piped in.
-#
-# TARGET must match the "Target name" in the widget's Edit Widget panel.
+#!/usr/bin/env python3
+"""Push a 100% stacked column chart of memory composition to a TerminalWidget target.
 
-set -euo pipefail
+A Muller-plot style view: how the App / Wired / Compressed / Cached / Free mix
+shifts over time, each column normalised to full height.
 
-TARGET=widget1
-WIDTH=20            # columns of history, one per run
-HEIGHT=8            # character rows; each row is 1/HEIGHT of total RAM
-WIDGET="$HOME/.local/bin/terminal-widget"
-HISTORY="${XDG_STATE_HOME:-$HOME/.local/state}/terminal-widget/memory-mix.csv"
+Terminal Widget has no stacked chart format - grouped series render side by side -
+so the chart is drawn with block glyphs. Two tricks make that legible:
 
-# Sampled once and reused for the title and the chart: two vm_stat calls could
-# straddle an allocation and disagree with each other.
-sample=$(vm_stat)
-total_bytes=$(sysctl -n hw.memsize)
+  * Monospace cells abut exactly, so columns touch with no gaps between them.
+  * Each cell carries TWO colours (ANSI foreground and background), and the lower
+    block glyphs U+2581..U+2588 fill 1/8..8/8 of the cell. A band boundary can
+    therefore land anywhere on an eighth, giving HEIGHT*8 levels rather than
+    HEIGHT. At HEIGHT=8 that is 64 levels (1.6% of RAM) instead of 8 (12.5%),
+    which is the difference between seeing the mix move and not.
 
-# app,wired,compressed,cached,free in GB. Cached (inactive) is
-# reclaimable-but-occupied, so it is its own band rather than folded into
-# either used or free.
-read -r app wired compressed cached free percent <<EOF
-$(printf '%s\n' "$sample" | awk -v total="$total_bytes" '
-    /page size of/                  { page = $8 }
-    /Pages active/                  { active = $3 }
-    /Pages inactive/                { inactive = $3 }
-    /Pages wired down/              { wired = $4 }
-    /Pages occupied by compressor/  { compressed = $5 }
-    /Pages free/                    { free = $3 }
-    END {
-        gsub(/\./, "", active); gsub(/\./, "", inactive); gsub(/\./, "", wired)
-        gsub(/\./, "", compressed); gsub(/\./, "", free)
-        gb = 1073741824
-        printf "%.2f %.2f %.2f %.2f %.2f %d",
-            active * page / gb, wired * page / gb, compressed * page / gb,
-            inactive * page / gb, free * page / gb,
-            ((active + wired + compressed) * page / total) * 100
-    }')
-EOF
+Rendering to a PNG would be finer still, but the sandboxed CLI only reads images
+from its own group container, and a launchd-spawned process cannot write there
+without Full Disk Access. Text has no such restriction, so this runs on a timer
+with no permission grant.
+"""
 
-mkdir -p "$(dirname "$HISTORY")"
-printf '%s,%s,%s,%s,%s\n' "$app" "$wired" "$compressed" "$cached" "$free" >> "$HISTORY"
-scratch=$(mktemp)
-tail -n "$WIDTH" "$HISTORY" > "$scratch"
-mv "$scratch" "$HISTORY"
+from __future__ import annotations
 
-{
-    awk -F, -v H="$HEIGHT" '
-        # Rows per band are allocated by the largest-remainder method. Plain
-        # rounding would let a column total H-1 or H+1 rows, so columns would
-        # come out ragged instead of all reaching full height.
-        {
-            col++
-            total = 0
-            for (i = 1; i <= 5; i++) { value[i] = $i + 0; total += value[i] }
-            if (total <= 0) total = 1
+import subprocess
+import sys
+from collections import Counter
+from pathlib import Path
 
-            used = 0
-            for (i = 1; i <= 5; i++) {
-                exact = value[i] / total * H
-                whole = int(exact)
-                rows[col, i] = whole
-                remainder[i] = exact - whole
-                used += whole
-            }
-            for (leftover = H - used; leftover > 0; leftover--) {
-                best = -1; pick = 0
-                for (i = 1; i <= 5; i++) if (remainder[i] > best) { best = remainder[i]; pick = i }
-                if (pick == 0) break
-                rows[col, pick]++
-                remainder[pick] = -1
-            }
-        }
-        END {
-            # Catppuccin, stacked bottom to top: App, Wired, Compressed,
-            # Cached, Free. Distinct hues - these are categories, not a scale.
-            red[1] = 203; grn[1] = 166; blu[1] = 247   # mauve
-            red[2] = 243; grn[2] = 139; blu[2] = 168   # rose
-            red[3] = 250; grn[3] = 179; blu[3] = 135   # peach
-            red[4] = 116; grn[4] = 199; blu[4] = 236   # sapphire
-            red[5] = 148; grn[5] = 226; blu[5] = 213   # teal
+TARGET = "widget1"
+COLUMNS = 20          # samples across; one per run
+HEIGHT = 8            # character rows
+SUB = 8               # sub-levels per row, from the eighth-block glyphs
 
-            # band H is the top of the column, band 1 the bottom.
-            for (band = H; band >= 1; band--) {
-                line = ""
-                for (c = 1; c <= col; c++) {
-                    stack = 0
-                    category = 5
-                    for (i = 1; i <= 5; i++) {
-                        stack += rows[c, i]
-                        if (band <= stack) { category = i; break }
-                    }
-                    line = line sprintf("\033[38;2;%d;%d;%dm\xe2\x96\x88",
-                                        red[category], grn[category], blu[category])
-                }
-                print line "\033[0m"
-            }
-        }
-    ' "$HISTORY"
+HOME = Path.home()
+WIDGET = HOME / ".local/bin/terminal-widget"
+HISTORY = HOME / ".local/state/terminal-widget/memory-mix.csv"
 
-    # Legend. Single letters keep it inside the small widget's ~23 characters:
-    # App, Wired, Compressed, cacHed, Free.
-    printf '\033[38;2;203;166;247m\xe2\x96\x88A\033[0m'
-    printf '\033[38;2;243;139;168m \xe2\x96\x88W\033[0m'
-    printf '\033[38;2;250;179;135m \xe2\x96\x88C\033[0m'
-    printf '\033[38;2;116;199;236m \xe2\x96\x88H\033[0m'
-    printf '\033[38;2;148;226;213m \xe2\x96\x88F\033[0m\n'
-} | "$WIDGET" \
-    --target "$TARGET" \
-    --background-mode \
-    --text - \
-    --ansi-mode on \
-    --no-wrap \
-    --font Menlo \
-    --font-size 11 \
-    --theme dark \
-    --bg-gradient-from 1E1E2E \
-    --bg-gradient-to 11111B \
-    --bg-gradient-start NW \
-    --title "Memory  ${percent}%" \
-    --title-color CDD6F4 \
-    --timestamp \
-    --caption-color 9399B2
+# Stacked bottom to top. Distinct catppuccin hues - these are categories, not a
+# scale, so they must not read as an ordered ramp.
+BANDS = [
+    ("app",        "A", (203, 166, 247)),   # mauve
+    ("wired",      "W", (243, 139, 168)),   # rose
+    ("compressed", "C", (250, 179, 135)),   # peach
+    ("cached",     "H", (116, 199, 236)),   # sapphire
+    ("free",       "F", (148, 226, 213)),   # teal
+]
+
+
+def memory_sample() -> dict[str, float]:
+    """Memory split into the categories Activity Monitor reports, in GB.
+
+    Cached (inactive) is reclaimable-but-occupied, so it stays its own band
+    rather than being folded into either used or free. memory_pressure's "free
+    percentage" measures pressure, not usage, and reads far too optimistic.
+    """
+    raw = subprocess.run(["vm_stat"], capture_output=True, text=True, check=True).stdout
+    total = int(subprocess.run(["sysctl", "-n", "hw.memsize"],
+                               capture_output=True, text=True, check=True).stdout)
+
+    page = 4096
+    counts: dict[str, int] = {}
+    for line in raw.splitlines():
+        if "page size of" in line:
+            page = int(line.split("page size of")[1].split()[0])
+            continue
+        label, _, value = line.partition(":")
+        digits = value.strip().rstrip(".")
+        if digits.isdigit():
+            counts[label.strip()] = int(digits)
+
+    scale = page / 1073741824
+    return {
+        "app": counts.get("Pages active", 0) * scale,
+        "wired": counts.get("Pages wired down", 0) * scale,
+        "compressed": counts.get("Pages occupied by compressor", 0) * scale,
+        "cached": counts.get("Pages inactive", 0) * scale,
+        "free": counts.get("Pages free", 0) * scale,
+        "total": total / 1073741824,
+    }
+
+
+def update_history(sample: dict[str, float]) -> list[list[float]]:
+    HISTORY.parent.mkdir(parents=True, exist_ok=True)
+    with HISTORY.open("a") as handle:
+        handle.write(",".join(f"{sample[name]:.3f}" for name, _, _ in BANDS) + "\n")
+
+    kept = HISTORY.read_text().splitlines()[-COLUMNS:]
+    HISTORY.write_text("\n".join(kept) + "\n")
+
+    columns = []
+    for line in kept:
+        try:
+            values = [float(v) for v in line.split(",")]
+        except ValueError:
+            continue
+        if len(values) == len(BANDS) and sum(values) > 0:
+            columns.append(values)
+    return columns
+
+
+def sublevels(values: list[float]) -> list[int]:
+    """Category index occupying each sub-level of a column, bottom to top."""
+    total = sum(values)
+    boundaries, running = [], 0.0
+    for value in values:
+        running += value / total
+        boundaries.append(running)
+
+    levels = []
+    for step in range(HEIGHT * SUB):
+        position = (step + 0.5) / (HEIGHT * SUB)
+        band = len(values) - 1
+        for index, edge in enumerate(boundaries):
+            if position <= edge:
+                band = index
+                break
+        levels.append(band)
+    return levels
+
+
+def cell(levels: list[int], row: int) -> str:
+    """One character: the lower part is the foreground colour, the upper the background.
+
+    A cell spanning three or more bands can only show two, so the lowest band
+    keeps its exact boundary and the rest collapse to whichever dominates above
+    it. With eight rows over five bands that is rare, and the error is under one
+    eighth of a row.
+    """
+    slice_ = levels[row * SUB:(row + 1) * SUB]
+    lower = slice_[0]
+    filled = 0
+    while filled < SUB and slice_[filled] == lower:
+        filled += 1
+
+    lower_rgb = BANDS[lower][2]
+    if filled == SUB:
+        return "\033[38;2;{};{};{}m█".format(*lower_rgb)
+
+    upper = Counter(slice_[filled:]).most_common(1)[0][0]
+    upper_rgb = BANDS[upper][2]
+    glyph = chr(0x2580 + filled)          # U+2581..U+2587 = 1/8..7/8 from the bottom
+    return "\033[48;2;{};{};{}m\033[38;2;{};{};{}m{}".format(*upper_rgb, *lower_rgb, glyph)
+
+
+def chart(columns: list[list[float]]) -> list[str]:
+    grid = [sublevels(values) for values in columns]
+    # Newest at the right: while history fills, pad the left rather than
+    # stretching a few samples across the full width, which would imply history
+    # that was never measured.
+    pad = COLUMNS - len(grid)
+    lines = []
+    for row in range(HEIGHT - 1, -1, -1):
+        lines.append(" " * pad + "".join(cell(levels, row) for levels in grid) + "\033[0m")
+    return lines
+
+
+def legend() -> str:
+    return " ".join(
+        "\033[38;2;{};{};{}m█{}".format(*rgb, key) for _, key, rgb in BANDS
+    ) + "\033[0m"
+
+
+def main() -> None:
+    sample = memory_sample()
+    used = sample["app"] + sample["wired"] + sample["compressed"]
+    percent = round(used / sample["total"] * 100)
+
+    body = "\n".join(chart(update_history(sample)) + [legend()])
+
+    subprocess.run([
+        str(WIDGET),
+        "--target", TARGET,
+        "--background-mode",
+        "--text", "-",
+        "--ansi-mode", "on",
+        "--no-wrap",
+        "--font", "Menlo",
+        "--font-size", "11",
+        "--theme", "dark",
+        "--bg", "1E1E2E",
+        "--title", f"Memory  {percent}%",
+        "--title-color", "CDD6F4",
+    ], input=body, text=True, check=True)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
