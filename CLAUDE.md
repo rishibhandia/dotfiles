@@ -156,7 +156,7 @@ CLI's sandbox.
 
 | Script | Widget | Schedule |
 |--------|--------|----------|
-| `dot_local/bin/executable_tw-memory` | target `widget1` — 100% stacked column chart (Muller-plot style) of memory composition over time | `com.rishi.tw-memory` LaunchAgent, 60s |
+| `dot_local/bin/executable_tw-memory` | target `widget1` — memory sections (App/Wired/Compressed/Cached/Free) as labelled coloured bars | `com.rishi.tw-memory` LaunchAgent, 60s |
 | `dot_local/bin/executable_tw-energy` | target `energy` — top energy consumers as coloured bars | `com.rishi.tw-energy` LaunchAgent, 120s |
 
 **One target per widget.** Two scripts pointed at the same target just overwrite each
@@ -193,27 +193,24 @@ Both are gated darwin + personal. Conventions worth keeping for future `tw-*` re
 - Grouped series (`--chart "a b/c d"` with comma-separated `--fg`) render **side by
   side, not stacked**, and there is no legend — at small widget sizes, labelled ANSI rows
   communicate a breakdown better than an unlabelled multi-series chart.
-- **There is no stacked chart format.** `tw-memory` draws its 100% stacked column chart
-  (a Muller plot: category share of the whole, over time) from block glyphs. Monospace
-  cells abut exactly, which is what gives columns with no gaps. Resolution comes from
-  two colours per cell:
-  - **ANSI background colours render** (verified), so a cell shows its foreground and
-    background as two stacked colours.
-  - The lower block glyphs `U+2581..U+2588` fill 1/8..8/8 of a cell, so a band boundary
-    lands on any eighth. That is `HEIGHT * 8` levels — at `HEIGHT=8`, **64 levels
-    (1.6% of RAM)** rather than 8 levels (12.5%). The coarse version was unusable: any
-    category under ~6% vanished entirely and the mix never appeared to move.
-  - A cell spanning three or more bands can only show two. The lowest band keeps its
-    exact boundary and the rest collapse to whichever dominates above it; with 8 rows
-    over 5 bands that is rare and the error stays under an eighth of a row.
-- **Rendering to a PNG is finer but cannot be scheduled.** `--image` only reads from the
-  app's own group container (not `/tmp`, `~/.local/state`, `/Users/Shared`, `~/Public`,
-  `~/Library/Caches`, or `~/Library/Application Support` — all verified), and a
-  launchd-spawned process cannot write there without Full Disk Access; it fails with
-  `PermissionError: [Errno 1] Operation not permitted` even overwriting an existing
-  file. An interactive shell works because the terminal already holds that grant.
-  `data:` URIs are rejected. Text has no such restriction, which is why the chart is
-  drawn with glyphs.
+- **Time-series stacked charts were tried and abandoned — don't redo this.** A 100%
+  stacked column chart (Muller plot) of the memory mix over time looked bad at widget
+  size in every form attempted, and the labelled section bars read better. What was
+  learned, so it needn't be rediscovered:
+  - There is **no stacked chart format**; grouped series render side by side, and there
+    is no legend.
+  - Drawn from `█` cells, resolution is one row per `1/HEIGHT` of RAM — at `HEIGHT=8`
+    that is 12.5%, so anything under ~6% (usually Free) vanishes entirely.
+  - **ANSI background colours do render** (verified on-screen), so a cell can carry two
+    colours, and the lower block glyphs `U+2581..U+2588` fill 1/8..8/8. That buys
+    `HEIGHT * 8` levels — 64 levels, 1.6% of RAM — and it still looked bad.
+  - **A real PNG cannot be scheduled.** `--image` reads only from the app's own group
+    container (not `/tmp`, `~/.local/state`, `/Users/Shared`, `~/Public`,
+    `~/Library/Caches`, or `~/Library/Application Support` — all verified), and a
+    launchd-spawned process cannot write there without Full Disk Access, failing with
+    `PermissionError: [Errno 1] Operation not permitted` even when overwriting an
+    existing file. An interactive shell succeeds because the terminal already holds
+    that grant. `data:` URIs are rejected outright. Text has no such restriction.
 - Energy impact comes from `top`'s POWER column — the same unitless score Activity
   Monitor's Energy tab shows (CPU, GPU, wakeups, I/O), **not watts**. Treat it as a
   ranking. It needs `top -l 2` (the first sample has no delta), which costs ~2s per run
