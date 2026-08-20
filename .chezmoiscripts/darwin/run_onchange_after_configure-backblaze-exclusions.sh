@@ -24,6 +24,13 @@
 #   - CrossOver Bottles  (Windows game prefixes; reinstallable)
 #   - Discord caches     (Cache / Code Cache / GPUCache; re-downloaded)
 #   - GOG Galaxy WebCache (re-downloaded)
+#   - iCloud dataless placeholders (old Mac mini Desktop/Documents + iBooks):
+#     2-byte local stubs whose content lives only in iCloud. Backblaze schedules
+#     them every scan, fails the read ("Resource deadlock avoided"), and re-queues
+#     the same ~6450 files / "3.7 GB remaining" forever (diagnosed 2026-08-15).
+#     NOTE: these are excluded by PATH, so if the folders are ever downloaded
+#     ("Download Now" / materialized), they STILL won't be backed up — remove the
+#     rules first if that's ever wanted.
 #
 # DELIBERATELY KEPT (real data, churn accepted): live Photos DB, Messages
 # chat.db, Safari History.db, live Zotero DB, Fantastical, Keynote.
@@ -78,6 +85,11 @@ cat > "$BLOCK_TMP" <<'BLOCK'
 
 <!-- GOG Galaxy web cache -->
 <excludefname_rule bzmergeblock="003" plat="mac" osVers="*"  ruleIsOptional="t" skipFirstCharThenStartsWith="users/" contains_1="/gog.com/galaxy/webcache/" contains_2="*" doesNotContain="*" endsWith="*" hasFileExtension="*" />
+
+<!-- iCloud dataless placeholders (content lives only in iCloud; local files are 2-byte stubs Backblaze cannot read, so it re-queued the same ~6450 files every scan) -->
+<excludefname_rule bzmergeblock="003" plat="mac" osVers="*"  ruleIsOptional="t" skipFirstCharThenStartsWith="users/" contains_1="/desktop/desktop - rishi's mac mini 2020/" contains_2="*" doesNotContain="*" endsWith="*" hasFileExtension="*" />
+<excludefname_rule bzmergeblock="003" plat="mac" osVers="*"  ruleIsOptional="t" skipFirstCharThenStartsWith="users/" contains_1="/documents/documents - rishi's mac mini 2020/" contains_2="*" doesNotContain="*" endsWith="*" hasFileExtension="*" />
+<excludefname_rule bzmergeblock="003" plat="mac" osVers="*"  ruleIsOptional="t" skipFirstCharThenStartsWith="users/" contains_1="/library/mobile documents/icloud~com~apple~ibooks/" contains_2="*" doesNotContain="*" endsWith="*" hasFileExtension="*" />
 <!-- END chezmoi backblaze-exclusions -->
 BLOCK
 
@@ -148,6 +160,13 @@ pass — several of them 2–4× per day.
 - **CrossOver `Bottles`** — Windows game prefixes (executable software).
 - **Discord `Cache`/`Code Cache`/`GPUCache`** — re-downloaded automatically.
 - **GOG Galaxy `WebCache`** — re-downloaded automatically.
+- **iCloud dataless placeholders** (`Desktop - Rishi's Mac Mini 2020`,
+  `Documents - Rishi's Mac Mini 2020`, iBooks `Mobile Documents`) — 2-byte local
+  stubs whose content lives only in iCloud. Backblaze scheduled them every scan,
+  failed the read (`Resource deadlock avoided`), and re-queued the same
+  ~6450 files / "3.7 GB remaining" forever (diagnosed 2026-08-15). These rules
+  match by path, so the folders stay excluded even if later downloaded from
+  iCloud — remove the rules first if they should ever be backed up for real.
 
 Deliberately **kept** (real data): live Photos DB, Messages `chat.db`, Safari
 `History.db`, live Zotero DB, Fantastical, Keynote.

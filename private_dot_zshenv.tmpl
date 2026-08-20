@@ -78,6 +78,20 @@ export PATH="$HOME/.local/bin:$PATH"
 export SSH_AUTH_SOCK=~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock
 {{- end }}
 
+# MATLAB on Apple Silicon ships no JVM; point it at a local JDK (needed for
+# Java features and the Add-On installer). MathWorks qualifies Java 11
+# (Amazon Corretto 11), so prefer that when installed; otherwise fall back to
+# the newest system JDK. Resolved dynamically so JDK upgrades don't break it.
+{{- if eq .chezmoi.os "darwin" }}
+if [ -x /usr/libexec/java_home ]; then
+    if /usr/libexec/java_home -v 11 >/dev/null 2>&1; then
+        export MATLAB_JAVA="$(/usr/libexec/java_home -v 11)"
+    elif /usr/libexec/java_home >/dev/null 2>&1; then
+        export MATLAB_JAVA="$(/usr/libexec/java_home)"
+    fi
+fi
+{{- end }}
+
 # Cargo
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
