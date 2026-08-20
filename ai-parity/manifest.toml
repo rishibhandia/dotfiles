@@ -126,6 +126,21 @@ destination = "dot_agents/skills/keynote"
 mode = "tree-copy"
 chezmoi_mappings = { "scripts/literal_keynote_audit.py" = "scripts/keynote_audit.py", "scripts/literal_keynote_bridge.py" = "scripts/keynote_bridge.py", "scripts/literal_keynote_inventory.py" = "scripts/keynote_inventory.py", "scripts/literal_keynote_layout.py" = "scripts/keynote_layout.py" }
 
+[[shared_artifacts]]
+name = "smolvm-sandbox"
+canonical = "ai-parity/shared/skills/smolvm-sandbox"
+import_mode = "review"
+
+[[shared_artifacts.targets]]
+side = "claude"
+destination = "dot_claude/skills/smolvm-sandbox"
+mode = "tree-copy"
+
+[[shared_artifacts.targets]]
+side = "codex"
+destination = "dot_agents/skills/smolvm-sandbox"
+mode = "tree-copy"
+
 [[artifacts]]
 name = "global-agents"
 source = "ai-parity/contracts/AGENTS.md"
@@ -214,6 +229,12 @@ mode = "copy"
 name = "keynote-codex-interface"
 source = "ai-parity/adapters/skills/keynote/agents/openai.yaml"
 destination = "dot_agents/skills/keynote/agents/openai.yaml"
+mode = "copy"
+
+[[artifacts]]
+name = "smolvm-sandbox-codex-interface"
+source = "ai-parity/adapters/skills/smolvm-sandbox/agents/openai.yaml"
+destination = "dot_agents/skills/smolvm-sandbox/agents/openai.yaml"
 mode = "copy"
 
 [[reviews]]
@@ -313,6 +334,9 @@ mode = "planned"
 [[skills]]
 name = "skill-creator"
 mode = "planned"
+[[skills]]
+name = "smolvm-sandbox"
+mode = "shared-explicit-pilot"
 [[skills]]
 name = "tdd"
 mode = "planned"

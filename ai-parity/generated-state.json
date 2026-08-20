@@ -1,9 +1,9 @@
 {
   "format": "ai-parity-generated-state",
-  "generation_id": "ccf89a601a041fe3b917c7be82de90006689d5208d008146acd463782d42c06d",
+  "generation_id": "6ff00bb5f468637542a342319f2ce0add889ca1ab670cb701df658181734423f",
   "generator_inputs": {
     "engine_sha256": "ebebaf96041867bc701fa7491c93cf5ecaf7b54b1723272027e729e695678074",
-    "manifest_sha256": "fbbfcc3a9288451e627096ee604f39c0a97c0d94f50b4793fd68705a47adbad8",
+    "manifest_sha256": "c672e7717a68d940610f9393bcd174483718b66ba4e2c04f91a4aa49455a5e73",
     "schemas_sha256": "33b5c6cc4c6a44a35ddf1ee205308857c2b651920ae21d7e93184ae9d22ed728"
   },
   "generator_version": 3,
@@ -405,6 +405,25 @@
       "source_digest": "05413e105428bfa41cd40617049a01f24fd6de521868fc759ec4b5ed5324fd3e",
       "source_mode": 420
     },
+    "dot_agents/skills/smolvm-sandbox/SKILL.md": {
+      "artifact": "smolvm-sandbox",
+      "canonical": "ai-parity/shared/skills/smolvm-sandbox",
+      "canonical_digest": "da78e7267e4eb58cacf3cc972b6ab720c279b9801d97d53b2cf491a736767588",
+      "deployed_mode": 420,
+      "sha256": "135db0223eaa9f7b7d7f44c1000f1b08ee65e9e74d71844c3e1d12fbfdf6e794",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/smolvm-sandbox/SKILL.md",
+      "source_digest": "e82acf9278b063939680a08745afad74d9151f495e547cf3feffa7215fd76d0d",
+      "source_mode": 420
+    },
+    "dot_agents/skills/smolvm-sandbox/agents/openai.yaml": {
+      "artifact": "smolvm-sandbox-codex-interface",
+      "deployed_mode": 420,
+      "sha256": "d2bb9eb189c43f8855f2fee2797e57ca0562c2b1e4a1022223018a354bb6910e",
+      "source": "ai-parity/adapters/skills/smolvm-sandbox/agents/openai.yaml",
+      "source_digest": "39cf2f4c705c626bb645686d64e4f934bf180927f5664974bb466310ae99f616",
+      "source_mode": 420
+    },
     "dot_agents/skills/verify/SKILL.md": {
       "artifact": "verify-skill-adapter",
       "deployed_mode": 420,
@@ -694,6 +713,17 @@
       "side": "claude",
       "source": "ai-parity/shared/skills/scientific-figures/SKILL.md",
       "source_digest": "97eba44f644159366df122166d3e36952756dd622d648fc70a699df07eaa66b9",
+      "source_mode": 420
+    },
+    "dot_claude/skills/smolvm-sandbox/SKILL.md": {
+      "artifact": "smolvm-sandbox",
+      "canonical": "ai-parity/shared/skills/smolvm-sandbox",
+      "canonical_digest": "da78e7267e4eb58cacf3cc972b6ab720c279b9801d97d53b2cf491a736767588",
+      "deployed_mode": 420,
+      "sha256": "135db0223eaa9f7b7d7f44c1000f1b08ee65e9e74d71844c3e1d12fbfdf6e794",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/smolvm-sandbox/SKILL.md",
+      "source_digest": "e82acf9278b063939680a08745afad74d9151f495e547cf3feffa7215fd76d0d",
       "source_mode": 420
     },
     "dot_claude/skills/zotero/SKILL.md": {

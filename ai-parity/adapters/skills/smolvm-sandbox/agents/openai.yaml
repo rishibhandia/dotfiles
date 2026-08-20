@@ -1,0 +1,4 @@
+interface:
+  display_name: "SmolVM Sandbox"
+  short_description: "Safely test untrusted code in disposable microVMs"
+  default_prompt: "Use $smolvm-sandbox to run this untrusted code in a tightly constrained disposable microVM."
