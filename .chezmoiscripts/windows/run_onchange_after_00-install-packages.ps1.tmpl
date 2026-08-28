@@ -2,7 +2,11 @@
 # Install packages from Scoopfile
 # This runs whenever the Scoopfile changes
 # Skipped in portable mode (when Scoop is unavailable)
-# Scoopfile hash: {{ include "dot_Scoopfile.tmpl" | sha256sum }}-work={{ .work }}
+# Hash the RENDERED Scoopfile, not the template source: data flips
+# (.work, .portable) change the rendered file without touching the
+# template, and must re-trigger scoop install too (same fix as the
+# Brewfile script; the old "-work=" suffix is subsumed by rendering).
+# Scoopfile hash: {{ includeTemplate "dot_Scoopfile.tmpl" . | sha256sum }}
 
 $ErrorActionPreference = "Continue"
 
