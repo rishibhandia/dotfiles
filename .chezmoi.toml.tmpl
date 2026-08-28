@@ -35,8 +35,8 @@
 {{-     $hostname = "rishi-mbp-2025" -}}{{/* MacBook Pro 14" M5 Max */}}
 {{-   else if contains "MacBook Pro 2019" $computerName -}}
 {{-     $hostname = "rishi-mbp-2019" -}}
-{{-   else if contains "Mac Mini 2020" $computerName -}}
-{{-     $hostname = "rishi-macmini-2020" -}}
+{{-   else if or (eq $model "Macmini9,1") (contains "Mac Mini 2020" $computerName) -}}
+{{-     $hostname = "rishi-macmini-2020" -}}{{/* M1 Mac mini 2020; hw.model verified on the machine 2026-08-28. ComputerName kept as fallback — this host gates the whole server stack */}}
 {{-   else -}}
 {{-     $hostname = $computerName -}}
 {{-   end -}}
