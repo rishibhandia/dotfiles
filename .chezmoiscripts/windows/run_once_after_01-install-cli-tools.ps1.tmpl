@@ -148,17 +148,16 @@ if (Get-Command tirith -ErrorAction SilentlyContinue) {
 # writes ~/.claude.json.
 # -----------------------------------------------------------------------------
 if ((Get-Command claude -ErrorAction SilentlyContinue) -and (Get-Command tirith -ErrorAction SilentlyContinue)) {
-    $mcpList = claude mcp list 2>$null | Out-String
-    if ($mcpList -match '(?m)^tirith') {
-        Write-Success "tirith MCP server already registered"
+    # Register idempotently. We deliberately avoid `claude mcp list` here: its
+    # per-server health check can hang, which previously stalled the entire
+    # apply (see the Unix twin). `claude mcp add` only writes config; a
+    # duplicate add returns non-zero, which we treat as "already registered".
+    Write-Info "Registering tirith MCP server with Claude Code (user scope)..."
+    claude mcp add --scope user tirith -- tirith mcp-server 2>&1 | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Success "tirith MCP server registered"
     } else {
-        Write-Info "Registering tirith MCP server with Claude Code (user scope)..."
-        claude mcp add --scope user tirith -- tirith mcp-server 2>&1 | Out-Null
-        if ($LASTEXITCODE -eq 0) {
-            Write-Success "tirith MCP server registered"
-        } else {
-            Write-Warn "tirith MCP registration failed (run: claude mcp add --scope user tirith -- tirith mcp-server)"
-        }
+        Write-Info "tirith MCP server already registered (or add skipped)"
     }
 } else {
     Write-Warn "claude or tirith not found, skipping tirith MCP registration"
