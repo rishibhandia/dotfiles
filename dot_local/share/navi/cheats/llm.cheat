@@ -42,6 +42,6 @@ llm install <plugin>
 # Chat mode (interactive)
 llm chat -m <model>
 
-$ model: echo -e "claude-3-5-sonnet-latest\nclaude-3-opus\ngpt-4o\ngpt-4o-mini\ngemini-2.0-flash\ngemini-1.5-pro"
+$ model: llm models 2>/dev/null | sed -E 's/^[^:]+: //; s/ \(aliases.*//'
 $ file: find . -maxdepth 2 -type f 2>/dev/null | head -20
-$ plugin: echo -e "llm-claude-3\nllm-gemini\nllm-ollama"
+$ plugin: echo -e "llm-anthropic\nllm-gemini\nllm-ollama"
