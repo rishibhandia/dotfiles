@@ -1,6 +1,7 @@
+{{ if .personal -}}
 #!/bin/bash
 # =============================================================================
-# Backblaze Personal Backup — custom exclusion rules (macOS)
+# Backblaze Personal Backup — custom exclusion rules (macOS, personal only)
 # =============================================================================
 # WHY THIS EXISTS
 #
@@ -60,7 +61,7 @@ fi
 BLOCK_TMP="$(mktemp)"
 cat > "$BLOCK_TMP" <<'BLOCK'
 <!-- BEGIN chezmoi backblaze-exclusions -->
-<!-- Managed by chezmoi: .chezmoiscripts/darwin/run_onchange_after_configure-backblaze-exclusions.sh -->
+<!-- Managed by chezmoi: .chezmoiscripts/darwin/run_onchange_after_configure-backblaze-exclusions.sh.tmpl -->
 <!-- Rebuildable caches / redundant DB copies that otherwise re-upload daily.    -->
 <!-- See README.md in this directory for the full rationale.                      -->
 
@@ -137,7 +138,7 @@ cat > "$README" <<'DOC'
 # Backblaze custom exclusions — rationale
 
 > Managed by chezmoi:
-> `.chezmoiscripts/darwin/run_onchange_after_configure-backblaze-exclusions.sh`
+> `.chezmoiscripts/darwin/run_onchange_after_configure-backblaze-exclusions.sh.tmpl`
 > Edit the rules there (not this file) — this README and the rules in
 > `bzexcluderules_editable.xml` are regenerated on every `chezmoi apply`.
 
@@ -185,3 +186,4 @@ Excluding a path stops *future* uploads; copies already in the backup age out pe
 your retention setting (default 30 days) — not a retroactive delete.
 DOC
 success "Wrote $README"
+{{ end -}}
