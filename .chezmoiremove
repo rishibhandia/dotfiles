@@ -4,6 +4,11 @@
 # sourced this file. Removed from source 2026-06-11; clean up applied copies.
 .config/zsh/.zshprofile
 
+# Zed dropped 2026-08 (cask + config removed from source); clean up the
+# settings dir still deployed on other machines.
+.config/zed
+.config/zed/settings.json
+
 # Repo-only files that older versions of this repo applied into ~/ before
 # they were .chezmoiignore'd (2026-06-11). Note: ~/README.md, ~/install.sh,
 # and ~/install.ps1 can't be listed here - an exact .chezmoiignore match

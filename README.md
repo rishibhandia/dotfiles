@@ -189,7 +189,6 @@ The `.chezmoi.toml.tmpl` template sets feature flags based on machine type:
 | App | Description |
 |-----|-------------|
 | [Ghostty](https://ghostty.org/) | GPU-accelerated terminal |
-| [Zed](https://zed.dev/) | Code editor |
 | [1Password](https://1password.com/) | Password manager |
 | [Logseq](https://logseq.com/) | Note taking / PKM |
 | [Tailscale](https://tailscale.com/) | VPN/mesh network |
