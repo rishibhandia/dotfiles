@@ -118,17 +118,17 @@ alias cd-='cd -'
 alias cd..='cd ..'
 alias ..='cd ..'
 
-# Nagivates up two directories.
-alias ...='cd ../../../'
+# Navigates up two directories.
+alias ...='cd ../..'
 
-# Nagivates up three directories.
-alias ....='cd ../../../../'
+# Navigates up three directories.
+alias ....='cd ../../..'
 
-# Nagivates up four directories.
-alias .....='cd ../../../../'
-alias .4='cd ../../../../'
+# Navigates up four directories.
+alias .....='cd ../../../..'
+alias .4='cd ../../../..'
 
-# Nagivates up five directories.
+# Navigates up five directories.
 alias .5='cd ../../../../..'
 
 

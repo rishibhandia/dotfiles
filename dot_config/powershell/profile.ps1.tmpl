@@ -149,8 +149,8 @@ function ..... { Set-Location ../../../.. }
 # Navigation: Go to last directory
 function cd- { Set-Location - }
 
-# Directory listing
-function l { Get-ChildItem -Force @args }
+# Directory listing (mirrors zsh: l = long list, ll = long list incl. hidden)
+function l { Get-ChildItem @args }
 function ll { Get-ChildItem -Force @args }
 # Named ldir so the lsd binary stays usable (functions outrank executables)
 function ldir { Get-ChildItem -Directory @args }
