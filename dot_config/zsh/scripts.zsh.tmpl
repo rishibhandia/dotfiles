@@ -1023,8 +1023,10 @@ EOF
             ;;
         edit)
             if [ -z "$1" ]; then
-                # No file specified, open the source directory
-                ${EDITOR:-vim} "$CHEZMOI_DIR"
+                # No file specified, open the source directory.
+                # ${=..} forces word splitting: EDITOR may carry flags ("cot -w"),
+                # and zsh would otherwise exec a command literally named "cot -w".
+                ${=EDITOR:-vim} "$CHEZMOI_DIR"
             else
                 chezmoi edit "$@"
             fi

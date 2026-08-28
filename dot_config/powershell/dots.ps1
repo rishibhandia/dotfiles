@@ -96,9 +96,12 @@ Examples:
         }
         "edit" {
             if (-not $Args) {
-                # No file specified, open the source directory
+                # No file specified, open the source directory.
+                # EDITOR may carry flags ("code -w"); split so the first word is
+                # the command and the rest become arguments.
                 $editor = if ($env:EDITOR) { $env:EDITOR } else { "notepad" }
-                & $editor $ChezmoiDir
+                $editorParts = @($editor -split ' ') + @($ChezmoiDir)
+                & $editorParts[0] $editorParts[1..($editorParts.Count - 1)]
             } else {
                 & chezmoi edit @Args
             }
