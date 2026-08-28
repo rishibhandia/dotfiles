@@ -348,7 +348,7 @@ function calc {
 # -----------------------------------------------------------------------------
 
 # Keeps all apps and packages up to date.
-# Syntax: `update [all]`
+# Syntax: `update`
 function update() {
     if command -v softwareupdate &> /dev/null; then
         echo 'Checking for system updates...'
@@ -362,13 +362,6 @@ function update() {
         brew cleanup
     fi
 
-    if [[ "$1" == 'all' ]]; then
-        if command -v mas &> /dev/null; then
-            echo 'Updating App Store applications...'
-            mas upgrade
-        fi
-    fi
-
     if ! [[ "$OSTYPE" =~ ^darwin ]]; then
         if command -v apt &> /dev/null; then
             echo 'Updating packages with apt...'
@@ -377,9 +370,7 @@ function update() {
             apt autoremove
             apt clean
             apt autoclean
-        fi
-
-        if command -v apt-get &> /dev/null; then
+        elif command -v apt-get &> /dev/null; then
             echo 'Updating packages with apt-get...'
             apt-get update
             apt-get upgrade
