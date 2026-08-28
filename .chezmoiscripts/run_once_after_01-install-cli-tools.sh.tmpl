@@ -76,7 +76,7 @@ if command -v ssage &>/dev/null; then
 else
     if command -v uv &>/dev/null; then
         info "Installing Shell Sage via uv..."
-        if uv tool install shell_sage; then
+        if uv tool install shell-sage; then
             success "Shell Sage installed"
         else
             warn "Shell Sage installation failed"
