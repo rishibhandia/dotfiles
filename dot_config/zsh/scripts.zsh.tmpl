@@ -314,11 +314,16 @@ function history_search() {
 }
 
 # Searches session history for a string, or lists all session history.
-# Syntax: `history_session_search <string>`
+# `fc -L` restricts to events local to this shell, which is exactly
+# "session history" even with SHARE_HISTORY importing other sessions.
+# (stderr silenced: `fc` complains when the session has no events yet.)
+# Syntax: `history_session_search [string]`
 function history_session_search() {
-    prefix=$(date +"$HISTTIMEFORMAT")
-    offset=$((8 + ${#prefix}))
-    comm -23 <(history | cut -c ${offset}-) "${HISTFILE:-'~/.bash_history'}" | grep "$1"
+    if [ -z "$1" ]; then
+        fc -lL 1 2>/dev/null
+    else
+        fc -lL 1 2>/dev/null | grep "$1"
+    fi
 }
 
 # mkcd/take live further down in this file (single definition; an earlier
