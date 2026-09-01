@@ -5,12 +5,6 @@
 #If debug flag enabled (ZSH_DEBUG = 1), will print file path and name when sourced
 [ ! -z "$ZSH_DEBUG" ] && printf "Sourcing file %s (path: %s)\n" "${(%):-%N}" "${(%):-%x}"
 
-screenres() {
-    system_profiler SPDisplaysDataType | grep -A2 "Resolution:" | grep "Retina\|Resolution:" | sed -n "${1:-1}p" | awk '{print $2"x"$4}'
-}
-
-
-
 extract() {
     local verbose=false
     local target_dir=""
@@ -396,18 +390,6 @@ function update() {
 }
 
 
-# Applications
-# -----------------------------------------------------------------------------
-
-# Opens file/URL in Microsoft Edge.
-# Syntax: `microsoft-edge <url>`
-if [[ "$OSTYPE" =~ ^(cygwin|mingw|msys) ]]; then
-    function microsoft-edge() {
-        start microsoft-edge:"$1"
-    }
-fi
-
-
 # LLM functions
 #------------------------------------------------------------------------------
 # Resolve provider credentials only for the lifetime of each llm process.
@@ -710,17 +692,6 @@ Follow these rules:
   echo "Preview:"
   head -n 10 "$output_file"
 }
-# Development
-# -----------------------------------------------------------------------------
-
-# Calls Python's pip3 at the global level.
-if command -v pip3 > /dev/null; then
-    function gpip3() {
-        PIP_REQUIRE_VIRTUALENV="0" pip3 "$@"
-    }
-fi
-
-
 # Varia
 # -----------------------------------------------------------------------------
 
@@ -1076,86 +1047,84 @@ EOF
 }
 
 # Tab completion for dots command (zsh)
-if [ -n "$ZSH_VERSION" ]; then
-    _dots_completion() {
-        local -a commands
-        commands=(
-            'apply:Apply dotfiles to home directory'
-            'diff:Show what would change'
-            'status:Show status of managed files'
-            'update:Pull latest and apply'
-            'edit:Edit a dotfile'
-            'add:Add a file to chezmoi'
-            'cd:Change to dotfiles directory'
-            'git:Run git commands in dotfiles repo'
-            'doctor:Check chezmoi configuration'
-            'data:Show template data'
-            're-init:Re-run chezmoi init'
-            'test:Run setup tests'
-            'brew:Manage Brewfile packages'
-            'ai:Check or synchronize Claude/Codex parity'
-            'help:Show help message'
-        )
+_dots_completion() {
+    local -a commands
+    commands=(
+        'apply:Apply dotfiles to home directory'
+        'diff:Show what would change'
+        'status:Show status of managed files'
+        'update:Pull latest and apply'
+        'edit:Edit a dotfile'
+        'add:Add a file to chezmoi'
+        'cd:Change to dotfiles directory'
+        'git:Run git commands in dotfiles repo'
+        'doctor:Check chezmoi configuration'
+        'data:Show template data'
+        're-init:Re-run chezmoi init'
+        'test:Run setup tests'
+        'brew:Manage Brewfile packages'
+        'ai:Check or synchronize Claude/Codex parity'
+        'help:Show help message'
+    )
 
-        if (( CURRENT == 2 )); then
-            _describe 'command' commands
-        elif (( CURRENT == 3 )); then
-            case "${words[2]}" in
-                edit|add)
-                    _files
-                    ;;
-                git)
-                    # Delegate to git completion
-                    _git
-                    ;;
-                apply)
-                    _values 'options' '-v[verbose output]' '--verbose[verbose output]'
-                    ;;
-                brew)
-                    local -a brew_cmds
-                    brew_cmds=(
-                        'add:Add package to Brewfile'
-                        'remove:Remove package from Brewfile'
-                        'list:List packages in Brewfile'
-                    )
-                    _describe 'brew command' brew_cmds
-                    ;;
-                ai)
-                    local -a ai_cmds
-                    ai_cmds=(
-                        'status:Check generated files and review acknowledgements'
-                        'diff:Show generated-file differences'
-                        'sync:Preview or write generated files'
-                        'verify:Run the blocking parity check'
-                        'hooks:Install or uninstall repository hooks'
-                        'propose:Create a reviewed import proposal'
-                        'proposals:List, inspect, accept, resolve, or reject proposals'
-                        'memories:Create proposals from runtime memories'
-                        'docs:Manage the official documentation MCP bootstrap'
-                        'doctor:Inspect transaction and lock state'
-                        'repair:Explicitly finish or roll back a transaction'
-                        'reconcile:Regenerate derived Git merge conflicts'
-                    )
-                    _describe 'AI parity command' ai_cmds
-                    ;;
-            esac
-        elif (( CURRENT == 4 )); then
-            case "${words[2]}" in
-                brew)
-                    case "${words[3]}" in
-                        add)
-                            _values 'options' '--cask[Force cask type]'
-                            ;;
-                        list)
-                            _values 'options' '--cask[Show only casks]' '--brew[Show only formulas]'
-                            ;;
-                    esac
-                    ;;
-            esac
-        fi
-    }
-    compdef _dots_completion dots
-fi
+    if (( CURRENT == 2 )); then
+        _describe 'command' commands
+    elif (( CURRENT == 3 )); then
+        case "${words[2]}" in
+            edit|add)
+                _files
+                ;;
+            git)
+                # Delegate to git completion
+                _git
+                ;;
+            apply)
+                _values 'options' '-v[verbose output]' '--verbose[verbose output]'
+                ;;
+            brew)
+                local -a brew_cmds
+                brew_cmds=(
+                    'add:Add package to Brewfile'
+                    'remove:Remove package from Brewfile'
+                    'list:List packages in Brewfile'
+                )
+                _describe 'brew command' brew_cmds
+                ;;
+            ai)
+                local -a ai_cmds
+                ai_cmds=(
+                    'status:Check generated files and review acknowledgements'
+                    'diff:Show generated-file differences'
+                    'sync:Preview or write generated files'
+                    'verify:Run the blocking parity check'
+                    'hooks:Install or uninstall repository hooks'
+                    'propose:Create a reviewed import proposal'
+                    'proposals:List, inspect, accept, resolve, or reject proposals'
+                    'memories:Create proposals from runtime memories'
+                    'docs:Manage the official documentation MCP bootstrap'
+                    'doctor:Inspect transaction and lock state'
+                    'repair:Explicitly finish or roll back a transaction'
+                    'reconcile:Regenerate derived Git merge conflicts'
+                )
+                _describe 'AI parity command' ai_cmds
+                ;;
+        esac
+    elif (( CURRENT == 4 )); then
+        case "${words[2]}" in
+            brew)
+                case "${words[3]}" in
+                    add)
+                        _values 'options' '--cask[Force cask type]'
+                        ;;
+                    list)
+                        _values 'options' '--cask[Show only casks]' '--brew[Show only formulas]'
+                        ;;
+                esac
+                ;;
+        esac
+    fi
+}
+compdef _dots_completion dots
 
 # =============================================================================
 # Useful functions from mathiasbynens/dotfiles
@@ -1261,24 +1230,6 @@ function mkcd() {
     mkdir -p "$1" && cd "$1"
 }
 alias take='mkcd'
-
-# Create empty file or update timestamp (touch equivalent)
-function touchfile() {
-    if [[ -e "$1" ]]; then
-        touch "$1"
-    else
-        > "$1"
-    fi
-}
-
-# Repeat a command n times
-function repeat_cmd() {
-    local count=$1
-    shift
-    for ((i=1; i<=count; i++)); do
-        "$@"
-    done
-}
 
 {{ if eq .hostname "rishi-macmini-2020" -}}
 # =============================================================================
