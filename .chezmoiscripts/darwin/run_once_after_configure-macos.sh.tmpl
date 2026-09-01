@@ -15,8 +15,9 @@ success() { printf "${GREEN}[OK]${NC} %s\n" "$1"; }
 
 info "Configuring macOS preferences..."
 
-# Close System Preferences to prevent conflicts
-osascript -e 'tell application "System Preferences" to quit' 2>/dev/null || true
+# Close the settings app to prevent conflicts (renamed from "System
+# Preferences" to "System Settings" in macOS 13)
+osascript -e 'tell application "System Settings" to quit' 2>/dev/null || true
 
 # =============================================================================
 # General UI/UX
@@ -112,18 +113,8 @@ defaults write com.apple.dock autohide -bool true
 # Remove the auto-hiding Dock delay
 defaults write com.apple.dock autohide-delay -float 0
 
-# =============================================================================
-# Safari (commented out - Safari is sandboxed in modern macOS)
-# =============================================================================
-# These settings require manual configuration in Safari preferences
-# or Full Disk Access for the terminal
-
-# # Enable Safari's debug menu
-# defaults write com.apple.Safari IncludeInternalDebugMenu -bool true
-
-# # Enable the Develop menu and the Web Inspector
-# defaults write com.apple.Safari IncludeDevelopMenu -bool true
-# defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
+# (Safari defaults are not scriptable here: Safari is sandboxed in modern
+# macOS, so Develop-menu settings must be enabled in Safari's own prefs.)
 
 # =============================================================================
 # Terminal
