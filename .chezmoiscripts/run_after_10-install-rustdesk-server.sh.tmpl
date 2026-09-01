@@ -149,6 +149,6 @@ echo "RustDesk server is up (hbbs 21115/21116, hbbr 21117)."
 if [ -n "$PUBKEY" ]; then
     echo "Client 'Key' field: $PUBKEY"
 else
-    echo "Could not read the public key; see docs/rustdesk.md to fetch it manually." >&2
+    echo "Could not read the public key; fetch it manually: docker exec hbbs cat /root/id_ed25519.pub" >&2
 fi
 {{ end -}}

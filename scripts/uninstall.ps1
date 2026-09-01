@@ -30,7 +30,6 @@ $ToRemove = @(
     (Join-Path $env:USERPROFILE ".config\git"),               # Git config
     (Join-Path $env:USERPROFILE ".config\nvim"),              # Neovim config (Unix-style location)
     (Join-Path $env:USERPROFILE ".config\psmux"),             # psmux config
-    (Join-Path $env:USERPROFILE ".config\broot"),             # broot config
     (Join-Path $env:USERPROFILE ".config\windows-terminal"),  # WT color scheme source
     (Join-Path $env:USERPROFILE ".config\shell_sage"),        # Shell Sage config
     (Join-Path $env:USERPROFILE ".local\share\navi"),         # navi cheats

@@ -61,15 +61,6 @@ Host Mac-mini.local mini 100.117.214.99
     IdentitiesOnly yes
 
 # =============================================================================
-# MARCC (JHU HPC)
-# =============================================================================
-Host login.marcc.jhu.edu
-    ControlMaster auto
-    ControlPath ~/.ssh/control:%h:%p:%r
-    ForwardX11Trusted yes
-    ForwardX11 yes
-
-# =============================================================================
 # NYU HPC (Greene)
 # =============================================================================
 Host greene.hpc.nyu.edu dtn.hpc.nyu.edu gw.hpc.nyu.edu

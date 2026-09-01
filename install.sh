@@ -96,8 +96,8 @@ install_xcode_cli() {
     info "Installing Xcode Command Line Tools..."
     xcode-select --install 2>/dev/null || true
 
-    # Wait for installation to complete
-    info "Waiting for Xcode CLI installation (press any key when done)..."
+    # Wait for installation to complete (polls every 5s)
+    info "Waiting for Xcode CLI installation to finish..."
     until xcode-select -p >/dev/null 2>&1; do
         sleep 5
     done
@@ -330,11 +330,6 @@ print_next_steps() {
     echo "  chezmoi update    - Pull and apply latest changes"
     echo ""
 
-    if [ "$os" = "darwin" ]; then
-        echo "macOS-specific:"
-        echo "  make macos        - Apply macOS system preferences"
-        echo ""
-    fi
 }
 
 # Setup 1Password CLI
