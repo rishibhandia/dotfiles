@@ -41,7 +41,11 @@ Supported formats:
     .zip, .epub, .cbz  zip archives
     .7z, .apk, .dmg    7zip archives
     .rar, .cbr         rar archives
-    .xz                xz compressed files
+    .xz, .lzma         xz/lzma compressed files
+    .Z                 compress'd files
+    .cpio              cpio archives
+    .cab, .exe         Microsoft cabinet archives
+    .zpaq              zpaq archives
     .iso               disk images
 
 Examples:
@@ -73,7 +77,7 @@ EOF
         dirname="${archive:t}"
         for ext in ".tar.bz2" ".tar.gz" ".tar.xz" ".tbz2" ".tgz" ".txz" ".tar" \
                   ".bz2" ".gz" ".zip" ".7z" ".rar" ".xz" ".epub" ".cbz" ".cbr" \
-                  ".dmg" ".apk" ".iso"; do
+                  ".dmg" ".apk" ".iso" ".lzma" ".Z" ".cpio" ".cab" ".zpaq"; do
             dirname="${dirname%$ext}"
         done
         printf "%s" "$dirname"
@@ -227,7 +231,7 @@ EOF
                 elif command_exists unar; then
                     unar "$archive_path" || log_error "Failed to extract rar: $archive"
                 else
-                    log_error "Neither unrar nor unar is installed. Try: brew install rar or brew install unar"
+                    log_error "Neither unrar nor unar is installed. Try: brew install unar"
                 fi
                 ;;
             *.xz)
@@ -244,11 +248,13 @@ EOF
                     log_error "lzma is not installed. Try: brew install xz"
                 fi
                 ;;
-            *.Z)
+            *.z)
+                # matched against the lowercased name, so this also catches .Z
+                # (the old literal *.Z pattern could never match)
                 if command_exists uncompress; then
                     uncompress -k "$archive_path" || log_error "Failed to extract Z: $archive"
                 else
-                    log_error "compress is not installed. Try: brew install compress"
+                    log_error "uncompress is not available (it ships with gzip/macOS)."
                 fi
                 ;;
             *.cpio)
@@ -261,8 +267,10 @@ EOF
             *.cab|*.exe)
                 if command_exists cabextract; then
                     cabextract "$archive_path" || log_error "Failed to extract cabinet: $archive"
+                elif command_exists unar; then
+                    unar "$archive_path" || log_error "Failed to extract cabinet: $archive"
                 else
-                    log_error "cabextract is not installed. Try: brew install cabextract"
+                    log_error "Neither cabextract nor unar is installed. Try: brew install unar"
                 fi
                 ;;
             *.zpaq)
