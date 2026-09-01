@@ -54,7 +54,11 @@ Library/LaunchAgents/com.rishi.tw-energy.plist
 {{ end }}
 
 # =============================================================================
-# macOS-only skills (require macOS apps)
+# macOS-only skills (require macOS apps). Some .agents/ entries don't exist
+# in dot_agents yet (parity manifest marks them "planned") — they're listed
+# ahead of time so rendering them later can't leak onto non-darwin machines.
+# keynote appears here AND in the personal block below: two independent
+# gates (needs darwin AND personal), not a duplicate.
 # =============================================================================
 {{ if ne .chezmoi.os "darwin" }}
 .claude/skills/things

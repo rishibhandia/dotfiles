@@ -1,19 +1,13 @@
 # Targets chezmoi should delete from machines (target paths, like .chezmoiignore)
-
-# Dead config: zsh reads $ZDOTDIR/.zprofile, never ".zshprofile", and nothing
-# sourced this file. Removed from source 2026-06-11; clean up applied copies.
-.config/zsh/.zshprofile
+#
+# Entries are temporary: once every machine has applied past a cleanup, delete
+# the entry (the 2026-06-11 batch was removed 2026-08 after all machines
+# converged). Gotcha kept for reference: an exact .chezmoiignore match
+# suppresses the corresponding remove entry (children of an ignored dir still
+# work), which is why ~/README.md, ~/install.sh, and ~/install.ps1 once had to
+# be deleted by hand per machine.
 
 # Zed dropped 2026-08 (cask + config removed from source); clean up the
 # settings dir still deployed on other machines.
 .config/zed
 .config/zed/settings.json
-
-# Repo-only files that older versions of this repo applied into ~/ before
-# they were .chezmoiignore'd (2026-06-11). Note: ~/README.md, ~/install.sh,
-# and ~/install.ps1 can't be listed here - an exact .chezmoiignore match
-# suppresses the corresponding remove entry (children of an ignored dir,
-# like these, still work) - delete those three by hand per machine.
-scripts/test.sh
-scripts/test.ps1
-scripts/uninstall.ps1
