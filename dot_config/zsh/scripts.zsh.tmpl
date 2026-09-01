@@ -11,15 +11,12 @@ screenres() {
 
 
 
-shell_type="$(ps -p $$ -ocomm=)"
-
 extract() {
     local verbose=false
     local target_dir=""
     local error_log=""
     local exit_code=0
     local here_flag=false
-    local OPTIND=1  # Important for bash compatibility with getopts
 
     # Function to show help
     show_help() {
@@ -55,33 +52,25 @@ Examples:
 EOF
     }
 
-    # Function to check if a command exists - compatible with both shells
+    # Function to check if a command exists
     command_exists() {
         command -v "$1" >/dev/null 2>&1
     }
 
-    # Function to log errors - compatible with both shells
+    # Function to log errors
     log_error() {
         printf "ERROR: %s\n" "$1" >&2
         error_log="${error_log}ERROR: $1\n"
         exit_code=1
     }
 
-    # Function to get clean directory name - compatible with both shells
+    # Function to get clean directory name
     get_extract_dir() {
         local archive="$1"
-        local basename
         local dirname
 
-        # Handle basename differently for bash/zsh
-        if [ "$shell_type" = "bash" ]; then
-            basename=$(basename "$archive")
-        else
-            basename="${archive:t}"
-        fi
-
         # Remove common archive extensions
-        dirname="$basename"
+        dirname="${archive:t}"
         for ext in ".tar.bz2" ".tar.gz" ".tar.xz" ".tbz2" ".tgz" ".txz" ".tar" \
                   ".bz2" ".gz" ".zip" ".7z" ".rar" ".xz" ".epub" ".cbz" ".cbr" \
                   ".dmg" ".apk" ".iso"; do
@@ -90,7 +79,7 @@ EOF
         printf "%s" "$dirname"
     }
 
-    # Parse options - compatible with both shells
+    # Parse options
     while [ $# -gt 0 ]; do
         case "$1" in
             --help)
@@ -147,7 +136,7 @@ EOF
             continue
         fi
 
-        # Get absolute path of archive - compatible with both shells
+        # Get absolute path of archive
         local archive_path
         archive_path="$(cd "$(dirname "$archive")" && pwd)/$(basename "$archive")"
 
@@ -160,7 +149,7 @@ EOF
             mkdir -p "$current_target_dir" || { log_error "Failed to create directory: $current_target_dir"; continue; }
         fi
 
-        # Save and change directory - compatible with both shells
+        # Save and change directory
         local original_dir
         original_dir="$(pwd)"
         if [ "$current_target_dir" != "." ]; then
@@ -169,7 +158,7 @@ EOF
 
         [ "$verbose" = true ] && printf "Extracting '%s' to '%s'\n" "$archive" "$(pwd)"
 
-        # Convert to lowercase for case-insensitive matching - compatible with both shells
+        # Convert to lowercase for case-insensitive matching
         local archive_lower
         archive_lower="$(printf "%s" "$archive_path" | tr '[:upper:]' '[:lower:]')"
 
@@ -287,11 +276,11 @@ EOF
                 log_error "'$archive' - unknown archive method"
                 ;;
         esac
-		# Return to original directory - compatible with both shells
+        # Return to original directory
         cd "$original_dir" || log_error "Failed to return to original directory"
     done
 
-   # Display any errors that occurred - compatible with both shells
+    # Display any errors that occurred
     if [ -n "$error_log" ]; then
         printf "\nThe following errors occurred:\n%b" "$error_log"
     fi
@@ -299,7 +288,7 @@ EOF
     return $exit_code
 }
 
-# Create alias - compatible with both shells
+# Create alias
 alias x='extract'
 
 
