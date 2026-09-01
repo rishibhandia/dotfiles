@@ -33,16 +33,17 @@ gates whole trees per OS/machine/flag.
 Runs at `chezmoi init` and produces `~/.config/chezmoi/chezmoi.toml`. This is
 the single decision point for the whole repo.
 
-**Five flags** (defaults false): `personal`, `work`, `ephemeral`, `headless`,
-`portable`.
+**Four flags** (defaults false): `personal`, `work`, `ephemeral`, `portable`.
+(A `headless` flag and an `osid` value used to be computed too; nothing ever
+consumed them and they were removed 2026-08.)
 
 **Machine detection** (lines 27–43): darwin machines are identified by
 hardware where possible — `hw.model == "Mac17,7"` → `rishi-mbp-2025` (rename-
 immune); the 2019 MBP and 2020 mini match on `scutil` ComputerName
 substrings; `ubuntu` by hostname. Known hostnames → `personal=true`.
-Containers/Codespaces/root users auto-set `ephemeral+headless` (22–26).
+Containers/Codespaces/root users auto-set `ephemeral`.
 Unknown interactive machines get prompted; unknown non-interactive machines
-(CI) default to `ephemeral+headless+work` so no 1Password/age call ever fires.
+(CI) default to `ephemeral+work` so no 1Password/age call ever fires.
 
 **What each flag gates:**
 
@@ -51,7 +52,7 @@ Unknown interactive machines get prompted; unknown non-interactive machines
 | `personal` | command-scoped 1Password API keys for `llm`, age encryption + key file, zotero/keynote skills, LiteParse, tirith MCP registration, lab-sync function |
 | `work` | NYU email in git config; personal apps (1Password, tailscale, …) excluded from Brewfile/Scoopfile |
 | `portable` (Windows) | GitHub-release externals instead of Scoop, psmux shell path, Astral uv installer, font install path |
-| `ephemeral`/`headless` | skips prompts/secrets; CI profile |
+| `ephemeral` | skips prompts/secrets; CI profile |
 | `hostname == rishi-macmini-2020` | the entire server stack (below) |
 
 Also set here: `[interpreters.py]` → `uvx python` (chezmoi `.py` scripts run

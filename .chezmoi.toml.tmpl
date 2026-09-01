@@ -11,18 +11,11 @@
 {{/* boolean feature tags */}}
 {{- $ephemeral := false -}}{{/* true if this machine is ephemeral, e.g. a cloud or VM instance */}}
 {{- $work := false -}}{{/* true if this machine is a work machine */}}
-{{- $headless := false -}}{{/* true if this machine does not have a screen and keyboard */}}
 {{- $personal := false -}}{{/* true if this machine should have personal secrets */}}
 {{- $portable := false -}}{{/* true if no package manager available (use portable binaries) */}}
-{{- "" -}}
-{{- $osID := .chezmoi.os -}}
-{{- if (and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id")) -}}
-{{-   $osID = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
-{{- end -}}
 {{/* detect GitHub codespaces, VSCode remote containers, Docker containers, Multipass VMs, and Vagrant boxes */}}
 {{- if or (env "CODESPACES") (env "REMOTE_CONTAINERS_IPC") (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") -}}
 {{-   $ephemeral = true -}}
-{{-   $headless = true -}}
 {{- end -}}
 {{/* work around unreliable hostname on darwin: prefer the stable hardware
      model (immune to DHCP hostname noise and ComputerName edits), then fall
@@ -57,7 +50,6 @@
 {{-   else if eq $hostname "rishi-mbp-2025" -}}
 {{-     $personal = true -}}
 {{-   else if eq $hostname "ubuntu" -}}
-{{-     $headless = true -}}
 {{-     $personal = true -}}
 {{-   else if stdinIsATTY -}}
 {{/* Unknown machine - prompt for configuration */}}
@@ -65,12 +57,10 @@
 {{-     if not $personal -}}
 {{-       $work = true -}}
 {{-     end -}}
-{{-     $headless = promptBoolOnce . "headless" "Is this a headless machine (no display)" -}}
 {{-     $ephemeral = promptBoolOnce . "ephemeral" "Is this an ephemeral machine (temporary, cloud VM)" -}}
 {{-   else -}}
 {{/* Non-interactive, unknown machine - assume ephemeral work machine */}}
 {{-     $ephemeral = true -}}
-{{-     $headless = true -}}
 {{-     $work = true -}}
 {{-   end -}}
 {{- end -}}
@@ -92,11 +82,9 @@ encryption = "age"
     email = {{ $email | quote }}
     ephemeral = {{ $ephemeral }}
     work = {{ $work }}
-    headless = {{ $headless }}
     hostname = {{ $hostname | quote }}
     personal = {{ $personal }}
     portable = {{ $portable }}
-    osid = {{ $osID | quote }}
 {{- if $personal }}
     age_recipient = {{ $age_recipient | quote }}
 {{- end }}
@@ -105,9 +93,6 @@ encryption = "age"
 [cd]
     command = "pwsh"
 {{ end }}
-[interpreters.py]
-    command = "uvx"
-    args = ["python"]
 [github]
     refreshPeriod = "12h"
     
