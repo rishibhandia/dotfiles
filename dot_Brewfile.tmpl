@@ -41,7 +41,6 @@ brew "rclone"                 # Cloud storage sync
 brew "navi"                   # Interactive cheatsheet
 brew "yt-dlp"                 # Video downloader
 brew "tesseract"              # OCR engine
-brew "age"                    # File encryption (used by chezmoi for encrypted source files)
 
 # =============================================================================
 # CLI Tools - Archive/Compression
@@ -142,6 +141,7 @@ brew "run-llama/liteparse/llamaindex-liteparse"   # Local PDF parser (LlamaIndex
 # =============================================================================
 # Mac mini only - always-on LAN services
 # =============================================================================
+brew "age"                    # File encryption — decrypts the AGH config seed (only .age file in the repo is mini-gated)
 cask "jellyfin"               # Self-hosted media server (LAN-wide)
 # Containers — Colima + Docker CLI (replaces Docker Desktop). Hosts the Shoko
 # metadata backend for Jellyfin/Shokofin as a Docker container via Colima

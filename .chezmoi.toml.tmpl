@@ -69,12 +69,15 @@
 {{-   $email = "rb3926@nyu.edu" -}}
 {{- end -}}
 {{- $name := "Rishi Bhandia" -}}
+{{/* age encryption is mini-only: the sole encrypted source file (the AGH
+     config seed) deploys only there, so other machines skip the recipient
+     prompt, the age dependency, and a copy of the decryption key. */}}
 {{- $age_recipient := "" -}}
-{{- if $personal -}}
+{{- if eq $hostname "rishi-macmini-2020" -}}
 {{-   $age_recipient = promptStringOnce . "age_recipient" "Your age public key (run on the source machine: grep '^# public key:' ~/.config/age/key.txt)" -}}
 {{- end -}}
 
-{{ if $personal -}}
+{{ if eq $hostname "rishi-macmini-2020" -}}
 encryption = "age"
 {{ end -}}
 [data]
@@ -85,7 +88,7 @@ encryption = "age"
     hostname = {{ $hostname | quote }}
     personal = {{ $personal }}
     portable = {{ $portable }}
-{{- if $personal }}
+{{- if eq $hostname "rishi-macmini-2020" }}
     age_recipient = {{ $age_recipient | quote }}
 {{- end }}
 
@@ -110,7 +113,7 @@ encryption = "age"
     # account = "my-account"
     # vault = "my-vault"
 
-{{ if $personal -}}
+{{ if eq $hostname "rishi-macmini-2020" -}}
 [age]
     identity = "~/.config/age/key.txt"
     recipient = {{ $age_recipient | quote }}

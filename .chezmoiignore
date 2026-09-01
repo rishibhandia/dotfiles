@@ -103,11 +103,11 @@ Library/LaunchAgents/com.rishi.tagorganizer.plist
 {{ end }}
 
 # =============================================================================
-# Age encryption key — pulled from 1Password, only useful on personal
-# machines that also have `op` CLI. Skip on non-personal machines (work,
-# ephemeral) and portable installs (no 1Password) so apply never invokes op.
+# Age encryption key — pulled from 1Password. Only the mini uses age (the
+# AGH config seed is the sole encrypted source file), so only it gets a
+# copy of the key; everywhere else skips it and apply never invokes op.
 # =============================================================================
-{{ if or .portable (not .personal) }}
+{{ if ne .hostname "rishi-macmini-2020" }}
 .config/age/key.txt
 {{ end }}
 
