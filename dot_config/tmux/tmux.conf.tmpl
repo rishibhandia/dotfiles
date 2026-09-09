@@ -11,3 +11,16 @@ set -as terminal-features 'xterm*:extkeys'
 set -as terminal-features '*:hyperlinks'
 
 {{ template "tmux-shared" . }}
+
+# =============================================================================
+# Plugins (tmux-only — psmux shares the snippet above, not this block).
+# TPM itself is cloned by chezmoi via .chezmoiexternal.toml.
+# =============================================================================
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+# Restore pane working directories and layouts across reboots.
+set -g @continuum-restore 'on'
+set -g @continuum-save-interval '15'
+# Initialize TPM (must stay the last line of this file).
+run '~/.config/tmux/plugins/tpm/tpm'
