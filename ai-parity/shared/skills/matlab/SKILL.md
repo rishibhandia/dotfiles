@@ -6,7 +6,7 @@ description: MATLAB R2025a coding patterns and the personal +thz analysis packag
 # MATLAB Skill — +thz Package and Coding Patterns
 
 **Extracted:** 2026-03-15
-**Updated:** 2026-07-21
+**Updated:** 2026-09-10
 **Context:** NbOI2 SHG/THz pump-probe scripts; general MATLAB R2025a; the personal `+thz` analysis package at `~/Code/matlab-thz-analysis/` (the `rishibhandia/matlab-thz-analysis` repo).
 
 This SKILL.md is the entry point. It documents the package layout,
@@ -24,6 +24,7 @@ topic-specific guidance, see the satellite docs in this directory.
 | FFT in tables: `thz.fft.disc_ft` zero-padding, datatable row-vector conventions for stored FFTs | [`fft.md`](fft.md) |
 | Transient absorption: sideband analysis, fluence scaling with wire grids, FFT frequency axis for negative-going time vectors, SHG probe-polarization normalization | [`ta.md`](ta.md) |
 | Golden-baseline workspace verification for output-identical refactors (loader migrations, package moves) | [`verification.md`](verification.md) |
+| 2D THz nonlinear spectroscopy: NL = AB - A - B keeps only cross terms, peak positions by order, Mahmood delay convention, projection-slice limits of 1D traces, filtered-pump pitfalls | [`thz2d.md`](thz2d.md) |
 
 ---
 
@@ -103,6 +104,25 @@ analysis scripts on other computers don't need edits.
 all TiSe2 call sites were migrated. String-valued template parameters are
 not supported by the universal loader — `replace()` them into the template
 before the call and re-attach as a column afterward.
+
+### Headless `-batch` runs do not load the package
+
+**Updated:** 2026-09-10
+
+`matlab -batch "cd('...'); myScript"` does not reliably execute the userpath
+`startup.m` that delegates to the repo's `startup.m`, so the first `thz.*` call
+fails with `Unable to resolve the name 'thz.io.load2DTimeTraceNew'`. Guard every
+script that is meant to run headless:
+
+```matlab
+if isempty(which('thz.fft.disc_ft'))
+    run(fullfile(getenv('HOME'), 'Code', 'matlab-thz-analysis', 'startup.m'));
+end
+```
+
+or prepend `run('~/Code/matlab-thz-analysis/startup.m');` to the `-batch`
+string. Do not use `exist('thz.io.load2DTimeTraceNew', 'class')` as the test;
+package functions are not classes and it returns false even when they resolve.
 
 ### TA analysis primitives in `+thz/+ta`
 

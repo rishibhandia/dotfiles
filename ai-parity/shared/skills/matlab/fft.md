@@ -1,7 +1,7 @@
 # FFT in Tables: `thz.fft.disc_ft` Conventions
 
 **Sources:** consolidated from learned/matlab-disc-ft-nfft-sizing (2026-03-20), learned/matlab-datatable-row-vector-convention (2026-03-13).
-**Updated:** 2026-05-04
+**Updated:** 2026-09-10
 
 How `thz.fft.disc_ft` and `thz.fft.rfftFreq` interact with multi-trace
 tables that store FFT results alongside time-domain data.
@@ -68,6 +68,16 @@ nfft   = 2^nextpow2(maxLen);
 Don't try to use a different `nfft` per signal — you'll lose the
 shared frequency axis and the row-vector convention above stops
 working.
+
+### Pick one `nfft` for a whole comparison
+
+**Updated:** 2026-09-10
+
+When several traces of different length are compared (a 14 ps and a 43 ps scan
+at the same 0.02 ps step), choose `nfft` from the *longest* trace (4096 here)
+and use that same value for every trace. A per-trace `nfft` silently gives each
+spectrum a different interpolation density, and an `nfft` chosen for the short
+trace throws the error above on the long one.
 
 ## When to Use
 

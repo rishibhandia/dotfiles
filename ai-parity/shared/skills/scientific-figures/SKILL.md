@@ -16,7 +16,9 @@ description: >-
 
 Treat a scientific figure as a representation of evidence, not an illustration.
 Use the `matlab` skill for MATLAB-specific implementation and `matlab-runner`
-for headless execution and output inspection.
+for headless execution and output inspection. For layout mechanics, stacked
+shared-axis panels, raster-panel staging and annotation hygiene in PRL-style
+figures see [`prl-layout.md`](prl-layout.md).
 
 ## Cardinal rule
 

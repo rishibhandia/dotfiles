@@ -157,3 +157,22 @@ Writing or reviewing any MATLAB function or class; naming variables; formatting 
 - Reset global state in `catch` or via `onCleanup` before rethrowing
 - Use `rethrow(exception)` or `throw(exception)` — **never `throwAsCaller`** (obscures stack trace)
 - Error messages should state problem + solution: `"Sparse matrices not supported. Use eigs instead."`
+
+## Loop over index sets as row vectors
+
+**Updated:** 2026-09-10
+
+A `for` loop iterates over the *columns* of its expression. `find` on a column
+mask returns a column, so `for ii = find(mask)` runs **once** with the whole
+column as `ii`, and `find(mask).'` on a row mask does the same. The failure is
+delayed and cryptic (`Arrays have incompatible sizes` inside the body, or a
+loop that silently executes one iteration). Always force a row:
+
+```matlab
+for ii = reshape(find(mask), 1, [])
+    ...
+end
+```
+
+The same applies to `for k = someColumnVector`; use `someColumnVector.'` or
+`1:numel(v)` with indexing inside the loop.

@@ -84,6 +84,25 @@ FROM itemCreators ic JOIN creators c ON c.creatorID = ic.creatorID
 WHERE ic.itemID = 1234 ORDER BY ic.orderIndex;
 ```
 
+## Reading a PDF's text without a PDF tool
+
+**Updated:** 2026-09-10
+
+Every PDF attachment folder `~/Zotero/storage/<KEY>/` also holds
+`.zotero-ft-cache`, Zotero's own plain-text extraction of that PDF (equations
+come out as flattened text, figures are absent). Read it directly instead of
+running pypdf/pdftotext — it exists for every indexed attachment and needs no
+Python packages. Find the folder from the parent item:
+
+```sql
+SELECT ia.parentItemID, i.key, ia.path
+FROM itemAttachments ia JOIN items i ON i.itemID = ia.itemID
+WHERE ia.parentItemID = 22089 AND ia.contentType = 'application/pdf';
+```
+
+`i.key` is the storage folder name; `ia.path` is `storage:<filename>.pdf`.
+Use the PDF itself (Read with `pages`) only when equations or figures matter.
+
 ## Caveats
 
 - **Copy, query, delete.** Querying the live DB fails with "database is
