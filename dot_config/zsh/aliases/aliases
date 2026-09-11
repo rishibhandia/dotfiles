@@ -470,8 +470,13 @@ fi
 
 # Prevents system sleep while Claude Code is running (AC power only).
 # caffeinate -s is a no-op on battery — no conditional needed.
+# ANTHROPIC_API_KEY is unset for this process only: it belongs to the llm
+# tooling, and Claude Code prefers it over the claude.ai subscription login
+# (which also disables Remote Control). Every other command still sees it.
 if [[ "$OSTYPE" == darwin* ]] && command -v caffeinate > /dev/null; then
-    alias claude='caffeinate -s claude'
+    alias claude='caffeinate -s env -u ANTHROPIC_API_KEY claude'
+else
+    alias claude='env -u ANTHROPIC_API_KEY claude'
 fi
 
 # Displays detailed weather and forecast.
