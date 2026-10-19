@@ -25,6 +25,14 @@ The install script will:
 4. Apply dotfiles
 5. Set zsh as default shell
 
+On **Windows**, `install.ps1` asks personal vs. work **first**, before any package
+manager runs (`DOTFILES_WORK=1` / `DOTFILES_PERSONAL=1` answer it unattended), and
+exports the answer so `chezmoi init` doesn't ask again. **Work machines never touch
+Scoop**: git/chezmoi come from `winget --scope user` or portable binaries, and the
+template forces `portable = true`. Personal machines install Scoop + the full
+Scoopfile; if that fails they fall back to portable with a warning. See README
+"Re-run from scratch" for why a plain re-run reuses cached answers.
+
 ## Common Commands
 
 Use the `dots` command (defined in `scripts.zsh` / `dots.ps1`):
@@ -112,6 +120,7 @@ This repo follows XDG Base Directory spec:
 - tmux config adds Unix-specific terminal settings (`default-terminal`, `terminal-overrides`, `allow-passthrough`)
 - psmux auto-launches on PowerShell terminal open (attaches to `main` session or creates one); skipped inside existing sessions, VS Code, and non-interactive contexts
 - **psmux installation**: Via Scoop when available, otherwise portable binary from GitHub releases to `~/.local/bin/psmux/` (installed by `run_once_after_01-install-cli-tools.ps1.tmpl`)
+- **psmux default shell**: Scoop pwsh shim on Scoop machines; on portable machines the PowerShell 7 zip at the fixed path `~/.local/opt/pwsh/pwsh.exe` (falls back to Windows PowerShell 5.1 if it's missing). pwsh is installed by a `run_once_before_` script precisely so `psmux.conf`'s `stat` check sees it on the first apply — chezmoi renders target templates *after* before-scripts run
 
 ### Navi Cheatsheets
 Cheats live in `dot_local/share/navi/cheats/` and sync to `~/.local/share/navi/cheats` on every OS. navi's *built-in* default cheat path varies by platform (`directories` crate: `%APPDATA%`-based on Windows, Application Support on some macOS builds), so both shells export `NAVI_PATH` pointing at the managed dir — navi's highest-precedence setting. The zsh widget loads in `.zshrc`, the PowerShell widget in `profile.ps1` (both guarded on navi existing; navi is not installed in Windows portable mode).
@@ -240,7 +249,7 @@ When editing `.tmpl` files, these variables are available:
 - `.chezmoi.os` - Operating system (darwin, linux, windows)
 - `.chezmoi.arch` - Architecture (amd64, arm64)
 - `.personal` - Boolean for personal machines (enables secrets)
-- `.work` - Boolean for work machines
+- `.work` - Boolean for work machines (on Windows, always implies `.portable`)
 - `.ephemeral` - Boolean for temporary/cloud environments
 - `.headless` - Boolean for machines without display
 - `.name`, `.email` - User identity (varies by machine type)
@@ -250,7 +259,8 @@ Scripts that run automatically during `chezmoi apply`:
 - `run_once_before_install-homebrew.sh.tmpl` - Installs Homebrew (first run only)
 - `run_onchange_after_00-install-packages.sh.tmpl` - Installs Brewfile/Scoopfile packages (when package files change)
 - `run_once_after_01-install-cli-tools.sh.tmpl` - Installs Claude Code, Shell Sage, nvim plugins, wires rtk hook (macOS/Linux)
-- `windows/run_once_after_01-install-cli-tools.ps1.tmpl` - Installs Claude Code, Tirith, psmux, nvim plugins, wires rtk hook (Windows)
+- `windows/run_once_before_install-portable-shells.ps1.tmpl` - Portable Windows only: PowerShell 7 zip → `~/.local/opt/pwsh`, Windows Terminal via `winget --scope user` (else portable zip → `~/.local/opt/windows-terminal`)
+- `windows/run_once_after_01-install-cli-tools.ps1.tmpl` - Installs Claude Code, Tirith (Scoop only), psmux, nvim plugins (if nvim exists), wires rtk hook (Windows). All Windows `.ps1` scripts run via `[interpreters.ps1]` with a process-scoped `-ExecutionPolicy Bypass`, so a Restricted policy on a work machine doesn't block them; the machine's policy is never changed.
 - `darwin/run_once_after_configure-macos.sh` - Configures macOS preferences
 - `run_once_after_02-install-adguardhome.sh.tmpl` - Installs AdGuard Home on the Mac mini (LAN DNS host) — gated to `rishi-macmini-2020`
 - `run_once_after_03-configure-mini-always-on.sh.tmpl` - `pmset` 24/7 settings for the Mac mini — gated to `rishi-macmini-2020`
@@ -264,7 +274,7 @@ Scripts that run automatically during `chezmoi apply`:
 **Note on the `docker` CLI:** scripts 07 and 10 both gate on `command -v docker`. Homebrew's `docker` formula was found *installed but unlinked* (2026-07-26), so `/opt/homebrew/bin/docker` was missing and **script 07 had been silently no-op'ing on every apply** — Shoko only stayed up because `restart: unless-stopped` kept the existing container alive. Fix is `brew link --overwrite docker`. If either script starts logging "docker not installed yet", check linkage before anything else.
 
 ### Windows Portable Mode (`.chezmoiexternal.toml.tmpl`)
-Fallback for Windows machines where Scoop is unavailable (`.portable = true`). Downloads pre-built binaries directly from GitHub releases to `~/.local/bin`, which is added to PATH in the PowerShell profile. Covers: rg, fd, bat, fzf, zoxide, starship, lsd, jq, yq, gh, duf, fastfetch, ruff — plus the Hack Nerd Font (portable mode only; Scoop's `nerd-fonts/Hack-NF` owns fonts otherwise, and installing both ways made them fight over the same HKCU registry names). Note: nvim, navi, and tirith are NOT included in portable mode.
+Used on **every work machine** (the template forces `.portable = true` when `.work`, even if Scoop is on PATH), on personal machines with `DOTFILES_PORTABLE=1`, and as the fallback when Scoop is unavailable. Downloads pre-built binaries directly from GitHub releases to `~/.local/bin`, which is added to PATH in the PowerShell profile. Covers: rg, fd, bat, fzf, zoxide, starship, lsd, jq, yq, gh, duf, fastfetch, ruff — plus the Hack Nerd Font (portable mode only; Scoop's `nerd-fonts/Hack-NF` owns fonts otherwise, and installing both ways made them fight over the same HKCU registry names). Note: nvim, navi, and tirith are NOT included in portable mode (decided 2026-10 for the work tool set). Also installed on portable machines: git/chezmoi (bootstrap), uv/uvx (Astral), Claude Code, psmux, PowerShell 7, Windows Terminal. Deliberately excluded: language toolchains (go, rustup, nodejs), rclone, yt-dlp, broot, btop, and the personal GUI apps. Anything new added here must be per-user and need no admin; `scripts/uninstall.ps1` must learn every new path and PATH entry.
 
 **uv / uvx exception:** Used to be in the list above, but `uv.exe` gets file-locked on Windows during `chezmoi apply` (commit `0a8b52c`). `.chezmoiignore` now blocks `.local/bin/uv.exe` and `.local/bin/uvx.exe` on all Windows targets. Install paths now: Scoop (`main/uv`) on non-portable Windows; the official Astral installer (`irm https://astral.sh/uv/install.ps1 | iex`) run from `windows/run_once_after_01-install-cli-tools.ps1.tmpl` on portable Windows. The Astral installer manages its own replacement logic, so it doesn't trigger the file-lock that prompted the chezmoi-external removal.
 
@@ -277,7 +287,9 @@ Fallback for Windows machines where Scoop is unavailable (`.portable = true`). D
 
 **Tap-based formulae:** Always use the fully qualified `tap/formula` name in the Brewfile when adding entries from a third-party tap. `brew bundle` resolves unqualified `brew "name"` lines against the formula index loaded at startup, which doesn't include taps added later in the same Brewfile, so a fresh-machine apply will fail with `No available formula`. Examples in this repo: `sheeki03/tap/tirith`, `run-llama/liteparse/llamaindex-liteparse`.
 
-**Windows package manager policy:** Use Scoop exclusively. Do not use npm, cargo, winget, or other package managers as alternatives for CLI tools.
+**Windows package manager policy:** On Scoop machines (personal), use Scoop exclusively — no npm, cargo, winget, or other package managers as alternatives for CLI tools. Work/portable machines never use Scoop: CLI tools come from GitHub releases; `winget --scope user` is allowed only for git, chezmoi, and Windows Terminal (each with a portable fallback).
+
+**Scoop installer gotcha:** get.scoop.sh's `Exit-Install` calls a bare `break` when run through `iex`, which unwinds through any `try/catch` and silently ends the *calling* script. `install.ps1` therefore downloads it and runs it as a `-File` child process (where it uses `exit`), after first checking the execution policy.
 
 **Cask upgrades that need `sudo` (bites hardest on the mini):** some casks — `tailscale-app`, `macfuse`, anything installing a pkg or system extension — shell out to `sudo` during uninstall-then-reinstall. In a non-interactive shell that fails with `sudo: a terminal is required`, but **only after brew has already quit the running app**. On the mini that means the service stays down and the upgrade never completes. Symptom seen 2026-08-02: `brew upgrade --cask tailscale-app` quit Tailscale, failed at the sudo step, and left the mini off the tailnet (AGH/LAN DNS was unaffected — it's a LaunchDaemon and doesn't route through Tailscale). Run these yourself with a `! sudo -v && brew upgrade --cask <name>` rather than delegating them, and prefer doing them when you're physically at the machine.
 

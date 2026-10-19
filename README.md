@@ -16,22 +16,55 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/rishibhandia/dotfiles/main
 iwr -useb https://raw.githubusercontent.com/rishibhandia/dotfiles/main/install.ps1 | iex
 ```
 
-The install script automatically detects the best installation method:
-- **Scoop available** → Uses Scoop for all packages
-- **winget available** → Uses winget for Git/chezmoi, portable binaries for tools
-- **Neither** → Downloads portable binaries directly (no admin required)
+The install script first asks whether this is a **personal or work** machine
+(before any package manager is touched), then:
+- **Work** → never touches Scoop. Git and chezmoi via `winget --scope user`, else
+  portable binaries; everything else is a portable binary in `~/.local`. No admin
+  rights, and the execution policy is never changed (chezmoi's scripts run with a
+  process-scoped `-ExecutionPolicy Bypass`).
+- **Personal** → installs Scoop and the full Scoopfile. If Scoop can't be installed
+  (e.g. a Restricted execution policy), it warns and falls back to portable mode.
 
-During setup, you'll be prompted:
-- "Is this a personal machine?" (enables 1Password secrets)
-- "Is this a headless machine?"
-- "Is this an ephemeral machine?"
+Unattended runs can answer the question up front:
+
+| Variable | Effect |
+|---|---|
+| `$env:DOTFILES_WORK = 1` | Work machine (portable, no Scoop) |
+| `$env:DOTFILES_PERSONAL = 1` | Personal machine (Scoop + full Scoopfile) |
+| `$env:DOTFILES_PORTABLE = 1` | Personal machine, but portable instead of Scoop |
+
+Non-interactive runs with neither set are treated as work. `chezmoi init` then only
+asks "Is this an ephemeral machine?".
 
 ### Uninstall (Windows)
 
 When leaving a work machine:
 
 ```powershell
-~/.local/share/chezmoi/scripts/uninstall.ps1
+powershell -ExecutionPolicy Bypass -File ~/.local/share/chezmoi/scripts/uninstall.ps1
+```
+
+It removes the chezmoi-managed configs, every binary and `~/.local/opt` install the
+bootstrap wrote, the user `PATH` entries it added, the per-user Hack Nerd Font, and
+the profile hook lines. Claude Code login/history in `~/.claude` is kept.
+
+### Re-run from scratch (Windows)
+
+A plain re-run of `install.ps1` does **not** start over: the personal/work answer is
+cached in `~/.config/chezmoi/chezmoi.toml` (reused unless `DOTFILES_WORK` /
+`DOTFILES_PERSONAL` is set), and an existing `~/.local/share/chezmoi` source dir is
+re-initialized in place (`chezmoi init --apply`) rather than re-cloned. To really
+start over — e.g. a work machine that got the Scoop profile:
+
+```powershell
+# 1. Remove Scoop and everything it installed (only if Scoop is present)
+scoop uninstall scoop
+
+# 2. Remove what the dotfiles wrote, including the cached answers
+powershell -ExecutionPolicy Bypass -File ~/.local/share/chezmoi/scripts/uninstall.ps1
+
+# 3. Open a new PowerShell window, then re-run the bootstrap
+iwr -useb https://raw.githubusercontent.com/rishibhandia/dotfiles/main/install.ps1 | iex
 ```
 
 ## What Gets Installed
@@ -42,14 +75,21 @@ When leaving a work machine:
 3. All packages from Brewfile
 4. zsh as default shell
 
-### Windows (with Scoop)
+### Windows (personal, with Scoop)
 - All packages from Scoopfile via Scoop
 
-### Windows (Portable Mode)
-Portable binaries downloaded directly from GitHub releases:
-- ripgrep, fd, bat, fzf, zoxide, starship, lsd
-- jq, yq, gh, duf, fastfetch
-- uv, uvx, ruff
+### Windows (work, or portable mode)
+Per-user installs only, no Scoop:
+- Git, chezmoi (winget `--scope user`, else portable)
+- ripgrep, fd, bat, fzf, zoxide, starship, lsd, jq, yq, gh, duf, fastfetch, ruff,
+  rtk (GitHub releases → `~/.local/bin`)
+- uv/uvx (Astral installer), Claude Code (native installer), psmux
+- PowerShell 7 (official zip → `~/.local/opt/pwsh`, psmux's default shell)
+- Windows Terminal (winget `--scope user`, else portable zip)
+- Hack Nerd Font (per-user)
+
+No language toolchains (go, rustup, nodejs), no rclone/yt-dlp/broot/btop, and none
+of the personal GUI apps.
 
 ## Repository Structure
 
@@ -125,12 +165,12 @@ The `.chezmoi.toml.tmpl` template sets feature flags based on machine type:
 | Flag | Purpose |
 |------|---------|
 | `personal` | Personal machines (enables 1Password secrets) |
-| `work` | Work machines (no personal secrets) |
-| `portable` | Windows without Scoop (uses portable binaries) |
+| `work` | Work machines: NYU git email, no personal apps/secrets; on Windows always `portable` |
+| `portable` | Windows without Scoop: work machines, `DOTFILES_PORTABLE=1`, or Scoop missing |
 | `ephemeral` | Temporary/cloud environments |
-| `headless` | Machines without display |
 
 **Detection logic:**
+- `DOTFILES_WORK=1` / `DOTFILES_PERSONAL=1` → used as-is (set by `install.ps1`)
 - Known hostnames → automatically configured
 - Unknown machines → prompted during `chezmoi init`
 - Non-interactive → defaults to ephemeral work machine

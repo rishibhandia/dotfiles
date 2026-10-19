@@ -23,10 +23,14 @@ gates whole trees per OS/machine/flag.
   build deps → Homebrew → chezmoi → `chezmoi init --apply rishibhandia` → 
   offer `op signin` and re-apply (secrets populate on the second pass) → zsh
   as default shell.
-- **Windows** — `install.ps1`: **Scoop first** (critical: `.chezmoi.toml.tmpl`
-  sets `portable=true` if Scoop is missing at init time, which permanently
-  changes the machine's profile) → git → chezmoi → init → dot-source the
-  PowerShell profile. `DOTFILES_PORTABLE=1` forces portable mode.
+- **Windows** — `install.ps1`: **machine type first** (personal vs. work, from
+  `DOTFILES_WORK`/`DOTFILES_PERSONAL`, the cached chezmoi answer, or a prompt;
+  non-interactive = work), exported so `chezmoi init` doesn't re-ask →
+  **personal only:** Scoop (run as a `-File` child so its `break` can't kill
+  the bootstrap; falls back to portable on failure) → git → chezmoi
+  (work: `winget --scope user`, else portable) → init (an existing source dir
+  is re-initialized, not just applied) → hook the 5.1 and 7 PowerShell
+  profiles. `DOTFILES_PORTABLE=1` keeps a personal machine off Scoop.
 
 ## The data layer: `.chezmoi.toml.tmpl`
 
@@ -42,16 +46,19 @@ hardware where possible — `hw.model == "Mac17,7"` → `rishi-mbp-2025` (rename
 immune); the 2019 MBP and 2020 mini match on `scutil` ComputerName
 substrings; `ubuntu` by hostname. Known hostnames → `personal=true`.
 Containers/Codespaces/root users auto-set `ephemeral`.
-Unknown interactive machines get prompted; unknown non-interactive machines
-(CI) default to `ephemeral+work` so no 1Password/age call ever fires.
+`DOTFILES_WORK=1` / `DOTFILES_PERSONAL=1` (set by `install.ps1`) answer the
+personal question outright. Unknown interactive machines get prompted;
+unknown non-interactive machines (CI) default to `ephemeral+work` so no
+1Password/age call ever fires. On Windows, `portable` is computed *after*
+machine type: `work`, Scoop missing, or `DOTFILES_PORTABLE=1`.
 
 **What each flag gates:**
 
 | Flag | Gates |
 |---|---|
 | `personal` | command-scoped 1Password API keys for `llm`, age encryption + key file, zotero/keynote skills, LiteParse, tirith MCP registration, lab-sync function |
-| `work` | NYU email in git config; personal apps (1Password, tailscale, …) excluded from Brewfile/Scoopfile |
-| `portable` (Windows) | GitHub-release externals instead of Scoop, psmux shell path, Astral uv installer, font install path |
+| `work` | NYU email in git config; personal apps (1Password, tailscale, …) excluded from the Brewfile; on Windows forces `portable` (no Scoop at all) |
+| `portable` (Windows) | GitHub-release externals instead of Scoop, PowerShell 7 zip + Windows Terminal, psmux shell path, Astral uv installer, font install path |
 | `ephemeral` | skips prompts/secrets; CI profile |
 | `hostname == rishi-macmini-2020` | the entire server stack (below) |
 
@@ -114,8 +121,9 @@ macOS sequence:
    duti (once), Backblaze exclusion-rules patcher (onchange; validates with
    xmllint, writes only on diff).
 
-Windows sequence mirrors it: Scoop (before) → Scoopfile (onchange, hash
-includes `.work`) → cli-tools (Claude Code via install.ps1→winget→npm
+Windows sequence mirrors it: Scoop (before, non-portable) or portable shells
+(before, portable: pwsh zip + Windows Terminal) → Scoopfile (onchange,
+non-portable, hash includes `.work`) → cli-tools (Claude Code via install.ps1→winget→npm
 fallback; uv via Astral in portable mode; rtk run with stdin closed + 30 s
 kill timeout because it has hung) → Windows Terminal theming (strips JSONC
 comments for PS 5.1; its rewrite drops hand comments) → portable font
@@ -180,7 +188,8 @@ Bash the same basics; both are Windows-only.
   `$LOCALAPPDATA/nvim` via `AppData/Local/nvim/init.vim.tmpl`, a one-line
   `include` of the Unix source.
 - **tmux/psmux** — thin platform wrappers around `tmux-shared`. psmux picks
-  its default shell by `.portable` (PowerShell 5.1 path vs Scoop pwsh shim).
+  its default shell by `.portable` (Scoop pwsh shim vs. the portable pwsh zip
+  at `~/.local/opt/pwsh`, with PowerShell 5.1 as the fallback).
 - **Ghostty** — Hack Nerd Font, catppuccin-macchiato, launches
   `/bin/zsh -lc 'tmux new-session -A -s main'` (login shell so brew PATH
   works), `shift+enter` mapped for multi-line Claude Code input.
@@ -264,8 +273,9 @@ chezmoi's `gitHub*` template functions.
 1. `include` paths in templates use the actual **source** filename, and
    chezmoi-native files (`.chezmoi*.toml.tmpl`) never take a `dot_` prefix.
 2. `create_` files don't propagate template updates to existing machines.
-3. Scoop must exist before `chezmoi init` on Windows, or the machine is
-   permanently profiled portable (re-run `chezmoi init` to fix).
+3. On Windows, machine type must be known before Scoop is installed: work
+   machines are always portable, and a re-run reuses the cached answer and
+   source dir (README "Re-run from scratch" to really start over).
 4. Never `colima delete` casually — Docker named volumes (Shoko's DB) die.
 5. Tap formulae need fully-qualified names in the Brewfile.
 6. `*.ps1.tmpl` must stay ASCII (PS 5.1 misdecodes BOM-less UTF-8; em-dashes
