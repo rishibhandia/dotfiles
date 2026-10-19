@@ -53,9 +53,23 @@ $ToRemove = @(
 # Astral uv installer). Listed individually so unrelated user binaries survive.
 $binDir = Join-Path $env:USERPROFILE ".local\bin"
 $repoBins = @("rg", "fd", "bat", "fzf", "zoxide", "starship", "lsd", "jq", "yq",
-    "gh", "duf", "fastfetch", "ruff", "rtk", "uv", "uvx", "chezmoi")
+    "gh", "duf", "fastfetch", "ruff", "rtk", "uv", "uvx", "uvw", "chezmoi", "claude")
 $ToRemove += ($repoBins | ForEach-Object { Join-Path $binDir "$_.exe" })
 $ToRemove += (Join-Path $binDir "psmux")                      # psmux install dir
+# Claude Code native-installer versions (the binary store behind claude.exe;
+# login/history live in ~\.claude and are kept, see above)
+$ToRemove += (Join-Path $env:USERPROFILE ".local\share\claude")
+# Multi-file portable installs (install.ps1 / cli-tools scripts)
+$optDir = Join-Path $env:USERPROFILE ".local\opt"
+$ToRemove += (Join-Path $optDir "git")                        # PortableGit (work machines)
+
+# User PATH entries this repo adds (install.ps1, the PowerShell profile, and
+# the cli-tools script). Removed by exact segment match below.
+$repoPathEntries = @(
+    $binDir,
+    (Join-Path $binDir "psmux"),
+    (Join-Path $optDir "git\cmd")
+)
 
 # Check what exists
 $ExistingPaths = @($ToRemove | Where-Object { Test-Path $_ })
@@ -131,19 +145,26 @@ foreach ($font in $hackFonts) {
     }
 }
 
-# psmux PATH entry (added by the cli-tools script in portable mode)
-$psmuxDir = Join-Path $binDir "psmux"
+# User PATH entries added by this repo (exact segment match, so unrelated
+# entries such as a different ~\.local\bin\foo survive)
 $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
-if ($userPath -and ($userPath -split ';') -contains $psmuxDir) {
-    $newPath = (($userPath -split ';') | Where-Object { $_ -ne $psmuxDir }) -join ';'
-    [Environment]::SetEnvironmentVariable("PATH", $newPath, "User")
-    Write-Host "Removed psmux from user PATH" -ForegroundColor Green
+if ($userPath) {
+    $segments = @($userPath -split ';')
+    $kept = @($segments | Where-Object { $repoPathEntries -notcontains $_ })
+    if ($kept.Count -ne $segments.Count) {
+        [Environment]::SetEnvironmentVariable("PATH", ($kept -join ';'), "User")
+        foreach ($entry in ($segments | Where-Object { $repoPathEntries -contains $_ })) {
+            Write-Host "Removed $entry from user PATH" -ForegroundColor Green
+        }
+    }
 }
 
-# Drop ~\.local\bin only if nothing else lives there
-if ((Test-Path $binDir) -and -not (Get-ChildItem $binDir -Force -ErrorAction SilentlyContinue)) {
-    Remove-Item $binDir -Force
-    Write-Host "Removed empty $binDir" -ForegroundColor Green
+# Drop ~\.local\bin and ~\.local\opt only if nothing else lives there
+foreach ($dir in @($binDir, $optDir)) {
+    if ((Test-Path $dir) -and -not (Get-ChildItem $dir -Force -ErrorAction SilentlyContinue)) {
+        Remove-Item $dir -Force
+        Write-Host "Removed empty $dir" -ForegroundColor Green
+    }
 }
 
 Write-Host ""

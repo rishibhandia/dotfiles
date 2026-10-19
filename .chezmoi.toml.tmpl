@@ -34,16 +34,17 @@
 {{-     $hostname = $computerName -}}
 {{-   end -}}
 {{- end -}}
-{{/* Detect portable mode on Windows (no Scoop available) */}}
-{{- if eq .chezmoi.os "windows" -}}
-{{-   if not (lookPath "scoop") -}}
-{{-     $portable = true -}}
-{{-   end -}}
-{{- end -}}
-
-{{/* Determine machine type */}}
+{{/* Determine machine type. DOTFILES_WORK=1 / DOTFILES_PERSONAL=1 (set by
+     install.ps1 after it asks, or by hand for unattended runs) answer the
+     personal question up front so it is never asked twice. */}}
 {{- if not $ephemeral -}}
-{{-   if eq $hostname "rishi-macmini-2020" -}}
+{{-   if or (env "DOTFILES_WORK" | eq "1") (env "DOTFILES_PERSONAL" | eq "1") -}}
+{{-     $personal = env "DOTFILES_PERSONAL" | eq "1" -}}
+{{-     $work = not $personal -}}
+{{-     if stdinIsATTY -}}
+{{-       $ephemeral = promptBoolOnce . "ephemeral" "Is this an ephemeral machine (temporary, cloud VM)" -}}
+{{-     end -}}
+{{-   else if eq $hostname "rishi-macmini-2020" -}}
 {{-     $personal = true -}}
 {{-   else if eq $hostname "rishi-mbp-2019" -}}
 {{-     $personal = true -}}
@@ -62,6 +63,16 @@
 {{/* Non-interactive, unknown machine - assume ephemeral work machine */}}
 {{-     $ephemeral = true -}}
 {{-     $work = true -}}
+{{-   end -}}
+{{- end -}}
+
+{{/* Portable mode on Windows: ~/.local/bin binaries instead of Scoop.
+     Work machines are always portable, even if Scoop is on PATH, so they
+     never get the full Scoopfile. Otherwise portable when Scoop is missing
+     or DOTFILES_PORTABLE=1. */}}
+{{- if eq .chezmoi.os "windows" -}}
+{{-   if or $work (not (lookPath "scoop")) (env "DOTFILES_PORTABLE" | eq "1") -}}
+{{-     $portable = true -}}
 {{-   end -}}
 {{- end -}}
 {{- $email := "rishi@bhandia.com" -}}
@@ -95,6 +106,14 @@ encryption = "age"
 {{ if eq .chezmoi.os "windows" }}
 [cd]
     command = "pwsh"
+
+# Run chezmoi's .ps1 scripts with a process-scoped Bypass so a Restricted
+# execution policy (common on work machines) doesn't block them. The
+# machine's policy itself is never changed. Same pwsh-else-powershell
+# choice as chezmoi's built-in default, resolved at init time.
+[interpreters.ps1]
+    command = {{ if lookPath "pwsh" }}"pwsh"{{ else }}"powershell"{{ end }}
+    args = ["-NoLogo", "-ExecutionPolicy", "Bypass", "-File"]
 {{ end }}
 [github]
     refreshPeriod = "12h"

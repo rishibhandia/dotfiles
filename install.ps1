@@ -7,12 +7,18 @@
 #   $env:DOTFILES_DEBUG = 1      - Enable debug output
 #   $env:DOTFILES_BRANCH = "xxx" - Use a specific branch (default: main)
 #   $env:DOTFILES_PORTABLE = 1   - Skip Scoop install, force portable mode
+#   $env:DOTFILES_WORK = 1       - Work machine (skip the personal/work prompt)
+#   $env:DOTFILES_PERSONAL = 1   - Personal machine (skip the prompt)
 #
 # Installation method:
-#   1. Install Scoop if missing (unless DOTFILES_PORTABLE=1), then use it
-#      for git/chezmoi and let chezmoi run the Scoopfile package scripts
-#   2. If Scoop unavailable: winget for git/chezmoi, portable binaries for tools
-#   3. Otherwise: download portable chezmoi, portable binaries for tools
+#   0. Decide personal vs. work first (env var, previous chezmoi answer, or
+#      prompt). Unknown/non-interactive machines are treated as work.
+#   Work: never touches Scoop. git/chezmoi via winget --scope user, else
+#      portable binaries; chezmoi then installs portable tools to ~/.local.
+#      No admin rights and no execution-policy changes needed.
+#   Personal: install Scoop if missing (unless DOTFILES_PORTABLE=1), use it
+#      for git/chezmoi, and let chezmoi run the Scoopfile package scripts.
+#      If Scoop can't be installed, fall back to the portable path.
 
 #Requires -Version 5.1
 $ErrorActionPreference = "Stop"
@@ -37,9 +43,45 @@ function Test-Command {
     return $null -ne (Get-Command $Command -ErrorAction SilentlyContinue)
 }
 
-# Detect installation mode
+# Machine type ("personal" or "work"), set once by Get-MachineType in Main
+$script:MachineType = "work"
+
+# Decide personal vs. work BEFORE any package-manager step: work machines
+# must never get Scoop. Order: env override, the answer cached by a previous
+# chezmoi init, then an interactive prompt. Non-interactive with no override
+# is treated as work (chezmoi profiles it ephemeral+work the same way).
+# The answer is exported as DOTFILES_WORK / DOTFILES_PERSONAL, which
+# .chezmoi.toml.tmpl reads, so chezmoi init doesn't ask again.
+function Get-MachineType {
+    if (($env:DOTFILES_WORK -eq "1") -and ($env:DOTFILES_PERSONAL -eq "1")) {
+        Write-Err "DOTFILES_WORK and DOTFILES_PERSONAL are both set; set only one."
+        exit 1
+    }
+    if ($env:DOTFILES_WORK -eq "1") { return "work" }
+    if ($env:DOTFILES_PERSONAL -eq "1") { return "personal" }
+
+    $answer = $null
+    $config = Join-Path $env:USERPROFILE ".config\chezmoi\chezmoi.toml"
+    $cached = if (Test-Path $config) { Select-String -Path $config -Pattern '^\s*personal\s*=\s*(true|false)' | Select-Object -First 1 } else { $null }
+    if ($cached) {
+        $answer = if ($cached.Matches[0].Groups[1].Value -eq "true") { "personal" } else { "work" }
+        Write-Info "Using machine type '$answer' from $config"
+        Write-Info "(set DOTFILES_WORK=1 or DOTFILES_PERSONAL=1 to change it)"
+    } elseif ([Environment]::UserInteractive -and -not [Console]::IsInputRedirected) {
+        $reply = Read-Host "Is this a personal machine (has 1Password, personal secrets)? [y/N]"
+        $answer = if ($reply -match '^(y|yes)$') { "personal" } else { "work" }
+    } else {
+        Write-Info "Non-interactive and no DOTFILES_WORK/DOTFILES_PERSONAL set - treating as work"
+        return "work"
+    }
+
+    if ($answer -eq "personal") { $env:DOTFILES_PERSONAL = "1" } else { $env:DOTFILES_WORK = "1" }
+    return $answer
+}
+
+# Detect installation mode. Work machines never use Scoop, even if present.
 function Get-InstallMode {
-    if (Test-Command "scoop") {
+    if (($script:MachineType -eq "personal") -and (Test-Command "scoop")) {
         return "scoop"
     }
     if (Test-Command "winget") {
@@ -48,11 +90,47 @@ function Get-InstallMode {
     return "portable"
 }
 
+# Add a directory to the user PATH (persisted) and to this session
+function Add-UserPath {
+    param($Dir)
+    $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+    $segments = if ([string]::IsNullOrEmpty($userPath)) { @() } else { $userPath -split ';' }
+    if ($segments -notcontains $Dir) {
+        $newPath = if ([string]::IsNullOrEmpty($userPath)) { $Dir } else { "$userPath;$Dir" }
+        [Environment]::SetEnvironmentVariable("PATH", $newPath, "User")
+    }
+    if (($env:PATH -split ';') -notcontains $Dir) {
+        $env:PATH = "$Dir;$env:PATH"
+    }
+}
+
+# winget install; personal machines keep the default (machine) scope,
+# work machines use --scope user so no admin/UAC is ever needed.
+# Returns $true on success.
+function Install-WithWinget {
+    param($Id)
+    $wingetArgs = @("install", "--id", $Id, "--exact", "--accept-source-agreements", "--accept-package-agreements")
+    if ($script:MachineType -eq "work") { $wingetArgs += @("--scope", "user") }
+    # EAP=Stop doesn't catch native-command failures; check the exit code.
+    # Out-Host keeps winget's output out of this function's return value.
+    & winget @wingetArgs | Out-Host
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warn "winget failed to install $Id (exit $LASTEXITCODE)"
+        return $false
+    }
+    $env:PATH = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+    return $true
+}
+
 # Install Scoop so chezmoi init detects the full (non-portable) profile.
 # chezmoi sets portable=true whenever scoop is missing at init time, so
 # without this step a fresh machine always lands in portable mode.
 # Set $env:DOTFILES_PORTABLE = 1 to skip Scoop and force portable mode.
 function Install-Scoop {
+    if ($script:MachineType -eq "work") {
+        Write-Info "Work machine - skipping Scoop (portable mode)"
+        return
+    }
     if (Test-Command "scoop") {
         Write-Success "Scoop already installed"
         return
@@ -120,48 +198,36 @@ function Install-Chezmoi {
 
     $mode = Get-InstallMode
 
-    switch ($mode) {
-        "scoop" {
-            Write-Info "Installing chezmoi via Scoop..."
-            scoop install chezmoi
-            Write-Success "chezmoi installed via Scoop"
-        }
-        "winget" {
-            Write-Info "Installing chezmoi via winget..."
-            # EAP=Stop doesn't catch native-command failures; check the exit code
-            winget install twpayne.chezmoi --accept-source-agreements --accept-package-agreements
-            if ($LASTEXITCODE -ne 0) {
-                Write-Err "winget failed to install chezmoi (exit $LASTEXITCODE). If this is a no-admin machine, try: winget install twpayne.chezmoi --scope user"
-                exit 1
-            }
-            # Refresh PATH
-            $env:PATH = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-            Write-Success "chezmoi installed via winget"
-        }
-        "portable" {
-            Write-Info "Installing chezmoi (portable binary)..."
-            $chezmoiBin = Join-Path $env:USERPROFILE ".local\bin\chezmoi.exe"
-            $chezmoiDir = Split-Path $chezmoiBin -Parent
-
-            # Create directory
-            if (-not (Test-Path $chezmoiDir)) {
-                New-Item -ItemType Directory -Path $chezmoiDir -Force | Out-Null
-            }
-
-            # Download latest chezmoi
-            $downloadUrl = "https://github.com/twpayne/chezmoi/releases/latest/download/chezmoi-windows-amd64.exe"
-            try {
-                Invoke-WebRequest -Uri $downloadUrl -OutFile $chezmoiBin -UseBasicParsing
-                Write-Success "chezmoi installed to $chezmoiBin"
-            } catch {
-                Write-Err "Failed to download chezmoi: $_"
-                exit 1
-            }
-
-            # Add to PATH for this session
-            $env:PATH = "$chezmoiDir;$env:PATH"
-        }
+    if ($mode -eq "scoop") {
+        Write-Info "Installing chezmoi via Scoop..."
+        scoop install chezmoi
+        Write-Success "chezmoi installed via Scoop"
+        return
     }
+    if ($mode -eq "winget") {
+        Write-Info "Installing chezmoi via winget..."
+        if (Install-WithWinget "twpayne.chezmoi") {
+            Write-Success "chezmoi installed via winget"
+            return
+        }
+        Write-Warn "Falling back to the portable chezmoi binary"
+    }
+
+    Write-Info "Installing chezmoi (portable binary)..."
+    $chezmoiDir = Join-Path $env:USERPROFILE ".local\bin"
+    $chezmoiBin = Join-Path $chezmoiDir "chezmoi.exe"
+    if (-not (Test-Path $chezmoiDir)) {
+        New-Item -ItemType Directory -Path $chezmoiDir -Force | Out-Null
+    }
+    $downloadUrl = "https://github.com/twpayne/chezmoi/releases/latest/download/chezmoi-windows-amd64.exe"
+    try {
+        Invoke-WebRequest -Uri $downloadUrl -OutFile $chezmoiBin -UseBasicParsing
+        Write-Success "chezmoi installed to $chezmoiBin"
+    } catch {
+        Write-Err "Failed to download chezmoi: $_"
+        exit 1
+    }
+    Add-UserPath $chezmoiDir
 }
 
 # Install Git if needed (required for chezmoi init)
@@ -173,31 +239,50 @@ function Install-Git {
 
     $mode = Get-InstallMode
 
-    switch ($mode) {
-        "scoop" {
-            Write-Info "Installing Git via Scoop..."
-            scoop install git
-            Write-Success "Git installed via Scoop"
-        }
-        "winget" {
-            Write-Info "Installing Git via winget..."
-            # EAP=Stop doesn't catch native-command failures; check the exit code
-            winget install Git.Git --accept-source-agreements --accept-package-agreements
-            if ($LASTEXITCODE -ne 0) {
-                Write-Err "winget failed to install Git (exit $LASTEXITCODE). Machine-scope installs need admin; try an elevated shell or install Git manually from https://git-scm.com/download/win"
-                exit 1
-            }
-            # Refresh PATH
-            $env:PATH = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-            Write-Success "Git installed via winget"
-        }
-        "portable" {
-            Write-Warn "Git not found and no package manager available."
-            Write-Warn "Please install Git manually from: https://git-scm.com/download/win"
-            Write-Warn "Or install winget/Scoop first."
-            exit 1
-        }
+    if ($mode -eq "scoop") {
+        Write-Info "Installing Git via Scoop..."
+        scoop install git
+        Write-Success "Git installed via Scoop"
+        return
     }
+    if ($mode -eq "winget") {
+        Write-Info "Installing Git via winget..."
+        if (Install-WithWinget "Git.Git") {
+            Write-Success "Git installed via winget"
+            return
+        }
+        Write-Warn "Falling back to portable Git"
+    }
+    Install-PortableGit
+}
+
+# Portable Git for Windows (self-extracting PortableGit archive from the
+# official git-for-windows releases) into ~\.local\opt\git. No admin needed.
+function Install-PortableGit {
+    Write-Info "Installing Git (PortableGit from github.com/git-for-windows)..."
+    $gitDir = Join-Path $env:USERPROFILE ".local\opt\git"
+    try {
+        $release = Invoke-RestMethod "https://api.github.com/repos/git-for-windows/git/releases/latest" -UseBasicParsing
+        $asset = $release.assets | Where-Object { $_.name -like "PortableGit-*-64-bit.7z.exe" } | Select-Object -First 1
+        if (-not $asset) { throw "no PortableGit asset in release $($release.tag_name)" }
+        $sfx = Join-Path $env:TEMP $asset.name
+        Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $sfx -UseBasicParsing
+        Write-Info "$($asset.name) SHA256: $((Get-FileHash $sfx -Algorithm SHA256).Hash)"
+        New-Item -ItemType Directory -Path $gitDir -Force | Out-Null
+        # 7-Zip SFX: -o<dir> extracts there, -y answers yes to every prompt
+        Start-Process -FilePath $sfx -ArgumentList "-o`"$gitDir`"", "-y" -Wait
+        Remove-Item $sfx -Force -ErrorAction SilentlyContinue
+    } catch {
+        Write-Err "Failed to install portable Git: $_"
+        Write-Err "Install Git manually from https://git-scm.com/download/win and re-run."
+        exit 1
+    }
+    Add-UserPath (Join-Path $gitDir "cmd")
+    if (-not (Test-Command "git")) {
+        Write-Err "Portable Git extracted to $gitDir but git.exe was not found"
+        exit 1
+    }
+    Write-Success "Git installed to $gitDir"
 }
 
 # Initialize dotfiles
@@ -207,9 +292,10 @@ function Initialize-Dotfiles {
     $chezmoiDir = Join-Path $env:USERPROFILE ".local\share\chezmoi"
 
     if (Test-Path $chezmoiDir) {
-        Write-Warn "chezmoi source directory already exists"
-        Write-Info "Running chezmoi apply..."
-        & chezmoi apply --keep-going
+        # Re-run the config template (not just apply) so the machine type
+        # decided above, and work => portable, take effect on re-runs too.
+        Write-Warn "chezmoi source directory already exists - regenerating config"
+        & chezmoi init --apply --keep-going
     } else {
         & chezmoi init --apply $GITHUB_USER --branch $BRANCH --keep-going
     }
@@ -299,11 +385,13 @@ function Main {
     Write-Host ""
 
     $arch = if ([Environment]::Is64BitOperatingSystem) { "amd64" } else { "x86" }
+
+    # Step 0: Machine type decides whether Scoop is allowed at all
+    $script:MachineType = Get-MachineType
     $mode = Get-InstallMode
+    Write-Info "Detected: Windows $arch, machine: $($script:MachineType), install mode: $mode"
 
-    Write-Info "Detected: Windows $arch, Install mode: $mode"
-
-    # Step 1: Install Scoop (so chezmoi init detects the non-portable profile)
+    # Step 1: Install Scoop (personal only; work machines stay portable)
     Install-Scoop
     $mode = Get-InstallMode
     Write-Info "Install mode after Scoop bootstrap: $mode"
@@ -316,9 +404,10 @@ function Main {
 
     # Step 4: Initialize dotfiles
     # This will:
-    # - Prompt for personal/work/ephemeral settings
-    # - If Scoop available: run Scoop install scripts
-    # - If portable mode: pull binaries via .chezmoiexternal
+    # - Personal/work already answered via DOTFILES_WORK/DOTFILES_PERSONAL;
+    #   only the ephemeral question is asked
+    # - Personal with Scoop: run Scoop install scripts
+    # - Work, or no Scoop: portable binaries via .chezmoiexternal
     Initialize-Dotfiles
 
     # Step 5: Configure PowerShell profile
