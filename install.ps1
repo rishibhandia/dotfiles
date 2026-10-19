@@ -62,18 +62,40 @@ function Install-Scoop {
         return
     }
 
+    # Scoop's shims are .ps1 scripts, so a policy that blocks scripts makes
+    # Scoop unusable in every later shell even if the installer is forced
+    # through. Check first instead of changing the machine's policy.
+    $policy = (Get-ExecutionPolicy).ToString()
+    if ($policy -notin @("Unrestricted", "RemoteSigned", "Bypass")) {
+        Write-Warn "Execution policy is '$policy'; Scoop needs RemoteSigned or looser."
+        Write-Warn "To use Scoop, run: Set-ExecutionPolicy RemoteSigned -Scope CurrentUser"
+        Write-Warn "then re-run this script. Continuing in portable mode."
+        return
+    }
+
     Write-Info "Installing Scoop (user-scope package manager)..."
+    # get.scoop.sh aborts with a bare `break` when run through iex (its
+    # Exit-Install), which unwinds through any try/catch and silently ends
+    # this whole script. Run it as a -File child process instead: there
+    # Exit-Install uses `exit`, so only the child ends and we get an exit
+    # code. -ExecutionPolicy Bypass applies to that one process only.
+    $installer = Join-Path $env:TEMP "scoop-install-$PID.ps1"
     try {
+        Invoke-WebRequest -Uri "https://get.scoop.sh" -OutFile $installer -UseBasicParsing
         $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
             ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-        if ($isAdmin) {
-            # get.scoop.sh refuses elevated shells unless -RunAsAdmin is passed
-            Invoke-Expression "& {$(Invoke-RestMethod get.scoop.sh)} -RunAsAdmin"
-        } else {
-            Invoke-RestMethod get.scoop.sh | Invoke-Expression
+        $childArgs = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $installer)
+        # get.scoop.sh refuses elevated shells unless -RunAsAdmin is passed
+        if ($isAdmin) { $childArgs += "-RunAsAdmin" }
+        $hostExe = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
+        & $hostExe @childArgs
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warn "Scoop installer exited with code $LASTEXITCODE"
         }
     } catch {
         Write-Warn "Scoop installation failed: $_"
+    } finally {
+        Remove-Item $installer -Force -ErrorAction SilentlyContinue
     }
 
     # The installer updates the user PATH; make shims visible to this session
