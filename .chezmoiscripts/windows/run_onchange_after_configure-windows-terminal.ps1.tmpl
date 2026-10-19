@@ -11,8 +11,13 @@
 
 $ErrorActionPreference = "Stop"
 
-# Windows Terminal settings path
+# Windows Terminal settings path: the packaged (Store/winget) install, else
+# the portable zip install-portable-shells falls back to on portable machines
 $WTSettingsPath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+$WTPortableSettings = "$env:USERPROFILE\.local\opt\windows-terminal\settings\settings.json"
+if (-not (Test-Path $WTSettingsPath) -and (Test-Path $WTPortableSettings)) {
+    $WTSettingsPath = $WTPortableSettings
+}
 
 if (-not (Test-Path $WTSettingsPath)) {
     Write-Host "Windows Terminal not found, skipping configuration" -ForegroundColor Yellow

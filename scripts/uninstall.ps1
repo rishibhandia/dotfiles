@@ -62,13 +62,17 @@ $ToRemove += (Join-Path $env:USERPROFILE ".local\share\claude")
 # Multi-file portable installs (install.ps1 / cli-tools scripts)
 $optDir = Join-Path $env:USERPROFILE ".local\opt"
 $ToRemove += (Join-Path $optDir "git")                        # PortableGit (work machines)
+$ToRemove += (Join-Path $optDir "pwsh")                       # PowerShell 7 zip (portable)
+$ToRemove += (Join-Path $optDir "windows-terminal")           # Windows Terminal zip fallback
 
 # User PATH entries this repo adds (install.ps1, the PowerShell profile, and
 # the cli-tools script). Removed by exact segment match below.
 $repoPathEntries = @(
     $binDir,
     (Join-Path $binDir "psmux"),
-    (Join-Path $optDir "git\cmd")
+    (Join-Path $optDir "git\cmd"),
+    (Join-Path $optDir "pwsh"),
+    (Join-Path $optDir "windows-terminal")
 )
 
 # Check what exists
@@ -159,6 +163,24 @@ if ($userPath) {
     }
 }
 
+# Dotfiles hook lines install.ps1 added to the 5.1 and 7 host profiles.
+# Only those two lines are removed; anything else in the profile stays.
+$docs = [Environment]::GetFolderPath("MyDocuments")
+foreach ($hostProfile in @(
+        (Join-Path $docs "WindowsPowerShell\Microsoft.PowerShell_profile.ps1"),
+        (Join-Path $docs "PowerShell\Microsoft.PowerShell_profile.ps1"))) {
+    if (-not (Test-Path $hostProfile)) { continue }
+    $lines = @(Get-Content $hostProfile)
+    $kept = @($lines | Where-Object {
+        $_ -ne "# Dotfiles profile (PATH, starship, zoxide, dots functions)" -and
+        $_ -notmatch '\.config\\powershell\\profile\.ps1'
+    })
+    if ($kept.Count -ne $lines.Count) {
+        Set-Content -Path $hostProfile -Value $kept
+        Write-Host "Removed dotfiles hook from $hostProfile" -ForegroundColor Green
+    }
+}
+
 # Drop ~\.local\bin and ~\.local\opt only if nothing else lives there
 foreach ($dir in @($binDir, $optDir)) {
     if ((Test-Path $dir) -and -not (Get-ChildItem $dir -Force -ErrorAction SilentlyContinue)) {
@@ -180,13 +202,13 @@ Write-Host ""
 # Additional cleanup hints
 Write-Host "Additional manual cleanup:" -ForegroundColor Yellow
 Write-Host ""
-Write-Host "1. Remove dotfiles profile line from your PowerShell profile:"
-Write-Host "   notepad `$PROFILE"
-Write-Host "   # Delete the line that sources profile.ps1"
+Write-Host "1. Windows Terminal, if winget installed it (Windows 11 ships it built in):"
+Write-Host "   winget uninstall Microsoft.WindowsTerminal"
 Write-Host ""
 Write-Host "2. Uninstall Scoop packages (or all of Scoop):"
 Write-Host "   scoop uninstall chezmoi   # or: scoop uninstall scoop (removes everything)"
 Write-Host "   winget uninstall twpayne.chezmoi   # if installed via winget"
+Write-Host "   winget uninstall Git.Git           # if installed via winget"
 Write-Host ""
 Write-Host "3. Claude Code login/history was kept in ~\.claude;"
 Write-Host "   delete that directory manually if this machine should keep nothing."

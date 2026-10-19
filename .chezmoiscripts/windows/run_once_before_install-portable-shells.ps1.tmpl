@@ -1,0 +1,115 @@
+{{- if and (eq .chezmoi.os "windows") .portable -}}
+#Requires -Version 5.1
+# PowerShell 7 and Windows Terminal for portable Windows (work machines and
+# DOTFILES_PORTABLE=1). Scoop machines get both from the Scoopfile instead.
+# No admin rights needed and the execution policy is never changed.
+#
+# A "before" script on purpose: chezmoi renders target templates after the
+# before-scripts run, so psmux.conf already sees pwsh.exe on the first apply.
+
+$ErrorActionPreference = "Continue"
+
+function Write-Info { param($Message) Write-Host "[INFO] $Message" -ForegroundColor Blue }
+function Write-Success { param($Message) Write-Host "[OK] $Message" -ForegroundColor Green }
+function Write-Warn { param($Message) Write-Host "[WARN] $Message" -ForegroundColor Yellow }
+
+# Add a directory to the user PATH (persisted) and to this session
+function Add-UserPath {
+    param($Dir)
+    $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+    $segments = if ([string]::IsNullOrEmpty($userPath)) { @() } else { $userPath -split ';' }
+    if ($segments -notcontains $Dir) {
+        $newPath = if ([string]::IsNullOrEmpty($userPath)) { $Dir } else { "$userPath;$Dir" }
+        [Environment]::SetEnvironmentVariable("PATH", $newPath, "User")
+    }
+    if (($env:PATH -split ';') -notcontains $Dir) {
+        $env:PATH = "$Dir;$env:PATH"
+    }
+}
+
+# Download the first asset matching $Pattern from a repo's latest GitHub
+# release, log its SHA256 for audit, and expand it into a fresh temp dir.
+# Returns the temp dir (caller moves what it needs, then deletes it).
+function Expand-LatestRelease {
+    param($Repo, $Pattern)
+    $release = Invoke-RestMethod "https://api.github.com/repos/$Repo/releases/latest" -UseBasicParsing
+    $asset = $release.assets | Where-Object { $_.name -like $Pattern } | Select-Object -First 1
+    if (-not $asset) { throw "no asset matching '$Pattern' in $Repo $($release.tag_name)" }
+    $zip = Join-Path $env:TEMP $asset.name
+    Write-Info "Downloading $($asset.browser_download_url)..."
+    Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zip -UseBasicParsing
+    Write-Info "$($asset.name) SHA256: $((Get-FileHash $zip -Algorithm SHA256).Hash)"
+    $tmpDir = Join-Path $env:TEMP ([System.IO.Path]::GetRandomFileName())
+    Expand-Archive -Path $zip -DestinationPath $tmpDir -Force
+    Remove-Item $zip -Force
+    return $tmpDir
+}
+
+$optDir = Join-Path $env:USERPROFILE ".local\opt"
+
+# -----------------------------------------------------------------------------
+# PowerShell 7 - official zip into ~\.local\opt\pwsh
+# Always this fixed path (never winget, whose install location varies) so
+# psmux.conf can name it. Installed once and never overwritten: a running
+# pwsh.exe is file-locked, the same failure that evicted uv.exe from externals.
+# -----------------------------------------------------------------------------
+$pwshDir = Join-Path $optDir "pwsh"
+if (Test-Path (Join-Path $pwshDir "pwsh.exe")) {
+    Write-Success "PowerShell 7 already installed in $pwshDir"
+} else {
+    Write-Info "Installing PowerShell 7 (portable zip)..."
+    try {
+        $tmpDir = Expand-LatestRelease "PowerShell/PowerShell" "PowerShell-*-win-x64.zip"
+        New-Item -ItemType Directory -Force -Path $optDir | Out-Null
+        Move-Item -Path $tmpDir -Destination $pwshDir
+        Write-Success "PowerShell 7 installed to $pwshDir"
+    } catch {
+        Write-Warn "PowerShell 7 installation failed: $_"
+    }
+}
+if (Test-Path (Join-Path $pwshDir "pwsh.exe")) {
+    Add-UserPath $pwshDir
+}
+
+# -----------------------------------------------------------------------------
+# Windows Terminal - winget --scope user (MSIX, per-user), else the official
+# portable zip into ~\.local\opt\windows-terminal. Windows 11 ships it, so
+# this is usually a no-op. Theming is done by configure-windows-terminal.
+# -----------------------------------------------------------------------------
+$wtAlias = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\wt.exe"
+$wtDir = Join-Path $optDir "windows-terminal"
+if ((Test-Path $wtAlias) -or (Test-Path (Join-Path $wtDir "wt.exe"))) {
+    Write-Success "Windows Terminal already installed"
+} else {
+    $installed = $false
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+        Write-Info "Installing Windows Terminal via winget (user scope)..."
+        winget install --id Microsoft.WindowsTerminal --exact --scope user --accept-source-agreements --accept-package-agreements
+        if ($LASTEXITCODE -eq 0) {
+            Write-Success "Windows Terminal installed via winget"
+            $installed = $true
+        } else {
+            Write-Warn "winget failed to install Windows Terminal (exit $LASTEXITCODE)"
+        }
+    }
+    if (-not $installed) {
+        Write-Info "Installing Windows Terminal (portable zip)..."
+        try {
+            $tmpDir = Expand-LatestRelease "microsoft/terminal" "Microsoft.WindowsTerminal_*_x64.zip"
+            # The zip holds a single terminal-<version> folder
+            $inner = Get-ChildItem $tmpDir -Directory | Select-Object -First 1
+            New-Item -ItemType Directory -Force -Path $optDir | Out-Null
+            Move-Item -Path $inner.FullName -Destination $wtDir
+            Remove-Item $tmpDir -Recurse -Force
+            # Marker file: keep settings in $wtDir\settings, not LocalAppData
+            New-Item -ItemType File -Force -Path (Join-Path $wtDir ".portable") | Out-Null
+            Write-Success "Windows Terminal installed to $wtDir"
+        } catch {
+            Write-Warn "Windows Terminal installation failed: $_"
+        }
+    }
+}
+if (Test-Path (Join-Path $wtDir "wt.exe")) {
+    Add-UserPath $wtDir
+}
+{{ end -}}

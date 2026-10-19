@@ -311,24 +311,32 @@ function Initialize-Dotfiles {
 function Set-PowerShellProfile {
     Write-Info "Configuring PowerShell profile..."
 
-    # Ensure profile directory exists
-    $profileDir = Split-Path $PROFILE -Parent
-    if (-not (Test-Path $profileDir)) {
-        New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
-    }
+    # Hook both Windows PowerShell 5.1 and PowerShell 7 (psmux's default shell
+    # where pwsh is installed): each reads its own profile under Documents.
+    $docs = [Environment]::GetFolderPath("MyDocuments")
+    $profiles = @(
+        (Join-Path $docs "WindowsPowerShell\Microsoft.PowerShell_profile.ps1"),
+        (Join-Path $docs "PowerShell\Microsoft.PowerShell_profile.ps1")
+    )
 
     # Add dotfiles profile (includes PATH setup, starship, zoxide, and dots functions)
     $profileScript = Join-Path $env:USERPROFILE ".config\powershell\profile.ps1"
-    if (-not (Test-Path $PROFILE) -or -not (Select-String -Path $PROFILE -Pattern "profile.ps1" -Quiet)) {
-        $profileContent = @(
-            "",
-            "# Dotfiles profile (PATH, starship, zoxide, dots functions)",
-            "if (Test-Path `"$profileScript`") { . `"$profileScript`" }"
-        )
-        Add-Content -Path $PROFILE -Value ($profileContent -join "`n")
-        Write-Success "Added dotfiles profile to PowerShell profile"
-    } else {
-        Write-Debug "Dotfiles profile already in PowerShell profile"
+    foreach ($hostProfile in $profiles) {
+        $profileDir = Split-Path $hostProfile -Parent
+        if (-not (Test-Path $profileDir)) {
+            New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
+        }
+        if (-not (Test-Path $hostProfile) -or -not (Select-String -Path $hostProfile -Pattern "profile.ps1" -Quiet)) {
+            $profileContent = @(
+                "",
+                "# Dotfiles profile (PATH, starship, zoxide, dots functions)",
+                "if (Test-Path `"$profileScript`") { . `"$profileScript`" }"
+            )
+            Add-Content -Path $hostProfile -Value ($profileContent -join "`n")
+            Write-Success "Added dotfiles profile to $hostProfile"
+        } else {
+            Write-Debug "Dotfiles profile already in $hostProfile"
+        }
     }
 }
 
