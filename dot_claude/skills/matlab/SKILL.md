@@ -18,12 +18,12 @@ topic-specific guidance, see the satellite docs in this directory.
 
 | Topic | File |
 |---|---|
-| MATLAB style: naming, formatting, function/class authoring, error handling | [`style-guide.md`](style-guide.md) |
-| Performance: vectorization, pre-allocation, memory, parallel, JIT-friendly idioms | [`performance.md`](performance.md) |
-| Plotting recipes: color, polar in tiledlayout, region highlighting, figure fonts and exportgraphics sizing | [`plotting.md`](plotting.md) |
+| MATLAB style: naming, formatting, function/class authoring, error handling, env-var overrides for `clearvars` scripts | [`style-guide.md`](style-guide.md) |
+| Performance: vectorization, pre-allocation, memory, parallel, JIT-friendly idioms, caching parfor ODE sweeps | [`performance.md`](performance.md) |
+| Plotting recipes: color, polar in tiledlayout, region highlighting, figure fonts and exportgraphics sizing, a table under a row of maps, title/label collisions | [`plotting.md`](plotting.md) |
 | FFT in tables: `thz.fft.disc_ft` zero-padding, datatable row-vector conventions for stored FFTs | [`fft.md`](fft.md) |
 | Transient absorption: sideband analysis, fluence scaling with wire grids, FFT frequency axis for negative-going time vectors, SHG probe-polarization normalization | [`ta.md`](ta.md) |
-| Golden-baseline workspace verification for output-identical refactors (loader migrations, package moves) | [`verification.md`](verification.md) |
+| Golden-baseline workspace verification for output-identical refactors (loader migrations, package moves); pixel-identity check of rebuilt figures against git | [`verification.md`](verification.md) |
 | 2D THz nonlinear spectroscopy: NL = AB - A - B keeps only cross terms, peak positions by order, Mahmood delay convention, projection-slice limits of 1D traces, filtered-pump pitfalls | [`thz2d.md`](thz2d.md) |
 
 ---
@@ -46,6 +46,19 @@ section-by-section execution.
   headless builds are unaffected.
 
 ---
+
+### Helpers that need the script workspace: anonymous, not local (added 2026-09-21)
+
+A local function at the end of a script cannot see the script's variables (`function guides(ax) yline(ax, carrierWl, ...)` fails at call time with "Unrecognized function or variable 'carrierWl'"), and MATLAB refuses a `function` block in the middle of a script. When a small helper only repeats a few plotting calls with the script's own values, write it as an anonymous function, which captures the workspace at definition:
+
+```matlab
+guides = @(ax, col) [yline(ax, carrierWl, ':',  'Color', col,    'LineWidth', lwG), ...
+                     yline(ax, blueWl,    '--', 'Color', S.blue, 'LineWidth', lwG), ...
+                     yline(ax, redWl,     '--', 'Color', S.red,  'LineWidth', lwG)];
+hold(ax, 'on'); guides(ax, gCarMap); hold(ax, 'off');
+```
+
+Graphics calls return handles, so the bracketed list is one valid expression. Define it after the variables it uses; it freezes their values at that point. Keep end-of-script local functions for helpers that take everything they need as arguments.
 
 ## The +thz Analysis Package
 
@@ -247,3 +260,7 @@ For plotting recipes (color, polar in tiledlayout, region highlighting,
 figure fonts), see [`plotting.md`](plotting.md). For the
 `computeFFTAndIntegrate` `varargin` pattern and other TA workflow
 helpers, see [`ta.md`](ta.md).
+
+### Loaders must not resample onto a nominal axis (added 2026-09-18)
+
+`thz.io.load2DTimeTraceNew` used to build its probe time axis from the stage parameters with 66.667 ps per 10 000 counts and `interp1` every row onto it, then set NaN to zero. The acquisition writes 0.04 ps per 6 counts, i.e. 200/3 per 10 000, so over 150 points the nominal axis overshot the file grid by 3e-5 ps, `interp1` returned NaN at the last sample and the loader wrote an exact zero into the last column of A, B, AB and NL of every row. Rules now in the loader and for any new one: when a file carries its own time column ('New' format), use it, validate it against the stage parameters and across rows, and do not interpolate; never replace NaN by zero, raise an error naming the file; write stage constants as exact fractions (`(200/3)/10000`), not rounded decimals. Diagnostic that found it: count exact zeros per column after loading (`nnz(M(:,end) == 0)`) and compare with the zeros present in the raw files.

@@ -8,6 +8,7 @@ type: reference
 
 **Extracted:** 2026-03-15
 **Sources:** MathWorks Performance Docs, MathWorks Coding Guidelines, Schoepfloeffel expert tips
+**Updated:** 2026-10-24
 
 ## When to Use
 Optimizing slow loops; choosing data types; large dataset I/O; writing idiomatic modern MATLAB (R2016b+).
@@ -220,3 +221,61 @@ result = memoizedFn(arg);   % cached after first call
 - Prefer **local functions** over nested functions (JIT-friendly)
 - Avoid: `eval`, `evalin`, `clear all`, `exist`/`whos`/`dbstack`, `cd`/`addpath` inside functions — all prevent JIT optimization
 - Keep variable types consistent throughout a function — type changes trigger reallocation
+
+---
+
+## Caching expensive parfor ODE sweeps (added 2026-10-24)
+
+A 2D sweep that solves an ODE per (parameter, delay) pair (e.g. an a·x² oscillator driven by two delayed pulses, `ode45` at RelTol 1e-10 in a `parfor` over 71 delays, repeated for 9 parameter values) took 95–133 s per run, almost all of it ODE solves plus pool start-up, and every label or layout fix reran all of it. A cache cut reruns to ~20 s with identical printed results.
+
+Pattern (inline in the script, no new helper):
+
+```matlab
+% SETTINGS
+useSimulationCache  = true;      % false: always solve
+simulationCacheFile = fullfile(scriptDir, "fooSimulationCache.mat");   % git-ignore *SimulationCache.mat
+
+% after every simulation input is known
+simulationKey = struct(timeGrid=timeGrid, tauRows=tauRows, odeTolerance=odeTolerance, ...
+    odeAbsTolerance=odeAbsTolerance, readoutMode=readoutMode, f0THz=f0THz, gammaPerPs=gammaPerPs, ...
+    driveTimePs=driveTimePs, drive=drive, linearPeak=linearPeak);      % EVERY input that changes the result
+cachedParams = zeros(1, 0);
+cachedMaps = {};
+if useSimulationCache && isfile(simulationCacheFile)
+    cache = load(simulationCacheFile, "simulationKey", "cachedParams", "cachedMaps");
+    if isequal(cache.simulationKey, simulationKey)          % any input change invalidates the whole cache
+        cachedParams = cache.cachedParams;
+        cachedMaps = cache.cachedMaps;
+    end
+end
+cacheChanged = false;
+for k = 1:numel(params)
+    hit = find(abs(cachedParams - params(k)) < 1e-12, 1);  % one entry per parameter value
+    if ~isempty(hit)
+        maps{k} = cachedMaps{hit};
+        continue
+    end
+    if isempty(gcp("nocreate"))                              % start the pool ONLY on a miss
+        parpool("Processes", numWorkers);
+    end
+    parfor jj = 1:numTau, ... end
+    cachedParams(end + 1) = params(k);
+    cachedMaps{end + 1} = maps{k};
+    cacheChanged = true;
+end
+if useSimulationCache && cacheChanged
+    save(simulationCacheFile, "simulationKey", "cachedParams", "cachedMaps", "-v7");
+end
+```
+
+- Key on the **inputs**, not the script text: plotting edits should hit, a changed drive or tolerance must miss. Include derived inputs that are cheap to recompute (e.g. the linear response peak used to set the parameter) so a change upstream invalidates the cache.
+- Store per parameter value so a later run that adds values (e.g. reruns at fitted values) reuses the grid and only solves the new ones.
+- Cache the arrays the solver returned, never something derived from them; disclose the cache in the script's PROCESSING header.
+- Verify once: run twice (fill, then hit) and diff the printed tables, ignoring the cache/pool lines; they must be identical.
+- A reproduction check against a map saved by another script must allow for the **numerical floor**: an `a = 0` run of the same NL extraction measures it (here ~2e-6 of the signal), and a parameter typed to 10 significant digits reproduces the other script's map only to that floor, not exactly. Use a threshold a few times the floor (1e-5), not 1e-6.
+
+Removing redundant solves (not yet applied, but worth doing before reaching for more workers):
+
+- For a time-invariant system starting from rest, the single-pulse response at delay τ is the fixed-pulse response shifted by τ. If τ steps by a whole number of time-grid steps, it is an index shift of one solve on an extended grid, which removes one ODE per delay.
+- The a = 0 "floor" run is linear, so it only measures solver error: one delay row suffices, not every row.
+- For x'' + ... + a x² = s F(t), x = s y gives the exact identity NL(s, a) = s·NL(1, a·s): a drive-amplitude scan at fixed a is the a-scan at unit drive times s, so do not solve both.

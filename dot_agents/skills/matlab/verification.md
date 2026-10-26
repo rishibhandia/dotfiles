@@ -1,6 +1,7 @@
 # Golden-Baseline Verification for Refactors That Must Not Change Outputs
 
 **Extracted:** 2026-07-22
+**Updated:** 2026-10-24
 **Context:** Proving a library/loader refactor is output-identical across a
 fleet of analysis scripts (used for the loadKerrTimeTrace →
 loadTHzPumpProbeTimeTrace migration: 17 TiSe2 scripts, 17/17 identical).
@@ -54,3 +55,20 @@ every script's numerical results are unchanged.
   scripts in `~/Documents/Scientific Data/`
 - Migrating call sites to a new API that claims to be behavior-identical
 - Before deleting a "duplicate" function that scripts may depend on
+
+## Pixel-identity check of a rebuilt figure against git (added 2026-10-24)
+
+For figure builders the outputs are images, and "a rework must leave the output pixel-identical" is checked on the committed PNG, not the workspace:
+
+```bash
+git show HEAD:AdvMat_Figures/rough/Fig4.png > "$TMP/Fig4_HEAD.png"     # before or after the rebuild, any time
+matlab -batch "a = imread('$TMP/Fig4_HEAD.png'); b = imread('AdvMat_Figures/rough/Fig4.png'); \
+  d = any(a ~= b, 3); [r, c] = find(d); \
+  fprintf('size %s vs %s, %d px differ, rows %d..%d cols %d..%d\n', mat2str(size(a)), mat2str(size(b)), \
+  nnz(d), min(r), max(r), min(c), max(c));"
+```
+
+- `0 px` proves a refactor or an opt-in switch changed nothing by default.
+- When a change is meant to touch one panel, the **bounding box** of the differing pixels proves that nothing else moved: a colour-scale change confined to rows 791–1185 (the FFT row) showed the time maps above were untouched; a model swap confined to columns 1023–1814 showed only the Theory panel changed.
+- PDFs: render the first page with macOS `sips -s format png -Z 1600 in.pdf --out out.png` and compare renders of old and new the same way (the PDF bytes differ on every build because of timestamps). Crop the differing bounding box from both renders, stack them vertically and look: it shows at once whether a difference is a relabel or new data.
+- Rebuilding an unchanged figure rewrites its PDF/PNG/FIG with new timestamps. When the PNG compares identical to HEAD, `git checkout --` those outputs (and any collected copies) so the working tree carries only real changes, then rerun the collector so downstream copies are byte-identical to the committed sources (check with `md5 -q`).

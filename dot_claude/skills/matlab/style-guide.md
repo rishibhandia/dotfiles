@@ -8,6 +8,7 @@ type: reference
 
 **Extracted:** 2026-03-15
 **Sources:** MathWorks MATLAB Coding Guidelines, matlab/rules repo, Johnson MatlabStyle1p5
+**Updated:** 2026-10-24
 
 ## When to Use
 Writing or reviewing any MATLAB function or class; naming variables; formatting code for shared use.
@@ -176,3 +177,34 @@ end
 
 The same applies to `for k = someColumnVector`; use `someColumnVector.'` or
 `1:numel(v)` with indexing inside the loop.
+
+## Opt-in overrides for scripts that start with `clearvars` (added 2026-10-24)
+
+A script that begins with `clearvars` cannot take options from a calling workspace or a wrapper loop (the loop variables are wiped), and `matlab -batch "run('x.m')"` has no argument list. Pass trial options through environment variables, read in the LOAD section, so the default build is untouched:
+
+```matlab
+% --- batch override of the simulated map for (g): trial builds only, written under their own suffix -----
+theoryMapsOverride = string(getenv("AM_FIG4_THEORY_MAPS"));
+theoryTag = string(getenv("AM_FIG4_THEORY_TAG"));
+if strlength(theoryMapsOverride) > 0
+    if strlength(theoryTag) == 0                     % half-set is an error, never a silent overwrite
+        error("buildAMFig4:missingTheoryTag", "AM_FIG4_THEORY_MAPS needs AM_FIG4_THEORY_TAG (an output suffix)");
+    end
+    theoryMapsFile = theoryMapsOverride;
+    fprintf("TRIAL BUILD: (g) from %s, outputs tagged %s\n", theoryMapsFile, theoryTag);
+else
+    theoryTag = "";
+end
+...
+roughBase = fullfile(roughDir, "Fig4" + outputSuffix + theoryTag);   % trial outputs never replace the paper's
+```
+
+```bash
+AM_FIG4_THEORY_MAPS="$PWD/trialMaps_a583.mat" AM_FIG4_THEORY_TAG="_a583" \
+  matlab -batch "run('~/Documents/MATLAB/startup.m'); run('AdvMat_Figures/buildAMFig4.m')"
+```
+
+- Prefix the variables with the script's name so they cannot leak into another build.
+- Require the output tag whenever the override is set, and print a loud TRIAL line, so a trial can never overwrite the deliverable or be mistaken for it.
+- Document the variables in the header's HOW TO RUN and OUTPUTS sections, and prove the unset path is unchanged with a pixel-identity check against the committed output (see `verification.md`).
+- The data file a trial reads must have the same variables as the default one (e.g. `axSquaredMap`, `tauPs`, `mapTimePs`, `readoutLabel`); write it from the script that produced the alternative, with `save(file, "-struct", s)`.

@@ -1,7 +1,7 @@
 # Plotting Recipes
 
 **Sources:** consolidated from learned/matlab-color-lightening (2026-03-15), learned/matlab-polar-in-tiledlayout (2026-03-15), learned/matlab-plot-region-highlighting (2026-03-15), learned/matlab-figure-export-sizing (2026-05-01), learned/matlab-figure-font-sizes (2026-04-08).
-**Updated:** 2026-06-11
+**Updated:** 2026-10-24
 
 Patterns for color, polar axes inside grid layouts, region highlighting,
 and figure-export font sizing in MATLAB R2025a. Most of these were
@@ -337,3 +337,56 @@ Any plotting script in `~/Documents/Scientific Data/` or anywhere
 - THz/TA time-trace + FFT pairs (stacked offsets, de-emphasized
   reference overlay)
 - 2D TA maps (symmetric `clim`, diverging colormap)
+
+## Splitting a saved figure into panel pieces (added 2026-09-18)
+
+`copyobj(fig, groot)` duplicates a whole figure with the `allchild` order preserved, so a panel can be exported by deleting every top-level object outside its group on the copy and calling `exportgraphics(copy, 'x.pdf', 'ContentType', 'vector', 'BackgroundColor', 'none')`, which crops tightly to what is left. Grouping rule that worked for eight manuscript figures: the axes that owns each "(x)" panel-letter text anchors a panel; every unlabelled object (colorbars, side spectra, polar axes under a label overlay) joins the labelled axes with the smallest rectangle gap in centimetres (zero when overlapping). Stacked panels sharing an x axis get an extra merged piece.
+
+Two traps that produced absurd pages:
+
+- The tight bounding box of a vector export includes text objects parked far outside their axes limits. They are invisible in the full figure but inflate the crop (two dead labels at y = 212 in an axes with ylim [-0.2 4] gave a 228 x 4211 pt PDF). Before exporting, delete text in data units whose position lies more than half a range beyond the axes limits, and fix the builder that drew them.
+- An invisible full-page axes used as a label carrier (e.g. a colorbar label placed in page centimetres) overlaps every panel, so nearest-neighbour grouping attaches it to the first one. Treat axes covering more than 80 % of the page as overlays: keep them in every group but delete their text objects outside the group's bounding box (+0.6 cm), and drop the overlay when nothing is left.
+
+## Sectioned maps with their own colour bars, and edges that line up (added 2026-09-21)
+
+Splitting one delay map into adjacent sections with separate colour scales (e.g. the incoherent transient and the ringing, each on the full range of its own window): give each section its own axes with widths proportional to its delay span so the picoseconds per centimetre match; set the gap between them to zero so the shared border marks the split; put each colour bar against its own map so ownership is unambiguous (bar I on the left edge of map I, bar II on the right edge of map II) and tag the bars underneath, where nothing else lives, rather than above where they collide with the row above. A trace panel above the maps is drawn as two axes with identical y limits placed exactly over the two maps, `linkaxes` per pair, so every delay registers with the map below; one continuous trace, split for display only.
+
+Two MATLAB facts found on the way:
+
+- A manually positioned `colorbar` draws its tick labels on its right whatever `AxisLocation` says. For a bar whose values must sit on its left, set `cb.Ticks = []` and write the values as right-aligned `annotation('textbox', ...)` entries at the bar's top, middle and bottom.
+- Plot boxes in different pieces line up only if their margins are absolute centimetres divided by each piece's own width (`[m(1)/W, ..., (W - sum(m))/W, ...]`), not shared normalized fractions; a 0.185 fraction is 0.78 cm in a 4.2 cm piece and 1.59 cm in an 8.6 cm one.
+
+## A table under a row of maps, and title collisions (added 2026-10-24)
+
+Numbers that compare several maps (e.g. each map's peak heights relative to its own reference peak) read better as a table under the maps than as a second title line per map ("0.87 : 1 : 0.72 : 0.62" means nothing without a legend). Use a nested `tiledlayout` so the colour bar stays beside the maps only, and draw the table as text in an axis-off axes, which exports as vectors (a `uitable` does not reliably appear in `exportgraphics` output):
+
+```matlab
+layoutOuter = tiledlayout(fig, 2, 1, TileSpacing="compact", Padding="compact");
+layoutMaps = tiledlayout(layoutOuter, 1, numMaps, TileSpacing="compact", Padding="compact");
+layoutMaps.Layout.Tile = 1;
+for k = 1:numMaps
+    ax = nexttile(layoutMaps);  ...                      % maps, one short title line each
+end
+bar = colorbar(ax);  bar.Layout.Tile = "east";            % east of the INNER layout: spans the maps only
+title(layoutOuter, ["what the maps are", "what the table is"], FontSize=9);
+
+axTable = nexttile(layoutOuter, 2);
+axis(axTable, "off");  set(axTable, XLim=[0 1], YLim=[0 1]);
+columnX = 0.30 + (0:numMaps-1) * 0.17;                    % value columns; row names at x = 0.02
+rowY = 0.55 - (0:numRows-1) * 0.12;
+text(axTable, 0.02, 0.97, "caption of the table", VerticalAlignment="top");
+for k = 1:numMaps
+    text(axTable, columnX(k), 0.81, header(k), FontWeight="bold", HorizontalAlignment="center");
+    text(axTable, columnX(k), 0.71, subheader(k), HorizontalAlignment="center", Color=[0.35 0.35 0.35]);
+end
+line(axTable, [0.02 columnX(end) + 0.08], [0.645 0.645], Color=[0.5 0.5 0.5]);
+% ... one text() per cell, sprintf("%.2f", value), HorizontalAlignment="center"
+```
+
+The outer rows are equal in height, so size the figure for the taller of the two (here 27 x 11.6 cm for four 1:1 maps and a five-row table) and place the table rows in normalized units with room between header, rule and rows; shrinking the figure to remove white space above the table made the header overlap its caption.
+
+Collisions to check on every exported PNG, not in the live window:
+
+- A centred multi-line `title` wider than its axes spills into the neighbouring panel and loses its first characters at the figure edge ("ι) a x² model" for "(a) a x² model"); shorten the longest line rather than shrinking the font.
+- Two side-by-side panels with long `xlabel`s run into each other in the gap ("...drive)Drive scale factor"); give each a two-line label (`xlabel(ax, ["Drive scale factor s", "(definition)"])`) and put the long definition in the layout title.
+- Log axes spanning about one decade label only one tick (10^3); set `XTick` to the simulated values with `XTickLabel=compose("%.0f", values)` so every point is readable.
