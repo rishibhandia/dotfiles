@@ -113,3 +113,17 @@ Use the PDF itself (Read with `pages`) only when equations or figures matter.
   ID, journal articles hold `publicationTitle` + `DOI`.
 - Item notes/PDF attachments are separate child items — the metadata
   above lives on the parent.
+
+## Better BibTeX citation keys and BibTeX export (added 2026-09-18)
+
+Citation keys are not in `zotero.sqlite`; they belong to the Better BibTeX add-on, and `~/Zotero/better-bibtex-search.sqlite` is a stale partial cache (it lacked recent items). With Zotero running, ask the add-on directly:
+
+```bash
+# item keys are the 8-character items.key values from zotero.sqlite, NOT itemIDs
+curl -s http://127.0.0.1:23119/better-bibtex/json-rpc -X POST -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","method":"item.citationkey","params":[["QL2Q3Z2Y","BQRE3TPS"]],"id":1}'
+# BibTeX entries by citation key, written to a file (a curl | python3 pipe is refused by tirith, rightly)
+curl -s "http://127.0.0.1:23119/better-bibtex/export/item?citationKeys=grishuninTHzElectricFieldInduced2017,cookTerahertzfieldinducedSecondharmonicGeneration1999&translator=bibtex" > out.bib
+```
+
+`item.export` over JSON-RPC wants citation keys too and rejects item keys with "not found". Author initials come out exactly as stored (a missing trailing period in Zotero prints as "V. N").

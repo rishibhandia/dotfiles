@@ -1,6 +1,6 @@
 {
   "format": "ai-parity-generated-state",
-  "generation_id": "5db8d431a97a11256eb511eec047a3643dec9380e659b5603a411a7301c43c2d",
+  "generation_id": "aadf375c3e03e685f03272ee9422b2b60a2e1e360fa5a828fa798e356394be09",
   "generator_inputs": {
     "engine_sha256": "ebebaf96041867bc701fa7491c93cf5ecaf7b54b1723272027e729e695678074",
     "manifest_sha256": "a056fea0e8579efb04cc7980951af5b6f90fc17a23c97afbaafd6a993a23f87b",
@@ -465,7 +465,7 @@
     "dot_agents/skills/zotero/SKILL.md": {
       "artifact": "zotero",
       "canonical": "ai-parity/shared/skills/zotero",
-      "canonical_digest": "2fe51ffb5dbceb83dd477a0d29ea811d08a0a6e79a905f2ac3bddda3e07bac93",
+      "canonical_digest": "2c98b4bf5232b5d5427cea875d3404550fbadf9dad7cc197cb0f44e42b92d632",
       "deployed_mode": 420,
       "sha256": "8982cc0bfbcd804036a77bbd54a67ca954126d5197b2a10b7119909ccc6ab077",
       "side": "codex",
@@ -484,7 +484,7 @@
     "dot_agents/skills/zotero/scripts/zotero_query.py": {
       "artifact": "zotero",
       "canonical": "ai-parity/shared/skills/zotero",
-      "canonical_digest": "2fe51ffb5dbceb83dd477a0d29ea811d08a0a6e79a905f2ac3bddda3e07bac93",
+      "canonical_digest": "2c98b4bf5232b5d5427cea875d3404550fbadf9dad7cc197cb0f44e42b92d632",
       "deployed_mode": 420,
       "sha256": "7e164d4d53ea53e3f6dc8a207dc63ab0eacaa60fa32b810d53e28ab5a82cdde9",
       "side": "codex",
@@ -781,18 +781,18 @@
     "dot_claude/skills/zotero/SKILL.md": {
       "artifact": "zotero",
       "canonical": "ai-parity/shared/skills/zotero",
-      "canonical_digest": "2fe51ffb5dbceb83dd477a0d29ea811d08a0a6e79a905f2ac3bddda3e07bac93",
+      "canonical_digest": "2c98b4bf5232b5d5427cea875d3404550fbadf9dad7cc197cb0f44e42b92d632",
       "deployed_mode": 420,
-      "sha256": "c65d663fc39d2946069e9633ded72b86c8e4eb4ef4ab2ac3ed1453195fef90b1",
+      "sha256": "52d90e6b8db3352065418304101fde153cad1bee8685b4318a00b421ac4ae4ca",
       "side": "claude",
       "source": "ai-parity/shared/skills/zotero/SKILL.md",
-      "source_digest": "c03df87adc512cd9c6fe065232d722b0be10956e69342dc0c4356e019eef6e8c",
+      "source_digest": "07f93b5d1409815ba4c36cd0c26126ab62a794d9960f2bfe2010e92ce84a214b",
       "source_mode": 420
     },
     "dot_claude/skills/zotero/scripts/zotero_query.py": {
       "artifact": "zotero",
       "canonical": "ai-parity/shared/skills/zotero",
-      "canonical_digest": "2fe51ffb5dbceb83dd477a0d29ea811d08a0a6e79a905f2ac3bddda3e07bac93",
+      "canonical_digest": "2c98b4bf5232b5d5427cea875d3404550fbadf9dad7cc197cb0f44e42b92d632",
       "deployed_mode": 420,
       "sha256": "7e164d4d53ea53e3f6dc8a207dc63ab0eacaa60fa32b810d53e28ab5a82cdde9",
       "side": "claude",
