@@ -80,6 +80,25 @@ that enters Claude's context leaves the machine.
 
 If a standard technique would add non-measured points, flag it and ask first.
 
+### Editor / File Viewer Preferences
+
+**On Windows, open text files with Notepad++, NOT Notepad.** When Claude needs to launch an external viewer for a file it just produced (notebook entries, config snippets, plain-text output, etc.), use Notepad++.
+
+```powershell
+# Preferred Windows file-open pattern
+$np = @(
+  'C:\Program Files\Notepad++\notepad++.exe',
+  'C:\Program Files (x86)\Notepad++\notepad++.exe'
+) | Where-Object { Test-Path $_ } | Select-Object -First 1
+if ($np) {
+    Start-Process $np -ArgumentList '<file path>'
+} else {
+    Start-Process notepad.exe -ArgumentList '<file path>'   # last-resort fallback
+}
+```
+
+On macOS/Linux, use the user's default `$EDITOR` or `open <file>` / `xdg-open <file>` — same principle: prefer the explicit editor over a minimal built-in viewer.
+
 ### Coding Style
 
 **File Organization (language-agnostic):**

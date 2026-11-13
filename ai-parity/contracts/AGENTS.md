@@ -58,6 +58,14 @@ Before changing code to fix a failure:
   user explicitly requests that transformation.
 - Clearly distinguish measured points from derived or fitted values.
 
+## Opening files for the user
+
+- On Windows, open text files you produced in Notepad++
+  (`C:\Program Files\Notepad++\notepad++.exe` or the `(x86)` path); fall
+  back to Notepad only when Notepad++ is not installed.
+- On macOS/Linux, prefer `$EDITOR`, `open`, or `xdg-open` over a minimal
+  built-in viewer.
+
 ## AI parity repository
 
 When working in the chezmoi repository:
