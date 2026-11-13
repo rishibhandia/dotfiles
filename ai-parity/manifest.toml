@@ -240,7 +240,7 @@ mode = "copy"
 [[reviews]]
 name = "global-agents-contract"
 source = "dot_claude/CLAUDE.md"
-acknowledged_digest = "84e3643a0d03ec1324c4586c83a374890ad0f59bc1b39bdf3176f149b71989b6"
+acknowledged_digest = "0c76442e4498ddf758c6c16288e5affa4f2939bffb20b7982faeb970a0104365"
 
 [[reviews]]
 name = "verify-skill-adapter"
@@ -349,6 +349,9 @@ mode = "planned"
 [[skills]]
 name = "things"
 mode = "planned-platform-gated"
+[[skills]]
+name = "typescript"
+mode = "planned"
 [[skills]]
 name = "update-codemaps"
 mode = "planned"

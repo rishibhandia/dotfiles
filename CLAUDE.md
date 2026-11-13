@@ -356,6 +356,8 @@ Skills are synced via chezmoi to `~/.claude/skills/`. Included skills, by catego
 
 **Development workflow:** `plan`, `tdd`, `code-review`, `build-fix`, `verify`, `checkpoint`, `e2e`, `eval`, `test-coverage`, `refactor-clean`, `orchestrate`, `update-codemaps`, `update-docs`, `learn`, `session-wrap`, `skill-creator`
 
+**Languages:** `typescript` (TS/JS patterns moved out of the global CLAUDE.md; auto-loads for `.ts`/`.tsx`/`.js`/`.jsx` work)
+
 **Research & science:** `academic-review` (papers/proposals review), `matlab` (R2025a patterns + the personal `+thz` package), `matlab-runner` (headless script execution), `zotero` (local-library citation lookup; **personal machines only**)
 
 **macOS app integrations (darwin-only via `.chezmoiignore`):** `things` (Things 3), `fantastical` (calendar), `keynote` (presentations; **also personal-only**)
