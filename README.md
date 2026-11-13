@@ -85,7 +85,7 @@ Per-user installs only, no Scoop:
   rtk (GitHub releases → `~/.local/bin`)
 - uv/uvx (Astral installer), Claude Code (native installer), psmux
 - PowerShell 7 (an existing system MSI install is used as-is, else official zip →
-  `~/.local/opt/pwsh`)
+  `~/.local/opt/pwsh`; psmux's default shell)
 - Windows Terminal (winget `--scope user`, else portable zip)
 - Hack Nerd Font (per-user)
 

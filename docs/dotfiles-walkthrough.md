@@ -189,8 +189,10 @@ Bash the same basics; both are Windows-only.
   `$LOCALAPPDATA/nvim` via `AppData/Local/nvim/init.vim.tmpl`, a one-line
   `include` of the Unix source.
 - **tmux/psmux** — thin platform wrappers around `tmux-shared`. psmux picks
-  its default shell by `.portable` (Scoop pwsh shim vs. the portable pwsh zip
-  at `~/.local/opt/pwsh`, with PowerShell 5.1 as the fallback).
+  its default shell by `.portable` (Scoop pwsh shim vs., on portable machines,
+  the system MSI pwsh under `$env:ProgramFiles\PowerShell\7`, then the
+  portable pwsh zip at `~/.local/opt/pwsh`, with PowerShell 5.1 as the last
+  fallback).
 - **Ghostty** — Hack Nerd Font, catppuccin-macchiato, launches
   `/bin/zsh -lc 'tmux new-session -A -s main'` (login shell so brew PATH
   works), `shift+enter` mapped for multi-line Claude Code input.

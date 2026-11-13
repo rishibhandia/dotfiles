@@ -2,12 +2,20 @@
 # Shared settings are synced with tmux via .chezmoitemplates/tmux-shared
 
 # Use PowerShell 7 so the user profile (starship, PSReadLine, etc.) loads.
-# Scoop machines use the Scoop shim (not the MSI). Portable machines use the
-# zip that run_once_before_install-portable-shells puts at a fixed path,
-# falling back to Windows PowerShell if that install failed.
+# Scoop machines use the Scoop shim. Portable machines prefer a system MSI
+# install (always at ProgramFiles\PowerShell\7, kept current by IT / Microsoft
+# Update), then the zip that run_once_before_install-portable-shells puts at a
+# fixed path when there is no MSI, then Windows PowerShell 5.1 if both are
+# missing.
 {{ $portablePwsh := joinPath .chezmoi.homeDir ".local" "opt" "pwsh" "pwsh.exe" -}}
+{{ $systemPwsh := "" -}}
+{{ if env "ProgramFiles" -}}
+{{   $systemPwsh = joinPath (env "ProgramFiles") "PowerShell" "7" "pwsh.exe" -}}
+{{ end -}}
 {{ if not .portable -}}
 set -g default-shell "{{ .chezmoi.homeDir | replace "\\" "/" }}/scoop/apps/pwsh/current/pwsh.exe"
+{{ else if and $systemPwsh (stat $systemPwsh) -}}
+set -g default-shell "{{ $systemPwsh | replace "\\" "/" }}"
 {{ else if stat $portablePwsh -}}
 set -g default-shell "{{ $portablePwsh | replace "\\" "/" }}"
 {{ else -}}
