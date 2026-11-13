@@ -247,60 +247,6 @@ Types: feat, fix, refactor, docs, test, chore, perf, ci, style
 
 **Build Troubleshooting:** If build fails, use `/build-fix`
 
-### Available Agents
-
-| Agent | Purpose | When to Use |
-|-------|---------|-------------|
-| `planner` | Implementation planning | Starting new features, architectural changes |
-| `architect` | System design | Planning features, making architectural decisions |
-| `tdd-guide` | Test-driven development | Writing new features, fixing bugs |
-| `code-reviewer` | Quality & security review | After writing/modifying code |
-| `security-reviewer` | Vulnerability detection | Code handling auth, user input, sensitive data |
-| `build-error-resolver` | Fix build errors | When build fails or type errors occur |
-| `e2e-runner` | Playwright testing | Testing critical user flows |
-| `refactor-cleaner` | Dead code removal | Cleaning up unused code |
-| `doc-updater` | Documentation sync | Updating codemaps and docs |
-| `git-commit` | Atomic commit enforcement | Before committing to ensure atomic commits |
-| `debugger` | Systematic debugging | When initial implementation fails or bugs occur |
-
-### Available Skills (Commands)
-
-**Development Workflow:**
-| Command | Purpose |
-|---------|---------|
-| `/plan` | Create implementation plan before coding |
-| `/tdd` | TDD workflow (red-green-refactor) |
-| `/code-review` | Quality assessment on git diff |
-| `/build-fix` | Fix compilation/type errors |
-| `/e2e` | Generate Playwright tests |
-| `/refactor-clean` | Remove dead code |
-| `/verify` | Run verification checks |
-| `/checkpoint` | Save/verify workflow state |
-| `/learn` | Extract patterns mid-session |
-| `/eval` | Evaluation harness |
-| `/orchestrate` | Workflow orchestration |
-| `/test-coverage` | Coverage analysis |
-| `/update-codemaps` | Codebase mapping |
-| `/update-docs` | Documentation sync |
-
-**Document & File Creation:**
-| Command | Purpose |
-|---------|---------|
-| `/pdf` | PDF manipulation and form extraction |
-| `/pdf-chunk` | Handle large PDFs without filling context |
-| `/xlsx` | Excel spreadsheet creation and editing |
-| `/pptx` | PowerPoint presentation creation |
-| `/docx` | Word document creation |
-| `/doc-coauthoring` | Structured documentation collaboration |
-| `/theme-factory` | Generate color themes for artifacts |
-| `/skill-creator` | Create custom Claude Code skills |
-
-**macOS App Integrations:**
-| Command | Purpose |
-|---------|---------|
-| `/things` | Things 3 task management |
-| `/fantastical` | Fantastical calendar integration |
-
 ### Dotfiles Management
 
 Use `dots` command (chezmoi wrapper) to manage dotfiles from any directory:
