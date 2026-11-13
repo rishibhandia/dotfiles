@@ -201,6 +201,129 @@ string gets `'Interpreter', 'latex'` with e.g. `$\delta P \parallel P$`.
 Derivative primes in a single-quoted latex string need FOUR quotes per
 double-prime: MATLAB collapses `''` → `'`, so `F''''(P_s)` is what
 renders as `F''(P_s)`. e.g. `'$\omega_0^2 = F''''(P_s)\,/\,m_p$'`.
+## THz / TA plotting conventions
+
+User has standardized on the following defaults across NbOI2 campaigns.
+Apply them automatically; only deviate when asked.
+
+### 2D TA maps: symmetric `clim`, white = 0
+
+User: *"in the future for 2D maps, always set clim to be symmetric
+such that white is the zero color. can you update all the scans for
+that?"* Use a diverging colormap and force the limits to ±max(|data|).
+
+```matlab
+M = max(abs(deltaSignal(:)));
+imagesc(time_ps, wavelength_nm, deltaSignal)
+clim([-M M])
+colormap(redbluecmap)   % or any diverging map
+colorbar
+```
+
+### Wavelength-coded line plots: blue = short λ, red = long λ, no yellow
+
+User: *"a color map that doesn't use yellow in the center... when we
+going from red to blue it should flow short wavelengths should be blue
+not longer"*. The pattern that satisfies this is `plasma` sliced to
+drop the bright-yellow end:
+
+```matlab
+fullCmap = plasma(512);
+cmap     = fullCmap(52:410, :);     % trims yellow upper end
+idx      = round(linspace(1, size(cmap,1), numel(wavelengths)));
+lineColors = cmap(idx, :);
+```
+
+Add a horizontal `yline(0, ':k', 'HandleVisibility', 'off')` baseline
+per offset trace and label the wavelength **next to the trace**
+(`text(...)`), rather than relying on a colorbar — the colorbar adds
+visual noise to multi-trace plots.
+
+### Stacked / offset waterfalls for time-trace families
+
+When plotting a family of related traces (fluence series, multiple
+wavelengths), offset them vertically. User has said both *"can you
+make them offset, its hard to read"* and *"they aren't stacked in the
+bottom plot"* — meaning the FFT panel in a paired time/FFT figure
+should be stacked the same way as the time panel.
+
+```matlab
+offset = 1.2 * max(abs(traces(:)));
+for ii = 1:nTraces
+    plot(t, traces(:,ii) + offset*(ii-1), 'Color', lineColors(ii,:))
+    yline(offset*(ii-1), ':k', 'HandleVisibility', 'off')
+    text(t(end), offset*(ii-1), sprintf(' %g nm', wavelengths(ii)), ...
+         'FontSize', 8, 'VerticalAlignment', 'middle')
+end
+```
+
+### "De-emphasized" FFT overlay
+
+When a reference trace (typically a pump-only scan, filename pattern
+`test_m*_DR_*` in the NbOI2 campaigns) is plotted as background under
+a data FFT, use **reduced alpha** so it reads as a guide rather than
+competing for attention:
+
+```matlab
+plot(freq, abs(ref_fft), 'Color', [0.5 0.5 0.5 0.35], 'LineWidth', 1.0)
+hold on
+plot(freq, abs(data_fft), 'k', 'LineWidth', 1.5)
+```
+
+(MATLAB accepts a 1×4 RGBA color in modern releases. If using an older
+version, fall back to a light gray `[0.7 0.7 0.7]` with a thinner
+line.)
+
+### Don't crop the rising edge
+
+On pump-probe time traces, keep enough pre-zero data to show the
+rising edge cleanly. Don't trim the plot window to "just the
+oscillations" — the rising edge is part of the diagnostic.
+
+### Save to `Figures/`, repeatable filenames
+
+Every plotting script writes PNGs to a sibling `Figures/` directory.
+**Use repeatable filenames** — each rerun overwrites the file.
+User explicitly reversed the earlier "don't overwrite" rule on
+2026-05-20: *"I prefer each figure has a repeatable name so it gets
+updated every time you run the script."*
+
+```matlab
+figDir = fullfile(scriptDir, 'Figures');
+if ~exist(figDir, 'dir'); mkdir(figDir); end
+exportgraphics(fig, fullfile(figDir, 'TA_summary.png'), ...
+               'Resolution', 200)
+```
+
+For loops over multiple input files, build the filename from the
+input stem so each input gets its own (still-repeatable) output:
+
+```matlab
+[~, h5stem] = fileparts(h5name);
+exportgraphics(fig, fullfile(figDir, sprintf('%s_TA.png', h5stem)), ...
+               'Resolution', 200)
+```
+
+**Exception:** keep timestamps on **notebook-entry text files**
+(`Notebook_Entries/*.txt`) — those are an audit trail of what was
+in the lab notebook at each point in time and must not be overwritten.
+
+### Hardcoded numeric ranges → variables
+
+Any wavelength window or time range that appears more than once must
+be pulled into a named variable at the top of the script. User:
+*"change the [520 655] to [500 700]... store it as a variable so I can
+only change it once."*
+
+```matlab
+% Top of script
+WL_RANGE_NM   = [500 700];
+TIME_RANGE_PS = [-1 10];
+
+% Then reference WL_RANGE_NM and TIME_RANGE_PS everywhere downstream
+```
+
+---
 
 ## When to Use
 
@@ -211,3 +334,6 @@ Any plotting script in `~/Documents/Scientific Data/` or anywhere
 - Time-trace and FFT plots with marked-region overlays
 - Figures bound for `exportgraphics` (paper/poster output)
 - Error-bound visualization on polar data
+- THz/TA time-trace + FFT pairs (stacked offsets, de-emphasized
+  reference overlay)
+- 2D TA maps (symmetric `clim`, diverging colormap)

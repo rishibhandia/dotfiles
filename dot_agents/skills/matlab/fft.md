@@ -78,12 +78,37 @@ at the same 0.02 ps step), choose `nfft` from the *longest* trace (4096 here)
 and use that same value for every trace. A per-trace `nfft` silently gives each
 spectrum a different interpolation density, and an `nfft` chosen for the short
 trace throws the error above on the long one.
+## "−0.0" first sample breaks rfftFreq uniformity check
+
+Lab text files often store the time axis starting at exactly
+`-0.0000000000`, while subsequent samples are `+0.0200000000`,
+`+0.0400000000`, … `thz.fft.rfftFreq` (and `disc_ft` via its uniformity
+check) rejects this as a non-uniform time vector even though the
+intended spacing is uniform.
+
+**Symptom:**
+> Invalid argument at position 1. Time vector must be uniformly spaced.
+
+**Fix:** rebuild a uniform time vector from `median(diff(ti))` before
+passing to FFT helpers.
+
+```matlab
+ti = d(:,1)';
+dt = median(diff(ti));
+t  = ti(1) + (0:numel(ti)-1) * dt;   % uniform; first sample stays -0.0 cleanly
+f   = thz.fft.rfftFreq(t, nfft);
+mag = abs(thz.fft.disc_ft(yi, nfft, @rectwin));
+```
+
+Do this once at load time in every `readmatrix → FFT` pipeline.
 
 ## When to Use
 
 - Any script that batches FFTs over a `dataTable` with one row per
   trace (the typical NbOI2 pump-probe / TA workflow)
 - Whenever `thz.fft.disc_ft` errors with the zero-padding message
+- Whenever `rfftFreq` errors "Time vector must be uniformly spaced"
+  on a `readmatrix`-loaded file
 - When deciding between cell vs matrix storage for FFT results — the
   matrix-of-rows convention is the default in this codebase
 

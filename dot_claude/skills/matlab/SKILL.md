@@ -158,6 +158,61 @@ call this from a future, unrelated experiment?*
 
 ---
 
+## Running MATLAB from Claude on this machine
+
+Two etiquette rules when invoking MATLAB on the user's box. Both are
+project-wide and apply to every analysis script.
+
+**1. Never blanket-kill MATLAB processes.** The user almost always has
+an interactive MATLAB session open in another window — they have said
+explicitly: *"i'm running matlab session in another window, don't quit
+all matlab sessions."* `taskkill /im matlab.exe`, `Stop-Process
+-Name matlab`, and similar will wipe their workspace. If a single
+`-batch` invocation is hung, terminate only that PID; never sweep all
+MATLAB processes.
+
+**2. Run `matlab -batch` invocations serially, never in parallel.**
+The user has hit failures running batch jobs concurrently: *"it failed
+maybe becaus you ran to many in parallel"* → *"rerun them
+sequentially. 1 at a time"*. Likely a mix of license-checkout
+contention, shared figure-output paths, and the parallel interactive
+session all competing. When a task implies multiple MATLAB runs
+(regenerating a family of plots, sweeping a parameter), chain them
+inside one `-batch` call or queue them one at a time. Reserve
+parallelism for cases the user explicitly approves.
+
+For headless execution use the `matlab-runner` skill (it bakes in the
+right entry point on this machine).
+
+---
+
+## EOS field-conversion quick reference
+
+`thz.eos.calcEOSAdv` (and its root-namespace wrapper `calcEOSAdv`)
+converts a measured EOS lock-in ratio `ΔI/I` to a peak field in
+**kV/cm**, accounting for `n` silicon filter wafers in the probe path.
+
+```matlab
+Ef = calcEOSAdv(dI_over_I, L_mm, detCrystal, siliconCount)
+%   dI_over_I    column of ΔI/I (lock-in signal / DC)
+%   L_mm         crystal thickness in MILLIMETERS (e.g. 0.050 for 50 µm GaP)
+%   detCrystal   'GaP' or 'ZnTe'
+%   siliconCount integer number of Si filter WAFERS (each contributes
+%                t_Si = 4·n_Si/(n_Si+1)^2 with n_Si = 3.418); 0 if none
+% Returns Ef in kV/cm.
+```
+
+Internally uses `asin(ΔI/I)`, so `|ΔI/I|` must be < 1 (always true in
+practice — typical values are 1e-3 to 1e-2). For GaP it uses
+`r41 = 0.88e-10 cm/V`, `n_GaP = 3.183` (probe), `n_GaP@THz = 3.24`.
+ZnTe branch uses Planken's formula with `r41 = 3.9e-10 cm/V`,
+`n_ZnTe = 2.8528`. Probe wavelength is hardcoded to 800 nm.
+
+`thz.eos.calcEOS` is the older two-arg version (no silicon correction)
+and `calc_E_flex` lets you override material constants.
+
+---
+
 ## Graceful Per-File Loading for In-Progress Scans
 
 Wrap each file load in try/catch and guard against too-short traces. Without the length guard, a 0-length trace sets `L = min(existing, 0) = 0`, zeroing all previously loaded rows and crashing downstream FFT code.

@@ -1,7 +1,7 @@
 # Transient Absorption Workflow
 
 **Sources:** consolidated from learned/ta-fft-frequency-axis (2026-04-08, fixed in package 2026-05-03), learned/ta-sideband-analysis (2026-05-01), learned/matlab-ta-fluence-scaling (2026-05-01), learned/matlab-shg-normalization (2026-03-15).
-**Updated:** 2026-05-04
+**Updated:** 2026-05-10
 
 End-to-end TA pump-probe analysis built on the `+thz/+ta` package. All
 five primitives — `oscillatoryPower`, `findSidebands`,
@@ -36,6 +36,77 @@ If you ever build a frequency axis from scratch outside the package
 dt   = abs(TimeDelays(2) - TimeDelays(1));
 freq = (0:nfftOut-1) / (nfft * dt);
 ```
+
+---
+
+## Canonical kinetic-trace FFT pipeline (physical units)
+
+For "give me the FFT of this kinetic trace at one wavelength" tasks
+— the spectroscopist's default ask — use this exact pipeline. It mirrors
+the user's reference Python recipe (`np.fft.rfft` + `np.hanning`) and adds
+the physical-units calibration (1/N normalization × 2 for one-sided
+spectrum) that the Python code intentionally omits.
+
+```matlab
+% Inputs: t (delays in ps, uniform), y (kinetic at one wavelength)
+N      = numel(t);
+dt_ps  = abs(mean(diff(t)));                          % matches Python's abs(mean(diff(...)))
+yDC    = y - mean(y);                                  % step 1: mean (DC) subtract
+freq   = thz.fft.rfftFreq(t, N);                       % NFFT = N (no zero-padding)
+F      = abs(thz.fft.disc_ft(yDC, N, @hann)) * (2 / N); % steps 2-5: Hann window, |rfft|, 2/N
+% step 6: drop the DC bin from BOTH arrays before plotting
+F      = F(2:end);
+freq   = freq(2:end);
+```
+
+**Rules (DO):**
+1. Mean (DC) subtract — and *only* mean subtraction. No detrending.
+2. Hann window via `@hann` passed to `thz.fft.disc_ft`.
+3. **NFFT = N** — do NOT zero-pad. (Zero-padding only interpolates the
+   plotted spectrum; it does not improve resolution. The user's spectra
+   are compared *quantitatively*, so the bin count must equal N.)
+4. **`abs(...) * (2/N)`** — one-sided amplitude spectrum in physical
+   units. The `2/N` is `(2 one-sided factor) / (N normalization)`. NOT
+   power, NOT corrected for window coherent gain.
+5. **Drop the DC (0-Hz) bin** from both `freq` and the magnitude array
+   before plotting.
+
+**Rules (DON'T):**
+- Don't zero-pad (changes the implicit normalization and the bin
+  density makes ratios across scans inconsistent).
+- Don't apply per-trace baseline-detrending (movmean / polyfit
+  subtraction) unless the user explicitly asks. The Hann window
+  already suppresses the impulse-decay's spectral leakage well enough
+  for typical pump-probe traces.
+- Don't truncate the trace to a "post-peak window" or "oscillating
+  region" unless the user explicitly asks. FFT the whole DC-subtracted
+  trace.
+- Don't return a power spectrum; the user wants amplitude.
+- Don't normalize per-wavelength (e.g. by peak amplitude). Keep
+  absolute physical units so amplitudes across wavelengths AND across
+  scans are directly comparable.
+
+**Why 2/N (not 4/N):** Hann window's coherent gain is 0.5, so a
+strictly "physical" calibration that recovers the original signal
+amplitude would use `4/N`. The user has explicitly chosen `2/N`
+(matches `numpy.fft.rfft` with no normalization, divided by N and
+doubled). This is the documented convention — apply it without
+"correcting" upward to 4/N.
+
+**Default visualization band:** trim to `freq <= 5 THz` after dropping
+the DC bin, for THz/coherent-phonon work on NbOI2-class samples.
+
+**Why no truncation / no detrend:** combined with the proper window
+(Hann) and the full-trace FFT, the impulse-response decay contributes
+mostly to the lowest 1–2 bins after the DC bin. Those few bins get
+dropped or are visually distinct from the THz-range phonon peaks. The
+result is honest — what's actually in the data — and ratios between
+scans are meaningful.
+
+For broadband per-wavelength loops (TA scans on the spectrograph), wrap
+the above in a `for` loop over wavelength pixels. See
+`+thz/+ta/oscillatoryPower.m` for an efficient implementation that
+reuses the FFT plan.
 
 ---
 
@@ -225,6 +296,103 @@ unchanged.
 
 ---
 
+## Auto-detect dominant FFT peak by averaging across configurations
+
+When you don't know the exact coherent-mode frequency ahead of time
+(e.g. it shifts slightly with BPF, sample alignment, or temperature),
+auto-detect it from the data: average **peak-normalized** FFTs across
+every (plate × probe × fluence) configuration, then `findpeaks` in a
+configurable search band. Cluster nearby peaks so a single mode split
+by FFT resolution doesn't appear twice.
+
+```matlab
+% Collect all FFTs, normalize each to its own peak so amplitudes
+% don't bias which mode dominates the average.
+allMag = [];
+for r = 1:nRows
+    for c = 1:nCols
+        m = fftStore(r,c).mag;
+        allMag(end+1, :) = m / max(m);          %#ok<AGROW>
+    end
+end
+meanMag = mean(allMag, 1);
+
+fmask = (allF >= fLo) & (allF <= fHi);
+[~, pkIdx] = findpeaks(meanMag(fmask), 'MinPeakProminence', 0.04);
+cand = sort(allF(pkIdx + find(fmask, 1) - 1));
+
+% Merge peaks within mergeTol THz — same physical mode split by resolution
+mergeTol = 0.4;
+modes = []; i = 1;
+while i <= numel(cand)
+    cluster = cand(i); j = i + 1;
+    while j <= numel(cand) && (cand(j) - cluster(end)) < mergeTol
+        cluster(end+1) = cand(j); j = j + 1;       %#ok<AGROW>
+    end
+    modes(end+1) = mean(cluster);                  %#ok<AGROW>
+    i = j;
+end
+```
+
+Use the returned `modes` as centers for ±0.3 THz integration windows
+in `computeFFTAndIntegrate`.
+
+---
+
+## Origin-forced linear vs quadratic fluence fit (1- vs 2-photon diagnostic)
+
+`thz.ta.fitPowerLaw` (above) extracts a continuous exponent `n` in
+`log(P) = n·log(F)`. When you instead want a clean "is this χ² or χ³?"
+test against only two specific powers (n = 1 vs n = 2), forcing both
+fits through the origin and comparing R² is more diagnostic — the
+intercept-free models can't trade off slope vs offset.
+
+```matlab
+% Origin-forced y = m * x  (n = 1)  and  y = a * x²  (n = 2)
+xv = fluence(:); yv = peakWeight(:);
+mLin  = sum(xv    .* yv) / sum(xv.^2);
+mQuad = sum(xv.^2 .* yv) / sum(xv.^4);
+r2Lin  = 1 - sum((yv - mLin  * xv   ).^2) / sum((yv - mean(yv)).^2);
+r2Quad = 1 - sum((yv - mQuad * xv.^2).^2) / sum((yv - mean(yv)).^2);
+
+fprintf('Linear    y = %.3e · F   R² = %.3f\n', mLin,  r2Lin);
+fprintf('Quadratic y = %.3e · F²  R² = %.3f\n', mQuad, r2Quad);
+```
+
+Plot both fit curves over the data (dotted = linear, solid = quadratic)
+so the model with better visual fit is obvious. With <4 fluence points
+the test is underconstrained — collect 5+ before drawing conclusions.
+
+---
+
+## Mislabel detection via Pearson correlation
+
+When a scan filename is ambiguous (probe angle? pump axis?
+detection-side filter?), cross-correlate the candidate against known
+"good" reference scans at each possible configuration. The strongest
+positive correlation reveals the true label — and a negative
+correlation against the wrong reference is a strong confirmation.
+
+```matlab
+% Truncate to common time window, post-rising-edge
+tStart = max([sCand.t(1), sRef.t(1), 0.5]);
+tEnd   = min(sCand.t(end), sRef.t(end));
+mC = sCand.t >= tStart & sCand.t <= tEnd;
+mR = sRef.t  >= tStart & sRef.t  <= tEnd;
+n = min(sum(mC), sum(mR));
+a = sCand.y(mC); a = a(1:n);
+b = sRef.y(mR);  b = b(1:n);
+r = corrcoef(a, b); r = r(1, 2);
+```
+
+A correlation matrix `candidate × {reference_A, reference_B}` makes
+the assignment unambiguous: each candidate should land at r > 0.8
+against its true label and r ≈ 0 or negative against the wrong one.
+Used in this project to flag mislabeled HWP-as-QWP scans and verify
+noDetBPF redo files weren't probe-angle swapped.
+
+---
+
 ## When to Use
 
 - Broadband TA data with coherent phonon oscillations
@@ -232,5 +400,11 @@ unchanged.
 - Fluence-dependent phonon scaling (χ² vs χ³ identification)
 - SHG pump-probe scans where the probe efficiency varies with angle
 - Any FFT on TA traces where the time vector may include negative delays
+- Defining integration windows without prior knowledge of the mode
+  frequency (auto-peak-detection across averaged FFTs)
+- Diagnosing 1-photon vs 2-photon excitation channels with limited
+  fluence points (origin-forced linear/quadratic R² comparison)
+- Verifying scan labels after suspected mistakes (Pearson correlation
+  against known-good references)
 - Any analysis script that calls into `thz.io.TAData`, `thz.ta.*`, or
   `thz.fft.*` for transient-absorption work
