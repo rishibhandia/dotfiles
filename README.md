@@ -84,7 +84,8 @@ Per-user installs only, no Scoop:
 - ripgrep, fd, bat, fzf, zoxide, starship, lsd, jq, yq, gh, duf, fastfetch, ruff,
   rtk (GitHub releases → `~/.local/bin`)
 - uv/uvx (Astral installer), Claude Code (native installer), psmux
-- PowerShell 7 (official zip → `~/.local/opt/pwsh`, psmux's default shell)
+- PowerShell 7 (an existing system MSI install is used as-is, else official zip →
+  `~/.local/opt/pwsh`)
 - Windows Terminal (winget `--scope user`, else portable zip)
 - Hack Nerd Font (per-user)
 

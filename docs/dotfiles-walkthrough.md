@@ -122,7 +122,8 @@ macOS sequence:
    xmllint, writes only on diff).
 
 Windows sequence mirrors it: Scoop (before, non-portable) or portable shells
-(before, portable: pwsh zip + Windows Terminal) → Scoopfile (onchange,
+(before, portable: pwsh zip unless a system MSI pwsh exists, + Windows
+Terminal) → Scoopfile (onchange,
 non-portable, hash includes `.work`) → cli-tools (Claude Code via install.ps1→winget→npm
 fallback; uv via Astral in portable mode; rtk run with stdin closed + 30 s
 kill timeout because it has hung) → Windows Terminal theming (strips JSONC

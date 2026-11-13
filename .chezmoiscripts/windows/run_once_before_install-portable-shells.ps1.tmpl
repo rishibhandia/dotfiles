@@ -2,7 +2,9 @@
 #Requires -Version 5.1
 # PowerShell 7 and Windows Terminal for portable Windows (work machines and
 # DOTFILES_PORTABLE=1). Scoop machines get both from the Scoopfile instead.
-# No admin rights needed and the execution policy is never changed.
+# A system-wide PowerShell 7 (MSI) is used as-is; only a machine without one
+# gets the portable zip. No admin rights needed and the execution policy is
+# never changed.
 #
 # A "before" script on purpose: chezmoi renders target templates after the
 # before-scripts run, so psmux.conf already sees pwsh.exe on the first apply.
@@ -48,13 +50,23 @@ function Expand-LatestRelease {
 $optDir = Join-Path $env:USERPROFILE ".local\opt"
 
 # -----------------------------------------------------------------------------
-# PowerShell 7 - official zip into ~\.local\opt\pwsh
-# Always this fixed path (never winget, whose install location varies) so
-# psmux.conf can name it. Installed once and never overwritten: a running
-# pwsh.exe is file-locked, the same failure that evicted uv.exe from externals.
+# PowerShell 7 - the system MSI install if present, else the official zip
+# into ~\.local\opt\pwsh.
+# The MSI always lands in $env:ProgramFiles\PowerShell\7 and is kept current
+# by its owner (IT / Microsoft Update), so a second, never-updated copy would
+# only shadow it. The MSI already puts it on the machine PATH, so nothing is
+# added here. psmux.conf checks the same fixed path first.
+# The zip fallback always uses this fixed path (never winget, whose install
+# location varies) so psmux.conf can name it. Installed once and never
+# overwritten: a running pwsh.exe is file-locked, the same failure that
+# evicted uv.exe from externals.
 # -----------------------------------------------------------------------------
 $pwshDir = Join-Path $optDir "pwsh"
-if (Test-Path (Join-Path $pwshDir "pwsh.exe")) {
+$systemPwsh = if ($env:ProgramFiles) { Join-Path $env:ProgramFiles "PowerShell\7\pwsh.exe" } else { "" }
+$useSystemPwsh = [bool]($systemPwsh -and (Test-Path $systemPwsh))
+if ($useSystemPwsh) {
+    Write-Success "Using system PowerShell 7 at $systemPwsh; skipping the portable zip"
+} elseif (Test-Path (Join-Path $pwshDir "pwsh.exe")) {
     Write-Success "PowerShell 7 already installed in $pwshDir"
 } else {
     Write-Info "Installing PowerShell 7 (portable zip)..."
@@ -67,7 +79,7 @@ if (Test-Path (Join-Path $pwshDir "pwsh.exe")) {
         Write-Warn "PowerShell 7 installation failed: $_"
     }
 }
-if (Test-Path (Join-Path $pwshDir "pwsh.exe")) {
+if (-not $useSystemPwsh -and (Test-Path (Join-Path $pwshDir "pwsh.exe"))) {
     Add-UserPath $pwshDir
 }
 
