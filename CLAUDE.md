@@ -432,6 +432,7 @@ Current learned files:
 - **powershell-utf8-bom-em-dash.md** — ASCII-only in `*.ps1.tmpl`: PowerShell 5.1 mis-decodes UTF-8 without BOM and em-dashes break parsing
 - **homebrew-cask-sudo-abort.md** — `brew upgrade --cask` quits the app *before* the `sudo` step that fails non-interactively, leaving a service down; also why `--greedy` lies about self-updating casks
 - **homebrew-circular-dep-false-hint.md** — Homebrew's "stale keg tab data" circular-dependency advice is often wrong (`libtiff` ⇄ `webp` is real); verify before running the destructive suggested fix
+- **powershell-bash-interop.md** — Inline `powershell -Command` from bash mangles `$_` and other PowerShell variables; write a `.ps1` and invoke it instead. Also: a hidden `desktop.ini` blocks removing "empty" Windows directories
 
 > MATLAB/TA patterns formerly listed here were consolidated into the **matlab** skill (`dot_claude/skills/matlab/`): `fft.md`, `performance.md`, `plotting.md`, `style-guide.md`, `ta.md`.
 

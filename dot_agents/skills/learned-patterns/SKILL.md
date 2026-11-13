@@ -1,6 +1,6 @@
 ---
 name: learned-patterns
-description: Consult Rishi's accumulated debugging notes for Andor SDK lifecycle, phantom USB devices, Python mocks, Qt shutdown, PowerShell encoding, or Apple Photos imports. Use only when the task matches one of those topics.
+description: Consult Rishi's accumulated debugging notes for Andor SDK lifecycle, phantom USB devices, Python mocks, Qt shutdown, PowerShell encoding, calling PowerShell from bash on Windows, or Apple Photos imports. Use only when the task matches one of those topics.
 ---
 
 # Learned debugging patterns
@@ -12,6 +12,7 @@ Read only the relevant file under `references/`:
 - `mockobject-attribute-getattr-trap.md`
 - `qt-test-window-close-blocking-shutdown.md`
 - `powershell-utf8-bom-em-dash.md`
+- `powershell-bash-interop.md`
 - `apple-photos-bulk-import.md`
 
 Treat the notes as prior local experience, not as evidence for current external

@@ -1,6 +1,6 @@
 {
   "format": "ai-parity-generated-state",
-  "generation_id": "2c1ddeecf2e3ed406d37e2e14b1bbb52fa5337722d549ae11c1e6493323633cb",
+  "generation_id": "5db8d431a97a11256eb511eec047a3643dec9380e659b5603a411a7301c43c2d",
   "generator_inputs": {
     "engine_sha256": "ebebaf96041867bc701fa7491c93cf5ecaf7b54b1723272027e729e695678074",
     "manifest_sha256": "a056fea0e8579efb04cc7980951af5b6f90fc17a23c97afbaafd6a993a23f87b",
@@ -115,9 +115,9 @@
     "dot_agents/skills/learned-patterns/SKILL.md": {
       "artifact": "learned-patterns-skill",
       "deployed_mode": 420,
-      "sha256": "cfd736130cd3372c2adf72fbc0eb81e2eb203d92517b2bec9cb47fdb3155bb60",
+      "sha256": "4a6a4f5bfeef867ce03b00575226071d257fd538373265621538a5cd1f89df28",
       "source": "ai-parity/adapters/skills/learned-patterns",
-      "source_digest": "96dc60e957d284134fd3579da94f47eee485d9a64f4cbc5dbfad06589f08e36a",
+      "source_digest": "2ec5c590574214aefab6e4d09a2517d37f0e10d774a8f517bb486de4fb28e49f",
       "source_mode": 420
     },
     "dot_agents/skills/learned-patterns/references/andor-sdk-dll-lifecycle.md": {
@@ -125,7 +125,7 @@
       "deployed_mode": 420,
       "sha256": "f5ca7a10d196dd742aa7d5d86afc0edf97799c32fa323fb24ba16231d234de7d",
       "source": "dot_claude/skills/learned",
-      "source_digest": "463abc95e93d647eb221050b16ef1bfd069772a36cacf4aa875f2a0f63f60ac2",
+      "source_digest": "8a14725cd94f7e8e28e136e6337eb6f9dc367ced6b78d8ab20e6ab557ae84e89",
       "source_mode": 420
     },
     "dot_agents/skills/learned-patterns/references/apple-photos-bulk-import.md": {
@@ -133,7 +133,7 @@
       "deployed_mode": 420,
       "sha256": "07c85a1247bdd7dac08cef1994af006b98e6bea836169888c378cd199e6e8b41",
       "source": "dot_claude/skills/learned",
-      "source_digest": "463abc95e93d647eb221050b16ef1bfd069772a36cacf4aa875f2a0f63f60ac2",
+      "source_digest": "8a14725cd94f7e8e28e136e6337eb6f9dc367ced6b78d8ab20e6ab557ae84e89",
       "source_mode": 420
     },
     "dot_agents/skills/learned-patterns/references/homebrew-cask-sudo-abort.md": {
@@ -141,7 +141,7 @@
       "deployed_mode": 420,
       "sha256": "8e3491e028baad10ff9f8603419c68b690042eacdafb52a1547ba44469cd80e9",
       "source": "dot_claude/skills/learned",
-      "source_digest": "463abc95e93d647eb221050b16ef1bfd069772a36cacf4aa875f2a0f63f60ac2",
+      "source_digest": "8a14725cd94f7e8e28e136e6337eb6f9dc367ced6b78d8ab20e6ab557ae84e89",
       "source_mode": 420
     },
     "dot_agents/skills/learned-patterns/references/homebrew-circular-dep-false-hint.md": {
@@ -149,7 +149,7 @@
       "deployed_mode": 420,
       "sha256": "272cb17dcb0356dcb92bdadaecd5ed2f89eae4d357f03ec89af192e4486c7449",
       "source": "dot_claude/skills/learned",
-      "source_digest": "463abc95e93d647eb221050b16ef1bfd069772a36cacf4aa875f2a0f63f60ac2",
+      "source_digest": "8a14725cd94f7e8e28e136e6337eb6f9dc367ced6b78d8ab20e6ab557ae84e89",
       "source_mode": 420
     },
     "dot_agents/skills/learned-patterns/references/mockobject-attribute-getattr-trap.md": {
@@ -157,7 +157,15 @@
       "deployed_mode": 420,
       "sha256": "6b19bf2c7c8b6578cc9447ae741ba31cd85b72c1d261fef43b3d09d09efcc922",
       "source": "dot_claude/skills/learned",
-      "source_digest": "463abc95e93d647eb221050b16ef1bfd069772a36cacf4aa875f2a0f63f60ac2",
+      "source_digest": "8a14725cd94f7e8e28e136e6337eb6f9dc367ced6b78d8ab20e6ab557ae84e89",
+      "source_mode": 420
+    },
+    "dot_agents/skills/learned-patterns/references/powershell-bash-interop.md": {
+      "artifact": "learned-pattern-references",
+      "deployed_mode": 420,
+      "sha256": "8b34543792c23852193212df5f7fd27802c91b1ecfdc742a2dc250f82821032f",
+      "source": "dot_claude/skills/learned",
+      "source_digest": "8a14725cd94f7e8e28e136e6337eb6f9dc367ced6b78d8ab20e6ab557ae84e89",
       "source_mode": 420
     },
     "dot_agents/skills/learned-patterns/references/powershell-utf8-bom-em-dash.md": {
@@ -165,7 +173,7 @@
       "deployed_mode": 420,
       "sha256": "096a23fb266127350ec5737b29d57d0bac3aa902da0f7433648aa8115f0d7ed3",
       "source": "dot_claude/skills/learned",
-      "source_digest": "463abc95e93d647eb221050b16ef1bfd069772a36cacf4aa875f2a0f63f60ac2",
+      "source_digest": "8a14725cd94f7e8e28e136e6337eb6f9dc367ced6b78d8ab20e6ab557ae84e89",
       "source_mode": 420
     },
     "dot_agents/skills/learned-patterns/references/qt-test-window-close-blocking-shutdown.md": {
@@ -173,7 +181,7 @@
       "deployed_mode": 420,
       "sha256": "614859c62598fd6f80a22f3cc92794cb22e98ccc50d2cbe2958ee3e91f16c876",
       "source": "dot_claude/skills/learned",
-      "source_digest": "463abc95e93d647eb221050b16ef1bfd069772a36cacf4aa875f2a0f63f60ac2",
+      "source_digest": "8a14725cd94f7e8e28e136e6337eb6f9dc367ced6b78d8ab20e6ab557ae84e89",
       "source_mode": 420
     },
     "dot_agents/skills/learned-patterns/references/storygraph-browser-automation.md": {
@@ -181,7 +189,7 @@
       "deployed_mode": 420,
       "sha256": "776fc1bfacca6c953566d9962bc8a173c14a4ec59f619dca86dacbcd750b6019",
       "source": "dot_claude/skills/learned",
-      "source_digest": "463abc95e93d647eb221050b16ef1bfd069772a36cacf4aa875f2a0f63f60ac2",
+      "source_digest": "8a14725cd94f7e8e28e136e6337eb6f9dc367ced6b78d8ab20e6ab557ae84e89",
       "source_mode": 420
     },
     "dot_agents/skills/learned-patterns/references/windows-phantom-usb-devices.md": {
@@ -189,7 +197,7 @@
       "deployed_mode": 420,
       "sha256": "193a786d5e5c79df7eade8801152c8fac14c6aab1be9d1f51adc2d9a1fe83817",
       "source": "dot_claude/skills/learned",
-      "source_digest": "463abc95e93d647eb221050b16ef1bfd069772a36cacf4aa875f2a0f63f60ac2",
+      "source_digest": "8a14725cd94f7e8e28e136e6337eb6f9dc367ced6b78d8ab20e6ab557ae84e89",
       "source_mode": 420
     },
     "dot_agents/skills/llm-pdf-processing/SKILL.md": {
