@@ -106,11 +106,17 @@ of the personal GUI apps.
 ├── dot_Brewfile.tmpl           # Homebrew packages → ~/.Brewfile
 ├── dot_Scoopfile.tmpl          # Scoop packages → ~/.Scoopfile
 ├── private_dot_zshenv.tmpl     # Environment variables → ~/.zshenv
+├── ai-parity/                  # Canonical AI skills, adapters, contracts, and sync engine
+├── dot_agents/                 # Generated portable skills → ~/.agents/skills/ (Codex + Antigravity)
+├── dot_claude/                 # Claude Code config, agents, and skills → ~/.claude/
+├── dot_codex/                  # Generated Codex config & agents → ~/.codex/
+├── dot_gemini/                 # Antigravity (agy) global config, hooks, MCPs → ~/.gemini/
 ├── dot_config/
 │   ├── ghostty/                # Terminal emulator config
 │   ├── git/                    # Git config & ignore
 │   ├── nvim/                   # Neovim configuration
 │   ├── powershell/             # PowerShell profile & functions
+│   ├── rex/                    # Rex multiplexer Lua config (macOS)
 │   ├── starship/               # Cross-shell prompt
 │   ├── tmux/                   # Terminal multiplexer
 │   └── zsh/                    # Shell config, aliases, functions
@@ -149,6 +155,7 @@ dots cd         # Go to dotfiles source directory
 dots git ...    # Run git commands in dotfiles repo
 dots test       # Run setup verification tests
 dots doctor     # Check chezmoi health
+dots ai verify  # Verify Claude/Codex/Antigravity skill parity
 
 # Brewfile management (macOS/Linux)
 dots brew add <package>       # Add package (auto-detects brew/cask)

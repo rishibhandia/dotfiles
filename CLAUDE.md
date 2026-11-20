@@ -87,6 +87,8 @@ The main configuration template `.chezmoi.toml.tmpl` defines:
 | `dot_config/nvim/init.vim` | `~/.config/nvim/init.vim` | Neovim configuration |
 | `dot_config/tmux/tmux.conf.tmpl` | `~/.config/tmux/tmux.conf` | Tmux configuration (macOS/Linux) |
 | `dot_config/psmux/psmux.conf.tmpl` | `~/.config/psmux/psmux.conf` | psmux configuration (Windows) |
+| `dot_config/rex/init.lua` | `~/.config/rex/init.lua` | Rex multiplexer config (macOS only; keybindings, actions, events, remote hosts) |
+| `dot_gemini/config/*` | `~/.gemini/config/*` | Antigravity (`agy`) global config (skills bridge, shared `AGENTS.md`, MCPs, plugins, hooks) |
 
 ### XDG Directory Structure
 This repo follows XDG Base Directory spec:
@@ -121,6 +123,13 @@ This repo follows XDG Base Directory spec:
 - psmux auto-launches on PowerShell terminal open (attaches to `main` session or creates one); skipped inside existing sessions, VS Code, and non-interactive contexts
 - **psmux installation**: Via Scoop when available, otherwise portable binary from GitHub releases to `~/.local/bin/psmux/` (installed by `run_once_after_01-install-cli-tools.ps1.tmpl`)
 - **psmux default shell**: Scoop pwsh shim on Scoop machines; on portable machines, in order: the system MSI install at the fixed path `$env:ProgramFiles\PowerShell\7\pwsh.exe` (IT/Microsoft-Update managed — preferred so psmux gets the copy that stays current), then the PowerShell 7 zip at the fixed path `~/.local/opt/pwsh/pwsh.exe`, then Windows PowerShell 5.1 if both are missing. The template only builds the MSI path when `ProgramFiles` is set, so non-Windows CI renders can't `stat` a bogus relative path. The zip is installed by a `run_once_before_` script precisely so `psmux.conf`'s `stat` check sees it on the first apply — chezmoi renders target templates *after* before-scripts run
+
+### Rex Terminal Multiplexer (`dot_config/rex/init.lua`)
+- Managed at `dot_config/rex/init.lua` → `~/.config/rex/init.lua` (macOS-only via `.chezmoiignore`).
+- **Scope split (by Rex's design):** `init.lua` is read by Rex Server and configures keybindings (`rex.bind`), modes (`rex.mode`), custom actions (`rex.action`), event handlers (`rex.on`), and remote servers (`rex.host`). Visual/app preferences (theme, font, padding, Tailscale Serve, Remote Control) live in `~/Library/Preferences/com.superlogical.rex.plist` via GUI **Settings (`Cmd+,`)** and have no Lua API.
+- **Matching Ghostty appearance:** import `/Applications/Ghostty.app/Contents/Resources/ghostty/themes/Catppuccin Macchiato` under **Settings → Themes → Import Theme**, and set **Hack Nerd Font Mono**, size **12** under **Settings → Terminal → Typography**.
+- **Built-in agent skill (`rex skill setup`):** installs `~/.claude/skills/rex` and `~/.agents/skills/rex` (the latter automatically visible to both Codex and Antigravity via `skills.json`) plus session-start hooks. Keep it `$HOME`-local — do **not** `dots add` it into chezmoi, so Rex updates it dynamically and `ai-parity` stays closed.
+- Validate changes with `rex config check` and apply with `rex config reload`.
 
 ### Navi Cheatsheets
 Cheats live in `dot_local/share/navi/cheats/` and sync to `~/.local/share/navi/cheats` on every OS. navi's *built-in* default cheat path varies by platform (`directories` crate: `%APPDATA%`-based on Windows, Application Support on some macOS builds), so both shells export `NAVI_PATH` pointing at the managed dir — navi's highest-precedence setting. The zsh widget loads in `.zshrc`, the PowerShell widget in `profile.ps1` (both guarded on navi existing; navi is not installed in Windows portable mode).
@@ -322,7 +331,7 @@ If you do need to know a self-updating app's real version, ask the app, not brew
 | `ai-parity/manifest.toml` | Ownership, mappings, render policy, review acknowledgements |
 | Non-migrated `dot_claude/**` | Legacy Claude-owned source (still edited directly) |
 
-**Generated — never hand-edit:** `dot_codex/**`, `dot_agents/**`, `ai-parity/generated-state.json`, and these migrated `dot_claude/skills/` roots: `matlab`, `matlab-runner`, `zotero`, `pdf-chunk`, `llm-pdf-processing`, `scientific-figures`. Two Claude-owned sources are additionally *rendered* to Codex (edit the Claude side, then sync): `dot_claude/skills/gemini-billing-blocks` and `dot_claude/skills/learned` (→ `dot_agents/skills/learned-patterns/references`). If a useful edit already landed in a rendered target, import it with `dots ai propose` — do not treat the rendered file as source.
+**Generated — never hand-edit:** `dot_codex/**`, `dot_agents/**`, `ai-parity/generated-state.json`, and these migrated `dot_claude/skills/` roots: `git-commit`, `keynote`, `llm-pdf-processing`, `matlab`, `matlab-runner`, `pdf-chunk`, `scientific-figures`, `smolvm-sandbox`, `zotero`. Two Claude-owned sources are additionally *rendered* to Codex (edit the Claude side, then sync): `dot_claude/skills/gemini-billing-blocks` and `dot_claude/skills/learned` (→ `dot_agents/skills/learned-patterns/references`). If a useful edit already landed in a rendered target, import it with `dots ai propose` — do not treat the rendered file as source.
 
 **Quick decision guide:** shared behavior → `shared/`; tool-specific expression → `adapters/`; Codex-native config → `contracts/`; legacy Claude skill → its `dot_claude/` path; edit found in rendered output → proposal; runtime memory worth keeping → `dots ai memories scan` then curate.
 

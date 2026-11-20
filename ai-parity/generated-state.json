@@ -1,9 +1,9 @@
 {
   "format": "ai-parity-generated-state",
-  "generation_id": "ff5c78a2c6215980f0b405e97534dc69a4ca39c496716c06e5ac5ef621b15f14",
+  "generation_id": "716719e5e16cdc4a582e3825b0bae460d9964033840b3f6b323c0f67870175f0",
   "generator_inputs": {
     "engine_sha256": "ebebaf96041867bc701fa7491c93cf5ecaf7b54b1723272027e729e695678074",
-    "manifest_sha256": "0309f2698adbf8f886a3980ea852bf277762ca29cb4caa97524890d9e78e93a4",
+    "manifest_sha256": "e515cb56171840f06a184272deb403512c8e0be164e1dd318b9ff13d007184bb",
     "schemas_sha256": "33b5c6cc4c6a44a35ddf1ee205308857c2b651920ae21d7e93184ae9d22ed728"
   },
   "generator_version": 3,
@@ -873,9 +873,9 @@
     "dot_codex/AGENTS.md": {
       "artifact": "global-agents",
       "deployed_mode": 420,
-      "sha256": "d32af13b7dd962ad04001af320c771db82799cf70533c91e6762b73abca661f3",
+      "sha256": "684a04d5c5b8e1cf4ab1bb92f82d432525d68d25ed5dc58d1edd30faba8d50fc",
       "source": "ai-parity/contracts/AGENTS.md",
-      "source_digest": "b9eab2332c9afd581529a04ddbcd357c75b9e6a4e1ebf9f48d87f0864c19fd47",
+      "source_digest": "f818cdb65bf0355fc557dc93ff2d3da76b75386ad0aa555f4eaa7fcdb3c8a255",
       "source_mode": 420
     },
     "dot_codex/agents/debugger.toml": {

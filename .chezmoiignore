@@ -3,11 +3,12 @@
 # Note: .chezmoiignore uses TARGET paths, so remove run_once_/run_onchange_ prefixes
 # =============================================================================
 
-# macOS-only scripts (darwin directory)
+# macOS-only scripts (darwin directory) and macOS-only app configs
 {{ if ne .chezmoi.os "darwin" }}
 .chezmoiscripts/darwin/configure-macos.sh
 .chezmoiscripts/darwin/set-default-terminal.sh
 .chezmoiscripts/darwin/configure-backblaze-exclusions.sh
+.config/rex
 {{ end }}
 
 # Windows-only scripts
@@ -114,9 +115,10 @@ Library/LaunchAgents/com.rishi.tagorganizer.plist
 
 # =============================================================================
 # Repo-only files — never applied to ~/ (chezmoi treats any non-dot source
-# file as a target). CLAUDE.md global rules live in dot_claude/CLAUDE.md;
-# docs/ holds repo-only runbooks.
+# file as a target). Global rules live in dot_claude/CLAUDE.md, dot_codex/AGENTS.md,
+# and dot_gemini/config/rules/AGENTS.md.tmpl; docs/ holds repo-only runbooks.
 # =============================================================================
+AGENTS.md
 CLAUDE.md
 LICENSE
 README.md

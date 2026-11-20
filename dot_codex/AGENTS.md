@@ -102,6 +102,9 @@ When working in the chezmoi repository:
 - Antigravity consumes `~/.agents/skills/` directly via
   `dot_gemini/config/skills.json` and shares this file via
   `dot_gemini/config/rules/AGENTS.md.tmpl`.
+- Keep Rex's self-managed agent skill (`rex skill setup` → `~/.claude/skills/rex`,
+  `~/.agents/skills/rex`) out of chezmoi/git so Rex updates it dynamically
+  without triggering `ai-parity`'s fail-closed inventory check.
 - Never synchronize AI parity from a Git or chezmoi hook.
 - Run `dots ai verify` before reporting parity work complete.
 - Use `dots ai doctor` and an explicit transaction finish or rollback after an

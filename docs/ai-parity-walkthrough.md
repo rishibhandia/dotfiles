@@ -33,6 +33,10 @@ dot_codex/**                        ┘
         │  chezmoi apply              (separate, explicit, human)
         ▼
 ~/.claude/skills/**   ~/.agents/skills/**   ~/.codex/**
+                              ▲
+                              │  read directly via ~/.gemini/config/skills.json
+                      Antigravity (agy) — also includes contracts/AGENTS.md via
+                                          dot_gemini/config/rules/AGENTS.md.tmpl
 ```
 
 Reverse direction: an edit found in a rendered target is **intake**, not
@@ -49,7 +53,7 @@ reviewable proposal; it never overwrites the other tool directly.
 | `ai-parity/manifest.toml` | human-authored | ownership wiring, inventory, review digests |
 | `ai-parity/schemas/**` | human-authored | 13 closed JSON schemas; hashed into the generation digest |
 | `dot_codex/**`, `dot_agents/**` | **generated** | never hand-edit |
-| `dot_claude/skills/{matlab,matlab-runner,zotero,pdf-chunk,llm-pdf-processing,scientific-figures}` | **generated** | migrated roots; edit the canonical source instead |
+| `dot_claude/skills/{git-commit,keynote,llm-pdf-processing,matlab,matlab-runner,pdf-chunk,scientific-figures,smolvm-sandbox,zotero}` | **generated** | migrated roots; edit the canonical source instead |
 | `ai-parity/generated-state.json` | generated evidence | hash ledger; grants no authority |
 | `.proposals/ .transactions/ .sync-journal.json .sync-lock` | local runtime state | git- and chezmoi-ignored; never touch by hand |
 
@@ -65,20 +69,22 @@ independently authored.
 
 - `[policy]` — pins protected/owned roots and the six operational paths. The
   engine refuses a manifest that tries to widen these (see envelope below).
-- `[[shared_artifacts]]` (6) — `matlab` and `scientific-figures` are
-  `import_mode = "direct"` (reverse edits can be accepted automatically);
-  `matlab-runner`, `zotero`, `pdf-chunk`, `llm-pdf-processing` are `"review"`.
-  Targets are always tree-copies to `dot_claude/skills/<name>` and
-  `dot_agents/skills/<name>`. `chezmoi_mappings` declares `literal_*` script
-  names; `source_overrides` points a target's `SKILL.md` at an adapter file.
-- `[[artifacts]]` (14) — one-way renders: the Codex contracts, the two
-  Claude-owned inputs, the Codex-only skills, and five `agents/openai.yaml`
-  interface files.
-- `[[reviews]]` (4) — acknowledged digests for `dot_claude/CLAUDE.md`,
-  `dot_claude/skills/verify/`, and the code-reviewer/debugger agents. Editing
-  any of these sources stales its digest; `dots ai verify` prints the new one
-  to acknowledge after reviewing the Codex counterpart.
-- `[[skills]]` (35) / `[[agents]]` (11) — the inventory. **Every** top-level
+- `[[shared_artifacts]]` (9) — `matlab`, `scientific-figures`, and `git-commit`
+  are `import_mode = "direct"` (reverse edits can be accepted automatically);
+  `matlab-runner`, `zotero`, `pdf-chunk`, `llm-pdf-processing`, `keynote`, and
+  `smolvm-sandbox` are `"review"`. Targets are always tree-copies to
+  `dot_claude/skills/<name>` and `dot_agents/skills/<name>`.
+  `chezmoi_mappings` declares `literal_*` script names; `source_overrides`
+  points a target's `SKILL.md` at an adapter file.
+- `[[artifacts]]` (18) — one-way renders: the Codex contracts (`AGENTS.md`,
+  `careful-review.config.toml`, `ai-parity.rules`, and `reviewer`/`debugger`/
+  `git-commit` agents), the two Claude-owned inputs, the Codex-only skills, and
+  `agents/openai.yaml` interface files.
+- `[[reviews]]` (5) — acknowledged digests for `dot_claude/CLAUDE.md`,
+  `dot_claude/skills/verify/`, and the `code-reviewer`/`debugger`/`git-commit`
+  agents. Editing any of these sources stales its digest; `dots ai verify`
+  prints the new one to acknowledge after reviewing the Codex counterpart.
+- `[[skills]]` (37) / `[[agents]]` (11) — the inventory. **Every** top-level
   `dot_claude/skills/` dir and `dot_claude/agents/*.md` must be classified
   (`planned`, `planned-platform-gated`, `*-explicit-pilot`); unlisted or stale
   names fail generation closed.

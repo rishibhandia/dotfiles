@@ -56,7 +56,7 @@ machine type: `work`, Scoop missing, or `DOTFILES_PORTABLE=1`.
 
 | Flag | Gates |
 |---|---|
-| `personal` | command-scoped 1Password API keys for `llm`, age encryption + key file, zotero/keynote skills, LiteParse, tirith MCP registration, lab-sync function |
+| `personal` | command-scoped 1Password API keys for `llm`, age encryption + key file, zotero/keynote skills, LiteParse, personal MCP registrations (`tirith`, `smogon-vgc`, `superlogical` across Claude/Codex/Antigravity), lab-sync function |
 | `work` | NYU email in git config; personal apps (1Password, tailscale, …) excluded from the Brewfile; on Windows forces `portable` (no Scoop at all) |
 | `portable` (Windows) | GitHub-release externals instead of Scoop, PowerShell 7 zip + Windows Terminal, psmux shell path, Astral uv installer, font install path |
 | `ephemeral` | skips prompts/secrets; CI profile |
@@ -68,12 +68,13 @@ under uv), `[onepassword] prompt=false`, `[age]` identity/recipient
 
 ## Ignore rules, externals, shared templates
 
-- **`.chezmoiignore`** — target-path gating: OS-foreign scripts and configs,
-  mac-only/personal-only skills, mini-only files (LaunchAgents, AGH seed),
-  the age key on non-personal/portable machines, repo-only files (`CLAUDE.md`,
-  `docs/**`, `ai-parity/**`, `scripts`, `.githooks/**`), `**/__pycache__`,
-  and a long `.codex/**` runtime-state blocklist (auth, sessions, sqlite,
-  caches — never sourced from this repo).
+- **`.chezmoiignore`** — target-path gating: OS-foreign scripts and configs
+  (including macOS-only `.config/rex`), mac-only/personal-only skills,
+  mini-only files (LaunchAgents, AGH seed), the age key on non-personal/portable
+  machines, repo-only files (`AGENTS.md`, `CLAUDE.md`, `docs/**`, `ai-parity/**`,
+  `scripts`, `.githooks/**`), `**/__pycache__`, and `.codex/**` + `.gemini/**`
+  runtime-state blocklists (auth, sessions, brain/builtin, sqlite, caches —
+  never sourced from this repo).
 - **`.chezmoiexternal.toml.tmpl`** — Windows-portable-only: ~15 CLI tools
   (rg, fd, bat, fzf, zoxide, starship, …) from GitHub releases into
   `~/.local/bin`, plus Hack Nerd Font (portable only — Scoop's font otherwise
@@ -114,8 +115,9 @@ macOS sequence:
 4. `01-install-cli-tools` (once) — Claude Code (with Rosetta-aware arch check
    that force-reinstalls a wrong-arch binary), Shell Sage, the rtk PreToolUse
    hook (`rtk init -g --auto-patch --hook-only`), vim-plug + headless
-   PlugInstall; personal machines also register the tirith MCP (deliberately
-   without `claude mcp list`, which can hang).
+   PlugInstall; personal machines also register the `tirith`, `smogon-vgc`, and
+   `superlogical` MCPs for Claude Code (deliberately without `claude mcp list`,
+   which can hang) and for Codex when `codex` is installed.
 5. `02`–`09` — the Mac mini stack (all no-ops elsewhere; see below).
 6. `darwin/` — macOS `defaults` (once), Ghostty as shell-script handler via
    duti (once), Backblaze exclusion-rules patcher (onchange; validates with
@@ -196,6 +198,9 @@ Bash the same basics; both are Windows-only.
 - **Ghostty** — Hack Nerd Font, catppuccin-macchiato, launches
   `/bin/zsh -lc 'tmux new-session -A -s main'` (login shell so brew PATH
   works), `shift+enter` mapped for multi-line Claude Code input.
+- **Rex** — `dot_config/rex/init.lua` (macOS-only): Lua config for keybindings,
+  custom actions, events, and remote hosts (`rex.host`); visual settings
+  (Ghostty `Catppuccin Macchiato` theme import, font) stay in Rex GUI Settings.
 - **Starship** — near-default; the 2025 MBP ("Lambda") gets a `λ ❯` prompt
   character via a hostname-gated block.
 - **Navi** — seven cheat files under `dot_local/share/navi/cheats/`; both
@@ -248,13 +253,22 @@ key and secret-bearing templates are ignore-gated.
   plan-by-default, permission allow/deny/ask lists per OS (git push is an
   *ask* rule since hooks can't prompt), and two inline hooks — block
   arbitrary `.md`/`.txt` writes (PreToolUse on Write) and console.log
-  warnings (PostToolUse). Plus 11 agents, ~36 skills (six of them
-  parity-generated), the `learned/` note collection, and dual statusline
-  scripts (context % / rate-limit % / git status).
-- **`dot_codex/`** + **`dot_agents/`** — entirely generated: Codex global
-  AGENTS.md, `careful-review` profile, reviewer/debugger subagents,
-  `ai-parity.rules` (blocks `git reset --hard` / `push --force`), and the
-  Codex skills tree with `agents/openai.yaml` interface files.
+  warnings (PostToolUse). Plus 11 agents, ~37 skills (nine of them
+  parity-generated, including `git-commit`), the `learned/` note collection,
+  and dual statusline scripts (context % / rate-limit % / git status).
+- **`dot_codex/`** + **`dot_agents/`** — entirely generated: shared global
+  `AGENTS.md`, `careful-review` profile, `reviewer`/`debugger`/`git-commit`
+  subagents, `ai-parity.rules` (blocks `git reset --hard` / `push --force`),
+  and the portable `~/.agents/skills/` tree with `agents/openai.yaml`
+  interface files.
+- **`dot_gemini/`** — Antigravity (`agy`) global customizations under
+  `~/.gemini/config/`: `skills.json` pointing directly at `~/.agents/skills`
+  (zero-duplication 3-way skill parity), `rules/AGENTS.md.tmpl` including
+  `ai-parity/contracts/AGENTS.md`, `.personal`-gated `mcp_config.json.tmpl`
+  (`tirith`, `smogon-vgc`, `superlogical`), `plugins.json.tmpl` pinning the
+  `i-have-adhd` submodule, `hooks.json.tmpl` + Python `PreToolUse` hooks
+  (`block_arbitrary_docs.py`, `tirith_check.py`), and a fresh-machine
+  `antigravity-cli/create_settings.json.tmpl` seed.
 - Ownership rules, commands, and recovery: see
   [`ai-parity-walkthrough.md`](ai-parity-walkthrough.md).
 

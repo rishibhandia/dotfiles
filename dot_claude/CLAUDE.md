@@ -284,7 +284,7 @@ Use `dots` command (chezmoi wrapper) to manage dotfiles from any directory:
 
 Source directory: `~/.local/share/chezmoi`
 
-**AI parity note:** some `~/.claude/skills` (currently `matlab`, `matlab-runner`, `zotero`, `pdf-chunk`, `llm-pdf-processing`, `scientific-figures`) are **generated** from canonical sources under `ai-parity/shared/` in the dotfiles repo and kept in parity with Codex. Edit the canonical source there — not the deployed copies or the rendered `dot_claude`/`dot_agents` targets — then run `dots ai sync --write`. See `ai-parity/SPEC.md` in the dotfiles repo.
+**AI parity note:** some `~/.claude/skills` (currently `git-commit`, `keynote`, `llm-pdf-processing`, `matlab`, `matlab-runner`, `pdf-chunk`, `scientific-figures`, `smolvm-sandbox`, `zotero`) are **generated** from canonical sources under `ai-parity/shared/` in the dotfiles repo and kept in parity with Codex (`~/.agents/skills/`) and Antigravity (`~/.gemini/config/skills.json` → `~/.agents/skills/`). Edit the canonical source there — not the deployed copies or the rendered `dot_claude`/`dot_agents` targets — then run `dots ai sync --write`. See `ai-parity/SPEC.md` in the dotfiles repo.
 
 ### Claude Code Settings
 
@@ -320,7 +320,9 @@ Configuration managed via `~/.claude/settings.json` (templated from `create_sett
 | **Deny** | `Stop-Computer`, `Restart-Computer`, `shutdown`, `Format-Volume`, `Clear-Disk`, `diskpart`, `bcdedit` |
 | **Ask** | `Remove-Item`, `del`, `rd`, `rmdir`, `icacls`, `Set-Acl`, `Stop-Process`, `taskkill` |
 
-**MCP Servers (personal machines):**
+**MCP Servers (personal machines — mirrored across Claude Code, Codex, and Antigravity):**
 | Server | Tools | Notes |
 |--------|-------|-------|
-| `tirith` | `tirith_check_command`, `tirith_check_url`, `tirith_check_paste`, `tirith_scan_file`, `tirith_scan_directory`, `tirith_verify_mcp_config`, `tirith_fetch_cloaking` | Terminal security analysis. Installed via Homebrew on personal machines only. Registered user-scope via `claude mcp add` by the cli-tools run_once script (settings.json `mcpServers` is not honored by Claude Code). |
+| `tirith` | `tirith_check_command`, `tirith_check_url`, `tirith_check_paste`, `tirith_scan_file`, `tirith_scan_directory`, `tirith_verify_mcp_config`, `tirith_fetch_cloaking` | Terminal security analysis. Installed via Homebrew/Scoop on personal machines only. Registered via `claude mcp add` / `codex mcp add` in the cli-tools `run_once` scripts and in `dot_gemini/config/mcp_config.json.tmpl`. |
+| `smogon-vgc` | Smogon ladder usage stats, VGC tournament pastes, Pokédex, `@smogon/calc` damage calc | Run via `uvx --from git+https://github.com/dtsong/smogon-vgc-mcp smogon-vgc-mcp`. Personal machines only; registered in `run_once_after_01` (Claude Code & Codex) and `dot_gemini/config/mcp_config.json.tmpl`. |
+| `superlogical` | Rex docs, changelog, and Beta Discord feedback (`search_docs`, `read_doc`, `search_feedback`, etc.) | Remote Streamable HTTP MCP at `https://www.superlogical.com/rex/community-mcp` (OAuth via Discord). Personal machines only; registered in `run_once_after_01` (Claude Code & Codex; run `codex mcp login superlogical` interactively) and `dot_gemini/config/mcp_config.json.tmpl`. |
