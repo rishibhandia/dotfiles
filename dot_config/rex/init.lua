@@ -1,0 +1,6 @@
+-- Rex terminal multiplexer configuration (managed by chezmoi: dot_config/rex/init.lua)
+--
+-- Migrated from tmux, Ghostty, and iTerm2:
+-- - All 11 Ghostty tab/window/split bindings match Rex's built-in defaults.
+-- - cmd+k intentionally kept as Rex's default session picker (session.switch).
+-- - Add custom rex.bind(...) / rex.action{...} overrides below as needed.
