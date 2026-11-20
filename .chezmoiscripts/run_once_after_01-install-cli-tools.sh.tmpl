@@ -147,6 +147,21 @@ else
 fi
 
 # -----------------------------------------------------------------------------
+# Superlogical (Rex) community MCP server for Claude Code (personal machines)
+# Remote Streamable HTTP MCP. Mirrors dot_gemini/config/mcp_config.json.tmpl.
+# -----------------------------------------------------------------------------
+if command -v claude &>/dev/null; then
+    info "Registering superlogical MCP server with Claude Code (user scope)..."
+    if claude mcp add -s user --transport http superlogical https://www.superlogical.com/rex/community-mcp >/dev/null 2>&1; then
+        success "superlogical MCP server registered with Claude Code"
+    else
+        info "superlogical MCP server already registered with Claude Code (or add skipped)"
+    fi
+else
+    warn "claude not found, skipping superlogical MCP registration"
+fi
+
+# -----------------------------------------------------------------------------
 # Codex MCP servers (personal machines)
 # ~/.codex/config.toml is runtime-owned and never managed by chezmoi/ai-parity,
 # so personal MCP servers are registered imperatively via `codex mcp add`,
@@ -173,6 +188,13 @@ if command -v codex &>/dev/null; then
         fi
     else
         warn "uvx not found, skipping Codex smogon-vgc MCP registration"
+    fi
+
+    info "Registering superlogical MCP server with Codex..."
+    if codex mcp add superlogical --url https://www.superlogical.com/rex/community-mcp >/dev/null 2>&1; then
+        success "superlogical MCP server registered with Codex (run 'codex mcp login superlogical' interactively to authenticate)"
+    else
+        info "superlogical MCP server already registered with Codex (or add skipped)"
     fi
 else
     info "codex not found, skipping Codex MCP registrations"
