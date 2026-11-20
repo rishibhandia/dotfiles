@@ -128,6 +128,23 @@ if command -v claude &>/dev/null && command -v tirith &>/dev/null; then
 else
     warn "claude or tirith not found, skipping tirith MCP registration"
 fi
+
+# -----------------------------------------------------------------------------
+# Smogon VGC Pokemon MCP server for Claude Code (personal machines)
+# Full VGC toolkit (Smogon ladder usage, tournament teams, Pokedex, damage calc)
+# run via uvx from github.com/dtsong/smogon-vgc-mcp. Mirrors the personal entry
+# in dot_gemini/config/mcp_config.json.tmpl.
+# -----------------------------------------------------------------------------
+if command -v claude &>/dev/null && command -v uvx &>/dev/null; then
+    info "Registering smogon-vgc MCP server with Claude Code (user scope)..."
+    if claude mcp add --scope user smogon-vgc -- uvx --from git+https://github.com/dtsong/smogon-vgc-mcp smogon-vgc-mcp >/dev/null 2>&1; then
+        success "smogon-vgc MCP server registered"
+    else
+        info "smogon-vgc MCP server already registered (or add skipped)"
+    fi
+else
+    warn "claude or uvx not found, skipping smogon-vgc MCP registration"
+fi
 {{ end -}}
 
 # -----------------------------------------------------------------------------

@@ -162,6 +162,24 @@ if ((Get-Command claude -ErrorAction SilentlyContinue) -and (Get-Command tirith 
 } else {
     Write-Warn "claude or tirith not found, skipping tirith MCP registration"
 }
+
+# -----------------------------------------------------------------------------
+# Smogon VGC Pokemon MCP server for Claude Code (personal machines)
+# Full VGC toolkit (Smogon ladder usage, tournament teams, Pokedex, damage calc)
+# run via uvx from github.com/dtsong/smogon-vgc-mcp. Mirrors the personal entry
+# in dot_gemini/config/mcp_config.json.tmpl.
+# -----------------------------------------------------------------------------
+if ((Get-Command claude -ErrorAction SilentlyContinue) -and (Get-Command uvx -ErrorAction SilentlyContinue)) {
+    Write-Info "Registering smogon-vgc MCP server with Claude Code (user scope)..."
+    claude mcp add --scope user smogon-vgc -- uvx --from git+https://github.com/dtsong/smogon-vgc-mcp smogon-vgc-mcp 2>&1 | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Success "smogon-vgc MCP server registered"
+    } else {
+        Write-Info "smogon-vgc MCP server already registered (or add skipped)"
+    }
+} else {
+    Write-Warn "claude or uvx not found, skipping smogon-vgc MCP registration"
+}
 {{ end -}}
 
 # -----------------------------------------------------------------------------
