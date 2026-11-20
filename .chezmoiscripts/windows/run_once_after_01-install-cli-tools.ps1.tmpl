@@ -180,6 +180,40 @@ if ((Get-Command claude -ErrorAction SilentlyContinue) -and (Get-Command uvx -Er
 } else {
     Write-Warn "claude or uvx not found, skipping smogon-vgc MCP registration"
 }
+
+# -----------------------------------------------------------------------------
+# Codex MCP servers (personal machines)
+# ~/.codex/config.toml is runtime-owned and never managed by chezmoi/ai-parity,
+# so personal MCP servers are registered imperatively via `codex mcp add`,
+# mirroring Claude Code above and dot_gemini/config/mcp_config.json.tmpl.
+# -----------------------------------------------------------------------------
+if (Get-Command codex -ErrorAction SilentlyContinue) {
+    if (Get-Command tirith -ErrorAction SilentlyContinue) {
+        Write-Info "Registering tirith MCP server with Codex..."
+        codex mcp add tirith -- tirith mcp-server 2>&1 | Out-Null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Success "tirith MCP server registered with Codex"
+        } else {
+            Write-Info "tirith MCP server already registered with Codex (or add skipped)"
+        }
+    } else {
+        Write-Warn "tirith not found, skipping Codex tirith MCP registration"
+    }
+
+    if (Get-Command uvx -ErrorAction SilentlyContinue) {
+        Write-Info "Registering smogon-vgc MCP server with Codex..."
+        codex mcp add smogon-vgc -- uvx --from git+https://github.com/dtsong/smogon-vgc-mcp smogon-vgc-mcp 2>&1 | Out-Null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Success "smogon-vgc MCP server registered with Codex"
+        } else {
+            Write-Info "smogon-vgc MCP server already registered with Codex (or add skipped)"
+        }
+    } else {
+        Write-Warn "uvx not found, skipping Codex smogon-vgc MCP registration"
+    }
+} else {
+    Write-Info "codex not found, skipping Codex MCP registrations"
+}
 {{ end -}}
 
 # -----------------------------------------------------------------------------

@@ -361,7 +361,7 @@ Antigravity shares global customizations across the CLI (`agy`), Antigravity 2.0
 | `dot_gemini/config/hooks.json.tmpl` | `~/.gemini/config/hooks.json` | `PreToolUse` guardrails: `block_arbitrary_docs.py` (blocks arbitrary `.md`/`.txt` writes while allowing `artifactDirectoryPath`/`brain/`, `skills/`, `memory/`, `rules/`, and standard doc names) and `tirith_check.py` (vets `run_command` via `tirith check`, pass-through when `tirith` is absent) |
 | `dot_gemini/antigravity-cli/create_settings.json.tmpl` | `~/.gemini/antigravity-cli/settings.json` | `create_`-prefixed default seed (`colorScheme`, `toolPermission`) for fresh machines; existing machines keep live `/settings` and `trustedWorkspaces` |
 
-Runtime state (`~/.gemini/antigravity-cli/brain/`, `builtin/`, `antigravity/`, `antigravity-ide/`, OAuth/credentials/caches) is excluded in `.chezmoiignore` and never managed. On personal machines, the `run_once_after_01-install-cli-tools` scripts also register `smogon-vgc` with Claude Code (`claude mcp add --scope user smogon-vgc -- uvx --from git+https://github.com/dtsong/smogon-vgc-mcp smogon-vgc-mcp`).
+Runtime state (`~/.gemini/antigravity-cli/brain/`, `builtin/`, `antigravity/`, `antigravity-ide/`, OAuth/credentials/caches) is excluded in `.chezmoiignore` and never managed. On personal machines, the `run_once_after_01-install-cli-tools` scripts also register `tirith` and `smogon-vgc` with both Claude Code (`claude mcp add --scope user ...`) and Codex (`codex mcp add ...`, when `codex` is installed).
 
 ### Claude Code Skills
 Skills are synced via chezmoi to `~/.claude/skills/`. Included skills, by category:
