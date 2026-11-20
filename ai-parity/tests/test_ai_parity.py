@@ -239,6 +239,9 @@ class ParityIntegrationTests(unittest.TestCase):
         subprocess.run(["git", "config", "user.email", "test@example.invalid"], cwd=self.root, check=True)
         subprocess.run(["git", "config", "user.name", "Parity Test"], cwd=self.root, check=True)
         subprocess.run(["git", "config", "commit.gpgsign", "false"], cwd=self.root, check=True)
+        # A detached auto-gc spawned by `git commit` keeps writing into .git
+        # while tearDown deletes the temp dir, failing with ENOTEMPTY.
+        subprocess.run(["git", "config", "gc.auto", "0"], cwd=self.root, check=True)
         subprocess.run(["git", "add", "-A"], cwd=self.root, check=True)
         subprocess.run(["git", "commit", "-qm", "baseline"], cwd=self.root, check=True)
 
