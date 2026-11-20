@@ -8,6 +8,7 @@
 .chezmoiscripts/darwin/configure-macos.sh
 .chezmoiscripts/darwin/set-default-terminal.sh
 .chezmoiscripts/darwin/configure-backblaze-exclusions.sh
+.chezmoiscripts/darwin/reload-rex-config.sh
 .config/rex
 {{ end }}
 

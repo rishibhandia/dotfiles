@@ -1,0 +1,40 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+# =============================================================================
+# Reload Rex after its config changes
+# =============================================================================
+# Rex Server reads ~/.config/rex/init.lua only at start or on
+# `rex config reload`. Without this, `chezmoi apply` updates the file but the
+# running server keeps the old config, so new rex.host / rex.bind entries
+# don't appear until a manual reload. Reload is local-socket only, so it can't
+# be pushed to other Macs remotely; each machine reloads itself here.
+#
+# Re-runs whenever init.lua changes: {{ include "dot_config/rex/init.lua" | sha256sum }}
+#
+# --autostart=false: if no server is running there is nothing stale to reload,
+# and the next server start reads the new file anyway. Never fails the apply.
+# =============================================================================
+
+REX=""
+for candidate in \
+    "$(command -v rex 2>/dev/null)" \
+    "$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex" \
+    "/Applications/Rex.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex"; do
+    if [ -n "$candidate" ] && [ -x "$candidate" ]; then
+        REX="$candidate"
+        break
+    fi
+done
+
+if [ -z "$REX" ]; then
+    echo "[INFO] Rex not installed; skipping config reload"
+    exit 0
+fi
+
+if "$REX" --autostart=false config reload >/dev/null 2>&1; then
+    echo "[OK] Rex config reloaded"
+else
+    echo "[INFO] Rex server not running; it will read init.lua on next start"
+fi
+exit 0
+{{ end -}}
