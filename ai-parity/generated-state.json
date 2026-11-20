@@ -1,6 +1,6 @@
 {
   "format": "ai-parity-generated-state",
-  "generation_id": "30a88b99e671dbd540229a1c24417c3ea5ea5107bc7b6caf8fea6eec8736f6b4",
+  "generation_id": "6716978b2e1e6f1166f2f94c30b576a3574944b263f226550385748f0d3d04a6",
   "generator_inputs": {
     "engine_sha256": "ebebaf96041867bc701fa7491c93cf5ecaf7b54b1723272027e729e695678074",
     "manifest_sha256": "a056fea0e8579efb04cc7980951af5b6f90fc17a23c97afbaafd6a993a23f87b",
@@ -115,9 +115,9 @@
     "dot_agents/skills/learned-patterns/SKILL.md": {
       "artifact": "learned-patterns-skill",
       "deployed_mode": 420,
-      "sha256": "4a6a4f5bfeef867ce03b00575226071d257fd538373265621538a5cd1f89df28",
+      "sha256": "48ac38f20dbfd318467cc4d8b2597ca297f5780a627314d194d6577af7fdd653",
       "source": "ai-parity/adapters/skills/learned-patterns",
-      "source_digest": "2ec5c590574214aefab6e4d09a2517d37f0e10d774a8f517bb486de4fb28e49f",
+      "source_digest": "b922d3642453a209cf687f3b5f9aba7196646b4c7241633fce1667e16d49593f",
       "source_mode": 420
     },
     "dot_agents/skills/learned-patterns/references/andor-sdk-dll-lifecycle.md": {
@@ -264,10 +264,10 @@
       "canonical": "ai-parity/shared/skills/matlab-runner",
       "canonical_digest": "b6c9d21cc405c5dba7e8050007e5caf0fd67c915813dcc8130bc24d93dd0b010",
       "deployed_mode": 420,
-      "sha256": "1d0d62f52ff620cf534c04f0e42affcd72bfa07d124a184a3491fcaf4a7312a5",
+      "sha256": "df69665b24e02b0671939aef5f99798035d73f41dbc35728ebe9466f0f15e2b8",
       "side": "codex",
       "source": "ai-parity/adapters/skills/matlab-runner/SKILL.md",
-      "source_digest": "2399787cf756b88955d32edff142bb1c4bca4da8a129421f1d6a6dd7e0fa32ad",
+      "source_digest": "a02a08d3bab6c17f047bdf5a08d9885891d9386628c96d57478876c4ecc32539",
       "source_mode": 420
     },
     "dot_agents/skills/matlab-runner/scripts/literal_run_matlab.sh": {
@@ -424,9 +424,9 @@
     "dot_agents/skills/pdf/SKILL.md": {
       "artifact": "pdf-codex-skill",
       "deployed_mode": 420,
-      "sha256": "d2c4259256aa7d9e922cfb5f370366e581ccae5d69fb0ae80a15fc794ce6486e",
+      "sha256": "2ce7313d57fa366a911d9519e96e05b956a9e68fbecf3efc21bb9944ece2c27d",
       "source": "ai-parity/adapters/skills/pdf",
-      "source_digest": "c89556c6f0e6f3621638edaccfd8e773919391eaff4fa0dc22d3b69ac6f563f5",
+      "source_digest": "5ffd0842111cb05dc27c5c0d71ba3ca427297fe546709af4b7042475b9328671",
       "source_mode": 420
     },
     "dot_agents/skills/pdf/agents/openai.yaml": {
@@ -434,7 +434,7 @@
       "deployed_mode": 420,
       "sha256": "cffafe4cdf14e6b77cccbaee609f1d7de7ac6384423546a64860b228ddb35b61",
       "source": "ai-parity/adapters/skills/pdf",
-      "source_digest": "c89556c6f0e6f3621638edaccfd8e773919391eaff4fa0dc22d3b69ac6f563f5",
+      "source_digest": "5ffd0842111cb05dc27c5c0d71ba3ca427297fe546709af4b7042475b9328671",
       "source_mode": 420
     },
     "dot_agents/skills/pdf/scripts/pdf_transform.py": {
@@ -442,7 +442,7 @@
       "deployed_mode": 420,
       "sha256": "005a8b249712880bfc8ae01f85778f416462550b1dd49f71479e1fe2da9a676f",
       "source": "ai-parity/adapters/skills/pdf",
-      "source_digest": "c89556c6f0e6f3621638edaccfd8e773919391eaff4fa0dc22d3b69ac6f563f5",
+      "source_digest": "5ffd0842111cb05dc27c5c0d71ba3ca427297fe546709af4b7042475b9328671",
       "source_mode": 420
     },
     "dot_agents/skills/scientific-figures/SKILL.md": {
@@ -843,9 +843,9 @@
     "dot_codex/AGENTS.md": {
       "artifact": "global-agents",
       "deployed_mode": 420,
-      "sha256": "af996a9305d51be2f3f36e3f1ee338dbbc33ba7b372b85dbccf96a73715271fa",
+      "sha256": "9c30de508f36c64ede30bf3bf6d7e195243c111fc4b54c6a09b5a5a23ca7aa5f",
       "source": "ai-parity/contracts/AGENTS.md",
-      "source_digest": "fca8d25adf76e04774921f90206f987855a703056bc775e9c3100759b5290a39",
+      "source_digest": "5bff47cbe838c295eb5ff2b44dd43dd11e5b2094cf0a79a586583f1bface9fa2",
       "source_mode": 420
     },
     "dot_codex/agents/debugger.toml": {

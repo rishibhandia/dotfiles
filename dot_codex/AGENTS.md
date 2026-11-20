@@ -1,7 +1,8 @@
-# Global Codex working agreements
+# Global agent working agreements
 
-These are concise cross-repository defaults. Repository `AGENTS.md` files own
-their exact build, lint, test, and release commands.
+These are concise cross-repository defaults (shared by Codex and Antigravity).
+Repository `AGENTS.md` files own their exact build, lint, test, and release
+commands.
 
 ## Before acting
 
@@ -94,8 +95,12 @@ When working in the chezmoi repository:
   outputs, and `ai-parity/generated-state.json` (run `dots ai sync --write`
   first). Partial parity staging is refused.
 - `~/.codex` runtime state (`config.toml`, `packages/`, `plugins/`, sessions,
-  `*.sqlite`, `.tmp/`) is never parity- or chezmoi-managed; do not propose
-  managing it.
+  `*.sqlite`, `.tmp/`) and `~/.gemini` runtime state (`antigravity-cli/brain/`,
+  `antigravity-cli/builtin/`, `antigravity/`, `antigravity-ide/`, auth/caches)
+  are never parity- or chezmoi-managed; do not propose managing them.
+- Antigravity consumes `~/.agents/skills/` directly via
+  `dot_gemini/config/skills.json` and shares this file via
+  `dot_gemini/config/rules/AGENTS.md.tmpl`.
 - Never synchronize AI parity from a Git or chezmoi hook.
 - Run `dots ai verify` before reporting parity work complete.
 - Use `dots ai doctor` and an explicit transaction finish or rollback after an

@@ -1,6 +1,6 @@
 ---
 name: matlab-runner
-description: Run MATLAB scripts headlessly, capture stdout/stderr, and read exported figures. Use when the user asks to run, test, or debug a MATLAB script (.m file), or when Claude has just edited a MATLAB script and should verify it executes correctly. Also use when the user wants to see what a script produces without opening MATLAB manually.
+description: Run MATLAB scripts headlessly, capture stdout/stderr, and read exported figures. Use when the user asks to run, test, or debug a MATLAB script (.m file), or when the agent has just edited a MATLAB script and should verify it executes correctly. Also use when the user wants to see what a script produces without opening MATLAB manually.
 ---
 
 # MATLAB Runner
@@ -63,7 +63,7 @@ Or invoke MATLAB directly (preferred for full control):
 1. **Run** the script with the shell using the command above
 2. **Read stdout** — MATLAB `disp()` and `fprintf()` output appears in the terminal
 3. **Check for errors** — MATLAB errors print to stderr with file/line info; read them carefully
-4. **Read exported figures** — scripts use `exportgraphics(fig, 'Figures/name.png')`; after the run, inspect those PNG paths with Codex image viewing
+4. **Read exported figures** — scripts use `exportgraphics(fig, 'Figures/name.png')`; after the run, inspect those PNG paths with image viewing
 5. **Iterate** — edit the script, re-run, re-inspect
 
 ## Reading Figures
