@@ -1,6 +1,6 @@
 {
   "format": "ai-parity-generated-state",
-  "generation_id": "c2947baad894cae97cc7760e3afee3547724abd02c4d318e483b429f74e2b7a8",
+  "generation_id": "30a88b99e671dbd540229a1c24417c3ea5ea5107bc7b6caf8fea6eec8736f6b4",
   "generator_inputs": {
     "engine_sha256": "ebebaf96041867bc701fa7491c93cf5ecaf7b54b1723272027e729e695678074",
     "manifest_sha256": "a056fea0e8579efb04cc7980951af5b6f90fc17a23c97afbaafd6a993a23f87b",
@@ -448,12 +448,12 @@
     "dot_agents/skills/scientific-figures/SKILL.md": {
       "artifact": "scientific-figures",
       "canonical": "ai-parity/shared/skills/scientific-figures",
-      "canonical_digest": "34051f391dea134085d0ef4d8ec2691a564ab27abb6afd5306d5cd7052be40ba",
+      "canonical_digest": "28e0d6c7e6c6d3b54b9c600c6b84f377b2b5c43214d7a2ccbd751a8bc41e0047",
       "deployed_mode": 420,
-      "sha256": "548630e1155b435f2be424fcbbb1b724a5a732e9f95ce7a1c4398a3e6405fc45",
+      "sha256": "39e9fdcc54c15b09af850e8438541e1403dd102676ea1820bfc5ee190236cf0e",
       "side": "codex",
       "source": "ai-parity/shared/skills/scientific-figures/SKILL.md",
-      "source_digest": "4a5ce470557cb8d944d52a5f1c3c4d386998a7704c88e55d15bd862ef8b6f82a",
+      "source_digest": "cd9df6a0517da3a434875aeaf159f7a781eb8a1e2095bdfa4706df16292a61f7",
       "source_mode": 420
     },
     "dot_agents/skills/scientific-figures/agents/openai.yaml": {
@@ -467,7 +467,7 @@
     "dot_agents/skills/scientific-figures/prl-layout.md": {
       "artifact": "scientific-figures",
       "canonical": "ai-parity/shared/skills/scientific-figures",
-      "canonical_digest": "34051f391dea134085d0ef4d8ec2691a564ab27abb6afd5306d5cd7052be40ba",
+      "canonical_digest": "28e0d6c7e6c6d3b54b9c600c6b84f377b2b5c43214d7a2ccbd751a8bc41e0047",
       "deployed_mode": 420,
       "sha256": "65116cb2543eace5ad0f853c5796774a2c45aa178c0ae7d196abd5cc2aba4a33",
       "side": "codex",
@@ -788,18 +788,18 @@
     "dot_claude/skills/scientific-figures/SKILL.md": {
       "artifact": "scientific-figures",
       "canonical": "ai-parity/shared/skills/scientific-figures",
-      "canonical_digest": "34051f391dea134085d0ef4d8ec2691a564ab27abb6afd5306d5cd7052be40ba",
+      "canonical_digest": "28e0d6c7e6c6d3b54b9c600c6b84f377b2b5c43214d7a2ccbd751a8bc41e0047",
       "deployed_mode": 420,
-      "sha256": "548630e1155b435f2be424fcbbb1b724a5a732e9f95ce7a1c4398a3e6405fc45",
+      "sha256": "39e9fdcc54c15b09af850e8438541e1403dd102676ea1820bfc5ee190236cf0e",
       "side": "claude",
       "source": "ai-parity/shared/skills/scientific-figures/SKILL.md",
-      "source_digest": "4a5ce470557cb8d944d52a5f1c3c4d386998a7704c88e55d15bd862ef8b6f82a",
+      "source_digest": "cd9df6a0517da3a434875aeaf159f7a781eb8a1e2095bdfa4706df16292a61f7",
       "source_mode": 420
     },
     "dot_claude/skills/scientific-figures/prl-layout.md": {
       "artifact": "scientific-figures",
       "canonical": "ai-parity/shared/skills/scientific-figures",
-      "canonical_digest": "34051f391dea134085d0ef4d8ec2691a564ab27abb6afd5306d5cd7052be40ba",
+      "canonical_digest": "28e0d6c7e6c6d3b54b9c600c6b84f377b2b5c43214d7a2ccbd751a8bc41e0047",
       "deployed_mode": 420,
       "sha256": "65116cb2543eace5ad0f853c5796774a2c45aa178c0ae7d196abd5cc2aba4a33",
       "side": "claude",

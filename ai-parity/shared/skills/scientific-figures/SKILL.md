@@ -48,6 +48,20 @@ to be, do not apply it silently.
 
 - Choose the final physical size first: for example, PRL single-column 8.6 cm
   or double-column 17.2 cm. Avoid rescaling after layout.
+- **Default for PRL and other journal figures: build at actual print size.**
+  Create the figure in cm at its placed width (8.6 or 17.2 cm), set font sizes
+  in points as they will print, and include it in LaTeX at that same width, so
+  the PDF is never scaled. Do not draw an oversized figure (e.g. 3× with
+  22 pt labels) and rely on LaTeX shrinking it: anything left at a default size
+  shrinks to ~2–3 pt.
+- In MATLAB, create such figures with `'Visible','off'` so the window is not
+  clamped to the screen, and set `FontSize` explicitly on every axes, colorbar,
+  legend and text object. Tick labels follow the axes `FontSize`, not the
+  label's, so setting only `xlabel(...,'FontSize',22)` leaves the ticks at the
+  default size.
+- Before shipping, measure the printed text size (e.g. `pdftotext -bbox` glyph
+  heights × placed width / PDF page width) or render at the placed width and
+  300 dpi and look at it.
 - Use Arial or another explicitly approved sans-serif font, at least 6 pt at
   final size and preferably 7–8 pt. Keep typography consistent across a set.
 - Export vector PDF and, when assembling in Illustrator, SVG. Rasterize only
