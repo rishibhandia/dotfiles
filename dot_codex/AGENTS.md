@@ -48,7 +48,8 @@ Before changing code to fix a failure:
 
 ## Git and destructive operations
 
-- Keep commits atomic when the user asks for commits.
+- Keep commits atomic when the user asks for commits (use the `git-commit`
+  skill to split mixed changes and format conventional commit messages).
 - Never force-push, hard-reset, delete user work, or rewrite history without
   explicit authorization.
 - Do not commit or push unless requested.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Atomic Git Commits"
+  short_description: "Analyze changes, split into atomic commits, and write conventional messages"
+  default_prompt: "Use $git-commit to review the working tree, split unrelated changes into atomic commits, and draft conventional commit messages."

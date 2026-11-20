@@ -376,7 +376,7 @@ Skills are synced via chezmoi to `~/.claude/skills/`. Included skills, by catego
 
 **macOS app integrations (darwin-only via `.chezmoiignore`):** `things` (Things 3), `fantastical` (calendar), `keynote` (presentations; **also personal-only**)
 
-**Parity-generated skills:** `matlab`, `matlab-runner`, `zotero`, `pdf-chunk`, `llm-pdf-processing`, and `scientific-figures` are rendered from `ai-parity/shared/skills/` — edit the canonical source (and adapter, if any), then `dots ai sync --write`. See "AI Parity" above.
+**Parity-generated skills:** `git-commit`, `keynote`, `llm-pdf-processing`, `matlab`, `matlab-runner`, `pdf-chunk`, `scientific-figures`, `smolvm-sandbox`, and `zotero` are rendered from `ai-parity/shared/skills/` — edit the canonical source (and adapter, if any), then `dots ai sync --write`. See "AI Parity" above.
 
 **Adding more skills from the marketplace:**
 ```

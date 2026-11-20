@@ -141,6 +141,21 @@ side = "codex"
 destination = "dot_agents/skills/smolvm-sandbox"
 mode = "tree-copy"
 
+[[shared_artifacts]]
+name = "git-commit"
+canonical = "ai-parity/shared/skills/git-commit"
+import_mode = "direct"
+
+[[shared_artifacts.targets]]
+side = "claude"
+destination = "dot_claude/skills/git-commit"
+mode = "tree-copy"
+
+[[shared_artifacts.targets]]
+side = "codex"
+destination = "dot_agents/skills/git-commit"
+mode = "tree-copy"
+
 [[artifacts]]
 name = "global-agents"
 source = "ai-parity/contracts/AGENTS.md"
@@ -163,6 +178,12 @@ mode = "copy"
 name = "debugger-agent"
 source = "ai-parity/contracts/agents/debugger.toml"
 destination = "dot_codex/agents/debugger.toml"
+mode = "copy"
+
+[[artifacts]]
+name = "git-commit-agent"
+source = "ai-parity/contracts/agents/git-commit.toml"
+destination = "dot_codex/agents/git-commit.toml"
 mode = "copy"
 
 [[artifacts]]
@@ -237,6 +258,12 @@ source = "ai-parity/adapters/skills/smolvm-sandbox/agents/openai.yaml"
 destination = "dot_agents/skills/smolvm-sandbox/agents/openai.yaml"
 mode = "copy"
 
+[[artifacts]]
+name = "git-commit-codex-interface"
+source = "ai-parity/adapters/skills/git-commit/agents/openai.yaml"
+destination = "dot_agents/skills/git-commit/agents/openai.yaml"
+mode = "copy"
+
 [[reviews]]
 name = "global-agents-contract"
 source = "dot_claude/CLAUDE.md"
@@ -256,6 +283,11 @@ acknowledged_digest = "06aca1d5f8f6e5fceb9362ecd9e2e1a4f90cef2550259b068eaecbc4e
 name = "debugger-agent-adapter"
 source = "dot_claude/agents/debugger.md"
 acknowledged_digest = "ec57e9052b54179aefb5381df6f885794102b1e5663bd5beb8cc81d5fbc7519a"
+
+[[reviews]]
+name = "git-commit-agent-adapter"
+source = "dot_claude/agents/git-commit.md"
+acknowledged_digest = "2d97459578a25a0a5835c2bfdb019e0160e7dd2f89da4cfd9a7a92ec7a971862"
 
 # Every top-level Claude skill directory must be classified. "planned" means
 # intentionally unavailable to Codex until it receives an explicit review.
@@ -288,6 +320,9 @@ name = "fantastical"
 mode = "planned-platform-gated"
 [[skills]]
 name = "gemini-billing-blocks"
+mode = "shared-explicit-pilot"
+[[skills]]
+name = "git-commit"
 mode = "shared-explicit-pilot"
 [[skills]]
 name = "keynote"
@@ -391,7 +426,7 @@ name = "e2e-runner"
 mode = "planned"
 [[agents]]
 name = "git-commit"
-mode = "planned"
+mode = "converted-explicit-pilot"
 [[agents]]
 name = "planner"
 mode = "planned"

@@ -1,9 +1,9 @@
 {
   "format": "ai-parity-generated-state",
-  "generation_id": "6716978b2e1e6f1166f2f94c30b576a3574944b263f226550385748f0d3d04a6",
+  "generation_id": "ff5c78a2c6215980f0b405e97534dc69a4ca39c496716c06e5ac5ef621b15f14",
   "generator_inputs": {
     "engine_sha256": "ebebaf96041867bc701fa7491c93cf5ecaf7b54b1723272027e729e695678074",
-    "manifest_sha256": "a056fea0e8579efb04cc7980951af5b6f90fc17a23c97afbaafd6a993a23f87b",
+    "manifest_sha256": "0309f2698adbf8f886a3980ea852bf277762ca29cb4caa97524890d9e78e93a4",
     "schemas_sha256": "33b5c6cc4c6a44a35ddf1ee205308857c2b651920ae21d7e93184ae9d22ed728"
   },
   "generator_version": 3,
@@ -14,6 +14,25 @@
       "sha256": "d4deba953560369135677ea693abd7e35195e2d017c28a79a7944f95d87be720",
       "source": "dot_claude/skills/gemini-billing-blocks",
       "source_digest": "70b340c335cdfa2397a1633a2e9d9709026cc32dc5312d7d4a927ee6bd36c86d",
+      "source_mode": 420
+    },
+    "dot_agents/skills/git-commit/SKILL.md": {
+      "artifact": "git-commit",
+      "canonical": "ai-parity/shared/skills/git-commit",
+      "canonical_digest": "4ed3e61b0ae0bd153cef40bc4f13ee646472d326d49a59fe062c2ce72f8dadd8",
+      "deployed_mode": 420,
+      "sha256": "9a9ddc3adedbf86ea90554f65dd346f1e70beed5da910be7a70d9c3ce5472ae2",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/git-commit/SKILL.md",
+      "source_digest": "70a307bbb57e4444cd563c4f150cbb3ad1f8a61c686d4b6eb565e377827cd81f",
+      "source_mode": 420
+    },
+    "dot_agents/skills/git-commit/agents/openai.yaml": {
+      "artifact": "git-commit-codex-interface",
+      "deployed_mode": 420,
+      "sha256": "00d0dc0f9516807c0f0f4de7786d8d52229204563b05432187ac09de6ef0b03d",
+      "source": "ai-parity/adapters/skills/git-commit/agents/openai.yaml",
+      "source_digest": "826e8f8db977cf8a85e0d4bbc7a6121f3ea8f3013988262754e2a7e6e354348e",
       "source_mode": 420
     },
     "dot_agents/skills/keynote/SKILL.md": {
@@ -532,6 +551,17 @@
       "source_digest": "883927cbd9ca15161977ac470192e44fec3e73dae99886512fe30282ca32525d",
       "source_mode": 420
     },
+    "dot_claude/skills/git-commit/SKILL.md": {
+      "artifact": "git-commit",
+      "canonical": "ai-parity/shared/skills/git-commit",
+      "canonical_digest": "4ed3e61b0ae0bd153cef40bc4f13ee646472d326d49a59fe062c2ce72f8dadd8",
+      "deployed_mode": 420,
+      "sha256": "9a9ddc3adedbf86ea90554f65dd346f1e70beed5da910be7a70d9c3ce5472ae2",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/git-commit/SKILL.md",
+      "source_digest": "70a307bbb57e4444cd563c4f150cbb3ad1f8a61c686d4b6eb565e377827cd81f",
+      "source_mode": 420
+    },
     "dot_claude/skills/keynote/SKILL.md": {
       "artifact": "keynote",
       "canonical": "ai-parity/shared/skills/keynote",
@@ -843,9 +873,9 @@
     "dot_codex/AGENTS.md": {
       "artifact": "global-agents",
       "deployed_mode": 420,
-      "sha256": "9c30de508f36c64ede30bf3bf6d7e195243c111fc4b54c6a09b5a5a23ca7aa5f",
+      "sha256": "d32af13b7dd962ad04001af320c771db82799cf70533c91e6762b73abca661f3",
       "source": "ai-parity/contracts/AGENTS.md",
-      "source_digest": "5bff47cbe838c295eb5ff2b44dd43dd11e5b2094cf0a79a586583f1bface9fa2",
+      "source_digest": "b9eab2332c9afd581529a04ddbcd357c75b9e6a4e1ebf9f48d87f0864c19fd47",
       "source_mode": 420
     },
     "dot_codex/agents/debugger.toml": {
@@ -854,6 +884,14 @@
       "sha256": "821b92daf1ae5c80e407e6c2e299116a4c81f8ede59e568a58d1bcc23803295a",
       "source": "ai-parity/contracts/agents/debugger.toml",
       "source_digest": "333d00a7f3fb3b48fc654f58ad58943ff022f95a479371e706d4638f8468384d",
+      "source_mode": 420
+    },
+    "dot_codex/agents/git-commit.toml": {
+      "artifact": "git-commit-agent",
+      "deployed_mode": 420,
+      "sha256": "4afcf55134ce66929e1d4ef1160648b8f856ae29c9cccbf621d668f9ca9dea8f",
+      "source": "ai-parity/contracts/agents/git-commit.toml",
+      "source_digest": "ee7fc77912fe8cec4ab01ca00b46ec6a36bb2356194c8b0f84869fb0b1a1847a",
       "source_mode": 420
     },
     "dot_codex/agents/reviewer.toml": {
