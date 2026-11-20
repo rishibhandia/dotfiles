@@ -46,14 +46,14 @@ fi
 # Install shell-sage (AI shell assistant)
 # =============================================================================
 
-if command -v ssage &>/dev/null; then
+if ssage --help &>/dev/null; then  # runs it: a dead shim still passes command -v
     success "shell-sage already installed"
 else
     info "Installing shell-sage..."
 
     # Prefer uv for installation
     if command -v uv &>/dev/null; then
-        uv tool install shell-sage
+        uv tool install shell-sage --reinstall --managed-python
         success "shell-sage installed via uv"
     elif command -v pipx &>/dev/null; then
         pipx install shell-sage

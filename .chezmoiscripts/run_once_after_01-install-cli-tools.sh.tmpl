@@ -71,12 +71,17 @@ fi
 # Shell Sage (AI-powered shell assistant)
 # https://github.com/AnswerDotAI/shell_sage
 # -----------------------------------------------------------------------------
-if command -v ssage &>/dev/null; then
+# --managed-python: build the tool venv on uv's own Python, not Homebrew's.
+# A brew upgrade (e.g. python@3.14 -> 3.15) deletes the old interpreter and
+# leaves ssage dying with "bad interpreter". The check runs ssage instead of
+# `command -v`, because the dead shim still exists on PATH; --reinstall
+# rebuilds a broken venv in place.
+if ssage --help &>/dev/null; then
     success "Shell Sage already installed"
 else
     if command -v uv &>/dev/null; then
         info "Installing Shell Sage via uv..."
-        if uv tool install shell-sage; then
+        if uv tool install shell-sage --reinstall --managed-python; then
             success "Shell Sage installed"
         else
             warn "Shell Sage installation failed"
