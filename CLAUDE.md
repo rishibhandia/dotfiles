@@ -130,6 +130,8 @@ This repo follows XDG Base Directory spec:
 - **Matching Ghostty appearance:** import `/Applications/Ghostty.app/Contents/Resources/ghostty/themes/Catppuccin Macchiato` under **Settings → Themes → Import Theme**, and set **Hack Nerd Font Mono**, size **12** under **Settings → Terminal → Typography**.
 - **Built-in agent skill (`rex skill setup`):** installs `~/.claude/skills/rex` and `~/.agents/skills/rex` (the latter automatically visible to both Codex and Antigravity via `skills.json`) plus session-start hooks. Keep it `$HOME`-local — do **not** `dots add` it into chezmoi, so Rex updates it dynamically and `ai-parity` stays closed.
 - Validate changes with `rex config check` and apply with `rex config reload`.
+- **Remote hosts / servers:** declared with `rex.host{ label, endpoints }` in `init.lua` (currently `mini`). Always use the Rex node's MagicDNS **hostname** (`https://<node>-rex.<tailnet>.ts.net`), never the 100.x IP — the IP fails TLS and falls back to `:7297`, giving "Nothing is listening". `run_onchange_after_reload-rex-config.sh.tmpl` (darwin) runs `rex config reload` whenever `init.lua` changes, because reload is local-socket-only and can't be pushed remotely.
+- **Full notes** (server/host/home model, setting up a new server, gotchas, ssage-in-Rex): the parity-shared **`rex-servers`** skill — canonical source `ai-parity/shared/skills/rex-servers/SKILL.md`, rendered to Claude (`~/.claude/skills`) and Codex/agy (`~/.agents/skills`). Edit the canonical file, then `dots ai sync --write`. macOS-only via `.chezmoiignore`.
 
 ### Navi Cheatsheets
 Cheats live in `dot_local/share/navi/cheats/` and sync to `~/.local/share/navi/cheats` on every OS. navi's *built-in* default cheat path varies by platform (`directories` crate: `%APPDATA%`-based on Windows, Application Support on some macOS builds), so both shells export `NAVI_PATH` pointing at the managed dir — navi's highest-precedence setting. The zsh widget loads in `.zshrc`, the PowerShell widget in `profile.ps1` (both guarded on navi existing; navi is not installed in Windows portable mode).
@@ -331,7 +333,7 @@ If you do need to know a self-updating app's real version, ask the app, not brew
 | `ai-parity/manifest.toml` | Ownership, mappings, render policy, review acknowledgements |
 | Non-migrated `dot_claude/**` | Legacy Claude-owned source (still edited directly) |
 
-**Generated — never hand-edit:** `dot_codex/**`, `dot_agents/**`, `ai-parity/generated-state.json`, and these migrated `dot_claude/skills/` roots: `git-commit`, `keynote`, `llm-pdf-processing`, `matlab`, `matlab-runner`, `pdf-chunk`, `scientific-figures`, `smolvm-sandbox`, `zotero`. Two Claude-owned sources are additionally *rendered* to Codex (edit the Claude side, then sync): `dot_claude/skills/gemini-billing-blocks` and `dot_claude/skills/learned` (→ `dot_agents/skills/learned-patterns/references`). If a useful edit already landed in a rendered target, import it with `dots ai propose` — do not treat the rendered file as source.
+**Generated — never hand-edit:** `dot_codex/**`, `dot_agents/**`, `ai-parity/generated-state.json`, and these migrated `dot_claude/skills/` roots: `git-commit`, `keynote`, `llm-pdf-processing`, `matlab`, `matlab-runner`, `pdf-chunk`, `rex-servers`, `scientific-figures`, `smolvm-sandbox`, `zotero`. Two Claude-owned sources are additionally *rendered* to Codex (edit the Claude side, then sync): `dot_claude/skills/gemini-billing-blocks` and `dot_claude/skills/learned` (→ `dot_agents/skills/learned-patterns/references`). If a useful edit already landed in a rendered target, import it with `dots ai propose` — do not treat the rendered file as source.
 
 **Quick decision guide:** shared behavior → `shared/`; tool-specific expression → `adapters/`; Codex-native config → `contracts/`; legacy Claude skill → its `dot_claude/` path; edit found in rendered output → proposal; runtime memory worth keeping → `dots ai memories scan` then curate.
 
@@ -385,7 +387,7 @@ Skills are synced via chezmoi to `~/.claude/skills/`. Included skills, by catego
 
 **macOS app integrations (darwin-only via `.chezmoiignore`):** `things` (Things 3), `fantastical` (calendar), `keynote` (presentations; **also personal-only**)
 
-**Parity-generated skills:** `git-commit`, `keynote`, `llm-pdf-processing`, `matlab`, `matlab-runner`, `pdf-chunk`, `scientific-figures`, `smolvm-sandbox`, and `zotero` are rendered from `ai-parity/shared/skills/` — edit the canonical source (and adapter, if any), then `dots ai sync --write`. See "AI Parity" above.
+**Parity-generated skills:** `git-commit`, `keynote`, `llm-pdf-processing`, `matlab`, `matlab-runner`, `pdf-chunk`, `rex-servers`, `scientific-figures`, `smolvm-sandbox`, and `zotero` are rendered from `ai-parity/shared/skills/` — edit the canonical source (and adapter, if any), then `dots ai sync --write`. See "AI Parity" above.
 
 **Adding more skills from the marketplace:**
 ```

@@ -43,6 +43,21 @@ destination = "dot_agents/skills/scientific-figures"
 mode = "tree-copy"
 
 [[shared_artifacts]]
+name = "rex-servers"
+canonical = "ai-parity/shared/skills/rex-servers"
+import_mode = "direct"
+
+[[shared_artifacts.targets]]
+side = "claude"
+destination = "dot_claude/skills/rex-servers"
+mode = "tree-copy"
+
+[[shared_artifacts.targets]]
+side = "codex"
+destination = "dot_agents/skills/rex-servers"
+mode = "tree-copy"
+
+[[shared_artifacts]]
 name = "matlab-runner"
 canonical = "ai-parity/shared/skills/matlab-runner"
 import_mode = "review"
@@ -360,6 +375,9 @@ mode = "planned"
 [[skills]]
 name = "refactor-clean"
 mode = "planned"
+[[skills]]
+name = "rex-servers"
+mode = "shared-explicit-pilot"
 [[skills]]
 name = "scientific-figures"
 mode = "shared-explicit-pilot"

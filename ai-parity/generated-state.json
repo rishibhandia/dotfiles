@@ -1,9 +1,9 @@
 {
   "format": "ai-parity-generated-state",
-  "generation_id": "716719e5e16cdc4a582e3825b0bae460d9964033840b3f6b323c0f67870175f0",
+  "generation_id": "59d40bfed96cf04a35c04fdc8432e14b309067ad2d2f79c7e66262e9c9e35a6d",
   "generator_inputs": {
     "engine_sha256": "ebebaf96041867bc701fa7491c93cf5ecaf7b54b1723272027e729e695678074",
-    "manifest_sha256": "e515cb56171840f06a184272deb403512c8e0be164e1dd318b9ff13d007184bb",
+    "manifest_sha256": "d071066d1646b9e8a4c4d866cf519578ebe3ba64b04a5539d96ce7be35dfc730",
     "schemas_sha256": "33b5c6cc4c6a44a35ddf1ee205308857c2b651920ae21d7e93184ae9d22ed728"
   },
   "generator_version": 3,
@@ -464,6 +464,17 @@
       "source_digest": "5ffd0842111cb05dc27c5c0d71ba3ca427297fe546709af4b7042475b9328671",
       "source_mode": 420
     },
+    "dot_agents/skills/rex-servers/SKILL.md": {
+      "artifact": "rex-servers",
+      "canonical": "ai-parity/shared/skills/rex-servers",
+      "canonical_digest": "4d17a1e74a1dce41b2d69b0d472a721426bdf6ff4ed653fa25a67194030eed50",
+      "deployed_mode": 420,
+      "sha256": "975df7c58db8913a5065e37df794da94bda4cb5365a6186e08f36f51c21dabb7",
+      "side": "codex",
+      "source": "ai-parity/shared/skills/rex-servers/SKILL.md",
+      "source_digest": "2a28b4f02e48491e7278219bcc6eb3db2d7e38328ac0e43a5a869dd7657db243",
+      "source_mode": 420
+    },
     "dot_agents/skills/scientific-figures/SKILL.md": {
       "artifact": "scientific-figures",
       "canonical": "ai-parity/shared/skills/scientific-figures",
@@ -813,6 +824,17 @@
       "side": "claude",
       "source": "ai-parity/shared/skills/pdf-chunk/scripts/pdf_common.py",
       "source_digest": "1ab296a4cd32c4de51b31c6fdaaaaf68bb225254954a9ab0f04e778c7f898706",
+      "source_mode": 420
+    },
+    "dot_claude/skills/rex-servers/SKILL.md": {
+      "artifact": "rex-servers",
+      "canonical": "ai-parity/shared/skills/rex-servers",
+      "canonical_digest": "4d17a1e74a1dce41b2d69b0d472a721426bdf6ff4ed653fa25a67194030eed50",
+      "deployed_mode": 420,
+      "sha256": "975df7c58db8913a5065e37df794da94bda4cb5365a6186e08f36f51c21dabb7",
+      "side": "claude",
+      "source": "ai-parity/shared/skills/rex-servers/SKILL.md",
+      "source_digest": "2a28b4f02e48491e7278219bcc6eb3db2d7e38328ac0e43a5a869dd7657db243",
       "source_mode": 420
     },
     "dot_claude/skills/scientific-figures/SKILL.md": {

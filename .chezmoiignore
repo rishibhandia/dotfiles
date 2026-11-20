@@ -70,6 +70,8 @@ Library/LaunchAgents/com.rishi.tw-energy.plist
 .agents/skills/things
 .agents/skills/fantastical
 .agents/skills/keynote
+.claude/skills/rex-servers
+.agents/skills/rex-servers
 {{ end }}
 
 # =============================================================================
