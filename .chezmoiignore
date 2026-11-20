@@ -161,6 +161,18 @@ ai-parity/**
 .codex/config.toml
 .agents/skills/.system/**
 
+# Antigravity / Gemini runtime state must never be sourced from this repository.
+.gemini/oauth_creds.json
+.gemini/google_accounts.json
+.gemini/credentials.json
+.gemini/installation_id
+.gemini/antigravity-cli/brain/**
+.gemini/antigravity-cli/builtin/**
+.gemini/antigravity-cli/logs/**
+.gemini/antigravity-cli/cache/**
+.gemini/antigravity/**
+.gemini/antigravity-ide/**
+
 # Vendored Claude Code / Codex plugin, tracked as a git submodule.
 # Lives in the source tree only — it is loaded via `claude plugin marketplace
 # add ./i-have-adhd`, not by deploying a copy into $HOME.

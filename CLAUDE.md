@@ -349,6 +349,20 @@ If you do need to know a self-updating app's real version, ask the app, not brew
 - Shared scripts use manifest-declared `literal_*` source names (e.g. `literal_run_matlab.sh` → `run_matlab.sh`), deploy as `0644` non-executables, and are invoked with `uv run`.
 - Parity sync and home deployment are separate review boundaries: after `dots ai sync --write`, deployment is still an explicit `chezmoi diff` → `chezmoi apply`.
 
+### Antigravity (`agy`) Configuration & 3-Way Skill Parity
+Antigravity shares global customizations across the CLI (`agy`), Antigravity 2.0 App, and IDE from `~/.gemini/config/`, managed under `dot_gemini/`:
+
+| Source Path | Target | Purpose |
+|---|---|---|
+| `dot_gemini/config/skills.json` | `~/.gemini/config/skills.json` | Registers `~/.agents/skills` directly — zero-duplication 3-way skill parity with Claude Code & Codex (inherits existing `.chezmoiignore` OS/personal gates) |
+| `dot_gemini/config/rules/AGENTS.md.tmpl` | `~/.gemini/config/rules/AGENTS.md` | Includes `ai-parity/contracts/AGENTS.md` (single source of truth with Codex, review-linked to `dot_claude/CLAUDE.md`) |
+| `dot_gemini/config/mcp_config.json.tmpl` | `~/.gemini/config/mcp_config.json` | Global MCP servers; gated on `.personal` (`tirith`, `smogon-vgc` via `uvx` from `dtsong/smogon-vgc-mcp`) |
+| `dot_gemini/config/plugins.json.tmpl` | `~/.gemini/config/plugins.json` | Scans `{{ .chezmoi.sourceDir }}` with `include_only: ["i-have-adhd"]` so the pinned submodule SHA stays authoritative |
+| `dot_gemini/config/hooks.json.tmpl` | `~/.gemini/config/hooks.json` | `PreToolUse` guardrails: `block_arbitrary_docs.py` (blocks arbitrary `.md`/`.txt` writes while allowing `artifactDirectoryPath`/`brain/`, `skills/`, `memory/`, `rules/`, and standard doc names) and `tirith_check.py` (vets `run_command` via `tirith check`, pass-through when `tirith` is absent) |
+| `dot_gemini/antigravity-cli/create_settings.json.tmpl` | `~/.gemini/antigravity-cli/settings.json` | `create_`-prefixed default seed (`colorScheme`, `toolPermission`) for fresh machines; existing machines keep live `/settings` and `trustedWorkspaces` |
+
+Runtime state (`~/.gemini/antigravity-cli/brain/`, `builtin/`, `antigravity/`, `antigravity-ide/`, OAuth/credentials/caches) is excluded in `.chezmoiignore` and never managed. On personal machines, the `run_once_after_01-install-cli-tools` scripts also register `smogon-vgc` with Claude Code (`claude mcp add --scope user smogon-vgc -- uvx --from git+https://github.com/dtsong/smogon-vgc-mcp smogon-vgc-mcp`).
+
 ### Claude Code Skills
 Skills are synced via chezmoi to `~/.claude/skills/`. Included skills, by category:
 

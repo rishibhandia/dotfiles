@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+{{- if .personal }}
+    "tirith": {
+      "command": "tirith",
+      "args": ["mcp-server"]
+    },
+    "smogon-vgc": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/dtsong/smogon-vgc-mcp",
+        "smogon-vgc-mcp"
+      ]
+    }
+{{- end }}
+  }
+}

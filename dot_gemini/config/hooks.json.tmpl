@@ -1,0 +1,38 @@
+{
+  "block-arbitrary-docs": {
+    "PreToolUse": [
+      {
+        "matcher": "write_file|write_to_file",
+        "hooks": [
+          {
+            "type": "command",
+{{- if eq .chezmoi.os "windows" }}
+            "command": "uv run --no-project python ./hooks/block_arbitrary_docs.py",
+{{- else }}
+            "command": "python3 ./hooks/block_arbitrary_docs.py",
+{{- end }}
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "tirith-command-vetting": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+{{- if eq .chezmoi.os "windows" }}
+            "command": "uv run --no-project python ./hooks/tirith_check.py",
+{{- else }}
+            "command": "python3 ./hooks/tirith_check.py",
+{{- end }}
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}
